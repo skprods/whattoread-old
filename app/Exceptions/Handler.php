@@ -2,7 +2,12 @@
 
 namespace App\Exceptions;
 
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -37,5 +42,70 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $e)
+    {
+        $trace = env("APP_DEBUG") ? ['trace' => $e->getTrace()] : [];
+
+        if ($e instanceof BaseException) {
+            return $e->render();
+        } elseif ($e instanceof ModelNotFoundException || $e instanceof NotFoundHttpException) {
+            return $this->sendNotFoundError($e, $trace);
+        } elseif ($e instanceof ValidationException) {
+            return $this->sendValidationError($e, $trace);
+        } else {
+            $errorDetail = [
+                'code' => $e->getCode(),
+                'message' => $e->getMessage(),
+            ];
+
+            $error = $this->prepareResponseStructure($errorDetail, $trace);
+
+            return response()->json($error, 500);
+        }
+    }
+
+    private function sendNotFoundError(Exception $e, array $trace): JsonResponse
+    {
+        $message = ($e->getMessage() !== '') ? $e->getMessage() : 'Ничего не найдено';
+
+        $errorDetail = [
+            'code' => 404,
+            'message' => $message,
+        ];
+
+        $error = $this->prepareResponseStructure($errorDetail, $trace);
+
+        return response()->json($error, 404);
+    }
+
+    private function sendValidationError(ValidationException $e, array $trace): JsonResponse
+    {
+        $message = "Переданные данные невалидны.";
+        $code = $e->getCode();
+        $validator = [];
+
+        foreach ($e->validator->errors()->messages() as $field => $error) {
+            $validator[$field] = array_shift($error);
+        }
+
+        $errorDetail = [
+            'code' => $code,
+            'message' => $message,
+            'validator' => $validator,
+        ];
+
+        $error = $this->prepareResponseStructure($errorDetail, $trace);
+
+        return response()->json($error, 400);
+    }
+
+    private function prepareResponseStructure(array $errorDetail, array $trace): array
+    {
+        return array_merge([
+            'success' => false,
+            'error' => $errorDetail,
+        ], $trace);
     }
 }

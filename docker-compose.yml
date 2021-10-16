@@ -1,0 +1,68 @@
+version: "3.7"
+
+services:
+    whattoread-nginx:
+        ports:
+            - "8100:80"
+        container_name: whattoread-nginx
+        image: nginx:1.17
+        environment:
+            TZ: "Europe/Moscow"
+        volumes:
+            - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf
+            - ./:/opt/www
+        depends_on:
+            - whattoread-php-fpm
+
+    whattoread-php-fpm:
+        container_name: whattoread-php-fpm
+        build:
+            context: .
+            dockerfile: ./deploy/php-fpm/Dockerfile
+        volumes:
+            - ./deploy/php-fpm/php.ini:/usr/local/etc/php/php.ini
+            - ./deploy/php-fpm/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
+            - ./app:/opt/www/app
+            - ./bootstrap:/opt/www/bootstrap
+            - ./config:/opt/www/config
+            - ./database:/opt/www/database
+            - ./public:/opt/www/public
+            - ./resources:/opt/www/resources
+            - ./routes:/opt/www/routes
+            - ./storage:/opt/www/storage
+            - ./tests:/opt/www/tests
+            - ./.env:/opt/www/.env
+            - ./artisan:/opt/www/artisan
+            - ./composer.json:/opt/www/composer.json
+            - ./composer.lock:/opt/www/composer.lock
+            - ./phpunit.xml:/opt/www/phpunit.xml
+        depends_on:
+            - whattoread-percona
+            - whattoread-redis
+        environment:
+            TZ: "Europe/Moscow"
+
+    whattoread-percona:
+        container_name: whattoread-percona
+        image: percona:8.0
+        restart: always
+        ports:
+            - "3316:3306"
+        environment:
+            TZ: "Europe/Moscow"
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - whattoread-database-data:/var/lib/mysql
+            - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
+
+    whattoread-redis:
+        container_name: whattoread-redis
+        image: redis:6
+        environment:
+            TZ: "Europe/Moscow"
+
+volumes:
+    whattoread-database-data: # данные БД
