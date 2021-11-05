@@ -21,4 +21,4 @@ exec-nginx: # заходим в контейнер с nginx
 ### Копирование зависимостей локально из контейнера
 load-vendor:
 	rm -rf ./vendor/*
-	docker cp reviews-php-fpm:/opt/www/vendor/. ./vendor
+	docker cp whattoread-php-fpm:/opt/www/vendor/. ./vendor

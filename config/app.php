@@ -165,6 +165,7 @@ return [
         /*
          * Package Service Providers...
          */
+        \SKprods\LaravelHelpers\LaravelHelpersServiceProvider::class,
 
         /*
          * Application Service Providers...
