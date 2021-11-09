@@ -21,17 +21,11 @@ class CreateBooksTable extends Migration
             $table->string('publisher_name')->nullable();
             $table->string('publisher_year')->nullable();
             $table->string('author');
-            $table->string('category')->nullable();
-            $table->string('shop_url')->nullable();
-            $table->enum('shop_name', ['Буквоед']);
-            $table->integer('shop_book_id');
             $table->timestamps();
 
             $table->index('title');
             $table->index('publisher_name');
             $table->index('author');
-            $table->index('category');
-            $table->index('shop_name');
         });
     }
 

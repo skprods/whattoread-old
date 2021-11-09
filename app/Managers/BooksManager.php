@@ -59,7 +59,7 @@ class BooksManager
         $book->shop_book_id = $shopBookId;
 
         try {
-            $this->bookManager->createOrUpdate((array) $book);
+            $this->bookManager->create((array) $book);
         } catch (\Exception $exception) {
             dump($book);
             Log::error(json_encode($book));

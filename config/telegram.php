@@ -2,16 +2,29 @@
 
 return [
     'bots' => [
+
         'whattoread' => [
             'username'            => 'WhatToRead',
-            'token'               => env('TELEGRAM_BOT_TOKEN', 'YOUR-BOT-TOKEN'),
-            'certificate_path'    => env('TELEGRAM_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
-            'webhook_url'         => env('TELEGRAM_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
+            'token'               => env('TELEGRAM_WHATTOREAD_BOT_TOKEN', 'YOUR-BOT-TOKEN'),
+            'certificate_path'    => env('TELEGRAM_WHATTOREAD_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
+            'webhook_url'         => env('TELEGRAM_WHATTOREAD_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
             'commands'            => [
-                \App\Http\Commands\StartCommand::class,
-                \App\Http\Commands\HelpCommand::class,
+                \App\Http\Commands\WhatToReadBot\StartCommand::class,
+                \App\Http\Commands\WhatToReadBot\HelpCommand::class,
             ],
         ],
+
+        'associativeBooks' => [
+            'username'            => 'WhatToRead',
+            'token'               => env('TELEGRAM_WHATTOREAD_BOT_TOKEN', 'YOUR-BOT-TOKEN'),
+            'certificate_path'    => env('TELEGRAM_WHATTOREAD_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
+            'webhook_url'         => env('TELEGRAM_WHATTOREAD_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
+            'commands'            => [
+                \App\Http\Commands\WhatToReadBot\StartCommand::class,
+                \App\Http\Commands\WhatToReadBot\HelpCommand::class,
+            ],
+        ],
+
     ],
 
     'default' => 'whattoread',

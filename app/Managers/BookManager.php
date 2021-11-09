@@ -13,17 +13,6 @@ class BookManager
         $this->book = $book;
     }
 
-    public function createOrUpdate(array $params): Book
-    {
-        $this->book = Book::findByShopBookIdAndShopName($params['shop_book_id'], $params['shop_name']);
-
-        if ($this->book) {
-            return $this->update($params);
-        } else {
-            return $this->create($params);
-        }
-    }
-
     public function create(array $params): Book
     {
         $this->book = app(Book::class);

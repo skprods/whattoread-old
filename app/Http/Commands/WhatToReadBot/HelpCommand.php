@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Commands;
+namespace App\Http\Commands\WhatToReadBot;
 
 use Telegram\Bot\Commands\Command;
 
