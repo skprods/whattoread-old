@@ -33,7 +33,7 @@ class ParseSamolitJob implements ShouldQueue
     {
         $this->client = new Client();
 
-        $bookId = 56;
+        $bookId = 32577;
         Console::info("Начинается парсинг интернет-портала Самолит.");
 
         while ($bookId < 10000000) {
