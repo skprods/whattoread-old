@@ -1,0 +1,12 @@
+version: "3.7"
+
+services:
+    whattoread-nginx:
+        ports:
+            - "8300:80"
+        volumes:
+          - ./deploy/nginx/default.conf:/etc/nginx/conf.d/prod.conf
+        container_name: whattoread-nginx
+
+    whattoread-php-fpm:
+        container_name: whattoread-php-fpm

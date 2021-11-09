@@ -1,0 +1,31 @@
+version: "3.7"
+
+services:
+    whattoread-nginx:
+        ports:
+            - "8301:80"
+        volumes:
+          - ./deploy/nginx/default.conf:/etc/nginx/conf.d/dev.conf
+        container_name: whattoread-dev-nginx
+
+    whattoread-php-fpm:
+        container_name: whattoread-dev-php-fpm
+
+    whattoread-percona:
+        container_name: whattoread-dev-percona
+        image: percona:8.0
+        restart: always
+        ports:
+            - "3316:3306"
+        environment:
+            TZ: "Europe/Moscow"
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - whattoread-database-data:/var/lib/mysql
+            - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
+
+volumes:
+    whattoread-database-data: # данные БД
