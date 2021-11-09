@@ -13,16 +13,16 @@ app-stop-dev: # остановка проекта
 app-down-dev: # удаление контейнеров проекта
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 
-app-build-prod: # сборка проекта с указанием имени пользователя
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
+app-build-prod: # сборка проекта для прода
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
 app-build-no-cache-prod: # сборка без кэша
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u) --no-cache
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u) --no-cache
 app-up-prod: # запуск проекта
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 app-stop-prod: # остановка проекта
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
 app-down-prod: # удаление контейнеров проекта
-    docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
 
 ### Команды для работы с контейнерами приложения (прод)
 exec-php-fpm: # заходим в контейнер с php
