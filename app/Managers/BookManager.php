@@ -13,6 +13,20 @@ class BookManager
         $this->book = $book;
     }
 
+    public function createOrUpdate(array $params): Book
+    {
+        $this->book = Book::query()
+            ->where('title', '=', $params['title'])
+            ->where('author', '=', $params['author'])
+            ->first();
+
+        if ($this->book) {
+            return $this->update($params);
+        } else {
+            return $this->create($params);
+        }
+    }
+
     public function create(array $params): Book
     {
         $this->book = app(Book::class);
@@ -28,5 +42,10 @@ class BookManager
         $this->book->save();
 
         return $this->book;
+    }
+
+    public function addGenres(array $genreIds)
+    {
+        $this->book->genres()->sync($genreIds);
     }
 }

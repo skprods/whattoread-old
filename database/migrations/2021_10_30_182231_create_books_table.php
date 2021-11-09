@@ -26,6 +26,8 @@ class CreateBooksTable extends Migration
             $table->index('title');
             $table->index('publisher_name');
             $table->index('author');
+
+            $table->unique(['title', 'author']);
         });
     }
 
