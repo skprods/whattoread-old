@@ -31,7 +31,6 @@ services:
             - ./composer.lock:/opt/www/composer.lock
             - ./phpunit.xml:/opt/www/phpunit.xml
         depends_on:
-            - whattoread-percona
             - whattoread-redis
         environment:
             TZ: "Europe/Moscow"

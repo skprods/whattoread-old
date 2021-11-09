@@ -10,6 +10,8 @@ services:
 
     whattoread-php-fpm:
         container_name: whattoread-dev-php-fpm
+        depends_on:
+          - whattoread-percona
 
     whattoread-percona:
         container_name: whattoread-dev-percona
