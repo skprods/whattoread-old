@@ -2,6 +2,8 @@
 
 namespace App\Http\Commands\WhatToReadBot;
 
+use App\Http\Commands\TelegramCommand;
+
 class StartCommand extends TelegramCommand
 {
     protected $name = 'start';

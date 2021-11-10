@@ -2,6 +2,7 @@
 
 namespace App\Http\Commands\WhatToReadBot;
 
+use App\Http\Commands\TelegramCommand;
 use Telegram\Bot\Commands\Command;
 
 class HelpCommand extends TelegramCommand
