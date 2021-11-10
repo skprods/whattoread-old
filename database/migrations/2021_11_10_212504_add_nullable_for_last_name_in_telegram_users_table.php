@@ -26,7 +26,7 @@ class AddNullableForLastNameInTelegramUsersTable extends Migration
     public function down()
     {
         Schema::table('telegram_users', function (Blueprint $table) {
-            //
+            $table->string('last_name', 100)->change();
         });
     }
 }
