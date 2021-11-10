@@ -16,5 +16,3 @@ services:
       ports:
         - "3316:3306"
 
-volumes:
-    whattoread-database-data: # данные БД
