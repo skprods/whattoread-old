@@ -10,3 +10,8 @@ services:
 
     whattoread-php-fpm:
         container_name: whattoread-php-fpm
+
+    whattoread-percona:
+      container_name: whattoread-percona
+      ports:
+        - "3306:3306"

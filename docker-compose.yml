@@ -31,9 +31,23 @@ services:
             - ./composer.lock:/opt/www/composer.lock
             - ./phpunit.xml:/opt/www/phpunit.xml
         depends_on:
+            - whattoread-percona
             - whattoread-redis
         environment:
             TZ: "Europe/Moscow"
+
+    whattoread-percona:
+        image: percona:8.0
+        restart: always
+        environment:
+            TZ: "Europe/Moscow"
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+        volumes:
+            - whattoread-database-data:/var/lib/mysql
+            - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
 
     whattoread-redis:
         image: redis:6

@@ -10,24 +10,11 @@ services:
 
     whattoread-php-fpm:
         container_name: whattoread-dev-php-fpm
-        depends_on:
-          - whattoread-percona
 
     whattoread-percona:
-        container_name: whattoread-dev-percona
-        image: percona:8.0
-        restart: always
-        ports:
-            - "3316:3306"
-        environment:
-            TZ: "Europe/Moscow"
-            MYSQL_DATABASE: ${DB_DATABASE}
-            MYSQL_USER: ${DB_USERNAME}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
-            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-        volumes:
-            - whattoread-database-data:/var/lib/mysql
-            - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
+      container_name: whattoread-dev-percona
+      ports:
+        - "3316:3306"
 
 volumes:
     whattoread-database-data: # данные БД
