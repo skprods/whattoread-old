@@ -24,19 +24,25 @@ class ParseSamolitJob implements ShouldQueue
     private Client $client;
     private BooksManager $manager;
 
-    public function __construct()
+    private int $start;
+    private int $end;
+
+    public function __construct(int $start, int $end)
     {
         $this->manager = app(BooksManager::class);
+
+        $this->start = $start;
+        $this->end = $end;
     }
 
     public function handle()
     {
         $this->client = new Client();
 
-        $bookId = 56;
+        $bookId = $this->start;
         Console::info("Начинается парсинг интернет-портала Самолит.");
 
-        while ($bookId < 10000000) {
+        while ($bookId < $this->end) {
             $this->addBook($bookId);
             $bookId++;
         }
@@ -62,6 +68,7 @@ class ParseSamolitJob implements ShouldQueue
 
         if ($result) {
             Console::info("#$bookId :: Книга добавлена");
+            Log::info("#$bookId :: Книга добавлена");
         } else {
             Console::info("#$bookId :: Книга не добавлена!");
             Log::info("#$bookId :: Книга не добавлена!");
