@@ -48,6 +48,9 @@ services:
         volumes:
             - whattoread-database-data:/var/lib/mysql
             - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
+            - ./deploy/percona/dump.sh:/dump.sh
+            - ./deploy/percona/restore.sh:/restore.sh
+            - ./backups:/home
 
     whattoread-redis:
         image: redis:6
