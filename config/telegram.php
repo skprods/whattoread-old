@@ -14,17 +14,6 @@ return [
             ],
         ],
 
-        'associativeBooks' => [
-            'username'            => 'WhatToRead',
-            'token'               => env('TELEGRAM_WHATTOREAD_BOT_TOKEN', 'YOUR-BOT-TOKEN'),
-            'certificate_path'    => env('TELEGRAM_WHATTOREAD_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
-            'webhook_url'         => env('TELEGRAM_WHATTOREAD_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
-            'commands'            => [
-                \App\Http\Commands\WhatToReadBot\StartCommand::class,
-                \App\Http\Commands\WhatToReadBot\HelpCommand::class,
-            ],
-        ],
-
     ],
 
     'default' => 'whattoread',
