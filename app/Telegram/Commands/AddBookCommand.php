@@ -4,7 +4,7 @@ namespace App\Telegram\Commands;
 
 class AddBookCommand extends TelegramCommand
 {
-    protected $name = 'addBook';
+    protected $name = 'addbook';
 
     protected $description = 'Добавить прочитанную книгу';
 

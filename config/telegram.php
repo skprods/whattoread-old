@@ -18,7 +18,7 @@ return [
     ],
 
     'dialogs' => [
-        'addBook' => \App\Telegram\Dialogs\AddBookDialog::class,
+        'addbook' => \App\Telegram\Dialogs\AddBookDialog::class,
     ],
 
     'default' => 'whattoread',
