@@ -1,8 +1,6 @@
 <?php
 
-namespace App\Http\Commands\WhatToReadBot;
-
-use App\Http\Commands\TelegramCommand;
+namespace App\Telegram\Commands;
 
 class StartCommand extends TelegramCommand
 {
@@ -10,10 +8,8 @@ class StartCommand extends TelegramCommand
 
     protected $description = "Запускай бота для подбора книжек!";
 
-    public function handle()
+    public function handleCommand()
     {
-        $this->logUser();
-
         $commands = $this->getTelegram()->getCommands();
 
         $response = "Привет! Здесь ты можешь найти, что интересного можно почитать. \n\nВот доступные команды: \n";
@@ -25,11 +21,7 @@ class StartCommand extends TelegramCommand
             $response .= sprintf('/%s - %s' . PHP_EOL, $name, $command->getDescription());
         }
 
-        $message = ['text' => $response];
-        $this->replyWithMessage($message);
-        $this->logMessage([
-            ['text' => $response],
-        ]);
+        $this->replyWithMessage(['text' => $response]);
     }
 
     private function getStartCommand(&$commands): string

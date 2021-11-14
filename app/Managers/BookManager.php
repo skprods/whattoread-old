@@ -6,7 +6,7 @@ use App\Models\Book;
 
 class BookManager
 {
-    private ?Book $book;
+    public ?Book $book;
 
     public function __construct(Book $book = null)
     {
@@ -46,6 +46,7 @@ class BookManager
 
     public function addGenres(array $genreIds)
     {
-        $this->book->genres()->sync($genreIds);
+        $genres = $this->book->genres()->pluck('id')->toArray();
+        $this->book->genres()->sync(array_merge($genres, $genreIds));
     }
 }
