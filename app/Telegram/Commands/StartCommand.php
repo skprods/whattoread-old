@@ -12,7 +12,7 @@ class StartCommand extends TelegramCommand
     {
         $commands = $this->getTelegram()->getCommands();
 
-        $response = "Привет! Здесь ты можешь найти, что интересного можно почитать. \n\nВот доступные команды: \n";
+        $response = "Привет! Здесь ты можешь найти книги, которые тебе понравятся. \n\nВот доступные команды: \n";
         $response .= $this->getStartCommand($commands);
         $response .= $this->getHelpCommand($commands);
         $response .= "\n";
