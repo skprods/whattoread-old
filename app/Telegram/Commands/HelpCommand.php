@@ -10,13 +10,13 @@ class HelpCommand extends TelegramCommand
 
     protected $aliases = ['list'];
 
-    protected $description = 'Получить список команд';
+    protected $description = 'Список команд';
 
     public function handleCommand()
     {
         $commands = $this->telegram->getCommands();
 
-        $text = 'Вот доступные команды: \n";';
+        $text = "Вот доступные команды: \n";
         $text .= $this->getStartCommand($commands);
         $text .= $this->getHelpCommand($commands);
         $text .= "\n";
