@@ -29,6 +29,21 @@ class GenreManager
         return $created;
     }
 
+    public function firstOrCreate(array $params): Genre
+    {
+        $builder = Genre::query();
+        foreach ($params as $field => $value) {
+            $builder->where($field, '=', $value);
+        }
+
+        $this->genre = $builder->first();
+        if ($this->genre) {
+            return $this->genre;
+        } else {
+            return $this->create($params);
+        }
+    }
+
     public function createOrUpdate(array $params): Genre
     {
         $builder = Genre::query();

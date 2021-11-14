@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Commands\WhatToReadBot;
+namespace App\Telegram\Commands;
 
-use App\Http\Commands\TelegramCommand;
 use Telegram\Bot\Commands\Command;
 
 class HelpCommand extends TelegramCommand
@@ -13,10 +12,8 @@ class HelpCommand extends TelegramCommand
 
     protected $description = 'Получить список команд';
 
-    public function handle()
+    public function handleCommand()
     {
-        $this->logUser();
-
         $commands = $this->telegram->getCommands();
 
         $text = '';
@@ -25,7 +22,6 @@ class HelpCommand extends TelegramCommand
             $text .= sprintf('/%s - %s'.PHP_EOL, $name, $handler->getDescription());
         }
 
-        $this->replyWithMessage(compact('text'));
-        $this->logMessage([compact('text')]);
+        $this->replyWithMessage(['text' => $text]);
     }
 }
