@@ -6,7 +6,7 @@ class StartCommand extends TelegramCommand
 {
     protected $name = 'start';
 
-    protected $description = "Запускай бота для подбора книжек!";
+    protected $description = "Запуск бота";
 
     public function handleCommand()
     {
