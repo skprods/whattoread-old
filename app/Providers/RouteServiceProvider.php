@@ -12,7 +12,9 @@ class RouteServiceProvider extends ServiceProvider
 {
     public const HOME = '/';
 
-     protected $namespace = 'App\\Http\\Controllers';
+    protected $namespace = 'App\\Http\\Controllers';
+    protected $userNamespace = 'App\\Http\\Controllers\\User';
+    protected $adminNamespace = 'App\\Http\\Controllers\\Admin';
 
     public function boot()
     {
@@ -21,11 +23,20 @@ class RouteServiceProvider extends ServiceProvider
         Route::prefix('api')
             ->middleware(['api'])
             ->namespace($this->namespace)
-            ->group(base_path('routes/api.php'));
+            ->group(base_path('routes/auth.php'));
+
+        Route::prefix('api')
+            ->middleware(['api', 'auth'])
+            ->namespace($this->userNamespace)
+            ->group(base_path('routes/user.php'));
+
+        Route::prefix('api/admin/')
+            ->middleware(['api', 'auth'])
+            ->namespace($this->adminNamespace)
+            ->group(base_path('routes/admin.php'));
 
         Route::prefix('bot')
             ->middleware(['api'])
-            ->namespace($this->namespace)
             ->group(base_path('routes/bot.php'));
     }
 
