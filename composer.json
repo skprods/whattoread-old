@@ -15,7 +15,8 @@
         "laravel/framework": "^8.54",
         "laravel/tinker": "^2.5",
         "skprods/laravel-helpers": "^1.0",
-        "squizlabs/php_codesniffer": "^3.6"
+        "squizlabs/php_codesniffer": "^3.6",
+        "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

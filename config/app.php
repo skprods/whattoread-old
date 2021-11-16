@@ -167,7 +167,8 @@ return [
         /*
          * Package Service Providers...
          */
-        \SKprods\LaravelHelpers\LaravelHelpersServiceProvider::class,
+        SKprods\LaravelHelpers\LaravelHelpersServiceProvider::class,
+        Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
         /*
          * Application Service Providers...
