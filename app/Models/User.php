@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasDiffCount;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -12,6 +13,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory;
     use Notifiable;
+    use HasDiffCount;
 
     protected $fillable = [
         'first_name',
