@@ -54,6 +54,16 @@ class Handler extends ExceptionHandler
             return $this->sendNotFoundError($e, $trace);
         } elseif ($e instanceof ValidationException) {
             return $this->sendValidationError($e, $trace);
+        } elseif ($e->getMessage() === 'Token has expired') {
+            $error = array_merge([
+                'code' => 401,
+                'message' => 'Время действия токена истекло.',
+            ], $trace);
+
+            return response()->json([
+                'success' => false,
+                'error' => $error,
+            ], 401);
         } else {
             $errorDetail = [
                 'code' => $e->getCode(),

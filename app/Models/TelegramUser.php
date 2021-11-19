@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Traits\HasDiffCount;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class TelegramUser extends Model
 {
+    use HasDiffCount;
+
     protected $fillable = [
         'telegram_id',
         'first_name',

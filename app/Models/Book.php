@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasDiffCount;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Book extends Model
 {
     use HasFactory;
+    use HasDiffCount;
 
     public const MODERATION_STATUS = 'moderation';
     public const ACTIVE_STATUS = 'active';
@@ -53,5 +55,24 @@ class Book extends Model
     public function associations(): HasMany
     {
         return $this->hasMany(BookAssociation::class);
+    }
+
+    public static function getAuthorsCount(): int
+    {
+        return self::query()
+            ->selectRaw("count(distinct author) as total")
+            ->first()
+            ->total;
+    }
+
+    /** Разница в количестве записей по сравнению с прошлым месяцем (сколько записей в этом месяце) */
+    public static function getAuthorsDiffCount(): int
+    {
+        return self::query()
+            ->selectRaw('count(distinct author) as total')
+            ->whereRaw("year(curdate()) = year(created_at)")
+            ->whereRaw("month(curdate()) = month(created_at)")
+            ->first()
+            ->total;
     }
 }
