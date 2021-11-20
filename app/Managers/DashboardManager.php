@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardManager
 {
-    public function getMessagesCountByMonth(string $month = null): array
+    public function getBotActivity(string $month = null): array
     {
         if (!$month) {
             $date = now();
@@ -47,5 +47,37 @@ class DashboardManager
         }
 
         return $messages;
+    }
+
+    public function getBotActiveUsers(int $year = null): array
+    {
+        $year = $year ?? now()->format('Y');
+        $nextYear = $year + 1;
+
+        $start = "$year-01-01 00:00:00";
+        $end = "$nextYear-01-01 00:00:00";
+
+        DB::statement(DB::raw("call make_intervals('$start','$end',1,'MONTH')"));
+
+        $res = DB::select(DB::raw(
+            "select ifnull(tm.total,0) as total, month(ti.interval_start) as mon from (
+                select
+                    count(distinct(tm.telegram_user_id)) as total,
+                    month(created_at) as mon
+                from telegram_messages tm
+                where tm.created_at >= date('$start')
+                and tm.created_at < date('$end')
+                group by mon
+            ) as tm
+            right join time_intervals ti on month(ti.interval_start) = tm.mon"
+        ));
+
+        $users = [];
+        foreach ($res as $item) {
+            $users['month'][] = $item->mon;
+            $users['total'][] = $item->total;
+        }
+
+        return $users;
     }
 }
