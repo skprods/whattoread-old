@@ -46,7 +46,6 @@ services:
             MYSQL_PASSWORD: ${DB_PASSWORD}
             MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
         volumes:
-            - whattoread-database-data:/var/lib/mysql
             - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
             - ./deploy/percona/dump.sh:/dump.sh
             - ./deploy/percona/restore.sh:/restore.sh
@@ -59,5 +58,3 @@ services:
         environment:
             TZ: "Europe/Moscow"
 
-volumes:
-    whattoread-database-data: # данные БД

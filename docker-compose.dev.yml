@@ -15,4 +15,8 @@ services:
       container_name: whattoread-dev-percona
       ports:
         - "3316:3306"
+      volumes:
+        - whattoread-dev-database-data:/var/lib/mysql
 
+volumes:
+  whattoread-dev-database-data: # данные БД
