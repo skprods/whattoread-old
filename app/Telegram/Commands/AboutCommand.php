@@ -15,16 +15,17 @@ class AboutCommand extends TelegramCommand
 
     public function handleCommand()
     {
-        $booksCount = Book::query()->count();
+        $booksCount = Book::query()->where('status', Book::ACTIVE_STATUS)->count();
         $booksMessage = $this->getBooksMessage($booksCount);
 
         $authorsCount = DB::table('books')
             ->selectRaw("count(distinct author) as authorsCount")
+            ->where('status', Book::ACTIVE_STATUS)
             ->first()
             ->authorsCount;
         $authorsMessage = $this->getAuthorMessage($authorsCount);
 
-        $genresCount = Genre::query()->count();
+        $genresCount = Genre::query()->where('status', Genre::ACTIVE_STATUS)->count();
         $genresMessage = $this->getGenresMessage($genresCount);
 
         $associationsCount = BookAssociation::query()->count();
