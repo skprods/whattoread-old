@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\SingleResources;
+namespace App\Http\Resources;
 
 class UserResource extends SingleResource
 {

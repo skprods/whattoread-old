@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\SingleResources;
+namespace App\Http\Resources;
 
 use App\Traits\CanPrepareData;
 use Illuminate\Http\Resources\Json\JsonResource;

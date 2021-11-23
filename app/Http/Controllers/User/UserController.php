@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\SingleResources\UserResource;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 
 class UserController
