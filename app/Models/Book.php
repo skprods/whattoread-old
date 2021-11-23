@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
  * @property int $id
@@ -74,5 +75,20 @@ class Book extends Model
             ->whereRaw("month(curdate()) = month(created_at)")
             ->first()
             ->total;
+    }
+
+    public static function getPaginate(
+        int $perPage = 30
+    ): LengthAwarePaginator {
+        $builder = self::query()
+            ->select();
+
+        if (!empty($sort)) {
+            $builder->orderBy($sort['field'], $sort['dir']);
+        } else {
+            $builder->orderBy('id', 'desc');
+        }
+
+        return $builder->paginate($perPage, null, null, $page);
     }
 }

@@ -10,3 +10,7 @@ Route::group(['prefix' => 'system'], function () {
         Route::get('users', 'SystemController@botUsers');
     });
 });
+
+Route::group(['prefix' => 'books'], function () {
+    Route::get('/', 'BooksController@index');
+});

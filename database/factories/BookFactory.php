@@ -7,31 +7,14 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
 {
-    /**
-     * The name of the factory's corresponding model.
-     *
-     * @var string
-     */
     protected $model = Book::class;
 
-    /**
-     * Define the model's default state.
-     *
-     * @return array
-     */
-    public function definition()
+    public function definition(): array
     {
         return [
-            'title' => $this->faker->text(100),
+            'title' => $this->faker->text(40),
             'description' => $this->faker->text(350),
-            'series' => $this->faker->text(15),
-            'publisher_name' => $this->faker->text(25),
-            'publisher_year' => $this->faker->year,
-            'author' => $this->faker->firstName . " " . $this->faker->lastName,
-            'category' => $this->faker->text(25),
-            'shop_url' => $this->faker->url,
-            'shop_name' => $this->faker->text(25),
-            'shop_book_id' => $this->faker->numberBetween(1000, 999999),
+            'author' => $this->faker->firstName() . " " . $this->faker->lastName(),
         ];
     }
 }
