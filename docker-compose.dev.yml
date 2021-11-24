@@ -27,4 +27,4 @@ services:
 
 volumes:
   whattoread-dev-database-data: # данные БД
-  whattoread-dev-redis: # данные Redis
+  whattoread-dev-redis-data: # данные Redis
