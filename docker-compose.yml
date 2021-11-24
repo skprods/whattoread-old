@@ -6,6 +6,7 @@ services:
         environment:
             TZ: "Europe/Moscow"
         volumes:
+            - ./storage/logs/nginx:/var/log/nginx
             - ./:/opt/www
         depends_on:
             - whattoread-php-fpm
@@ -53,8 +54,5 @@ services:
 
     whattoread-redis:
         image: redis:6
-        ports:
-            - "6380:6379"
         environment:
             TZ: "Europe/Moscow"
-

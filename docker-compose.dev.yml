@@ -1,22 +1,30 @@
 version: "3.7"
 
 services:
-    whattoread-nginx:
-        ports:
-            - "8301:80"
-        volumes:
-          - ./deploy/nginx/dev.conf:/etc/nginx/conf.d/default.conf
-        container_name: whattoread-dev-nginx
+  whattoread-nginx:
+    container_name: whattoread-nginx-dev
+    ports:
+        - "8301:80"
+    volumes:
+      - ./deploy/nginx/dev.conf:/etc/nginx/conf.d/default.conf
 
-    whattoread-php-fpm:
-        container_name: whattoread-dev-php-fpm
+  whattoread-php-fpm:
+    container_name: whattoread-php-fpm-dev
 
-    whattoread-percona:
-      container_name: whattoread-dev-percona
-      ports:
-        - "3316:3306"
-      volumes:
-        - whattoread-dev-database-data:/var/lib/mysql
+  whattoread-percona:
+    container_name: whattoread-percona-dev
+    ports:
+      - "3316:3306"
+    volumes:
+      - whattoread-dev-database-data:/var/lib/mysql
+
+  whattoread-redis:
+    container_name: whattoread-redis-dev
+    ports:
+      - "6381:6379"
+    volumes:
+      - whattoread-dev-redis-data:/data
 
 volumes:
   whattoread-dev-database-data: # данные БД
+  whattoread-dev-redis: # данные Redis
