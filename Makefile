@@ -30,12 +30,6 @@ exec-php-fpm: # заходим в контейнер с php
 exec-nginx: # заходим в контейнер с nginx
 	docker-compose exec whattoread-nginx bash
 
-### Команды для работы с контейнерами приложения (дев)
-exec-php-fpm-dev: # заходим в контейнер с php
-	docker-compose exec whattoread-dev-php-fpm bash
-exec-nginx-dev: # заходим в контейнер с nginx
-	docker-compose exec whattoread-dev-nginx bash
-
 ### Копирование зависимостей локально из контейнера
 load-vendor:
 	rm -rf ./vendor/*
