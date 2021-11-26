@@ -36,4 +36,4 @@ load-vendor:
 	docker cp whattoread-php-fpm:/opt/www/vendor/. ./vendor
 load-vendor-dev:
 	rm -rf ./vendor/*
-	docker cp whattoread-dev-php-fpm:/opt/www/vendor/. ./vendor
+	docker cp whattoread-php-fpm-dev:/opt/www/vendor/. ./vendor

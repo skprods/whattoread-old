@@ -18,6 +18,15 @@ services:
     volumes:
       - whattoread-database-data:/var/lib/mysql
 
+  whattoread-elasticsearch:
+    container_name: whattoread-elasticsearch
+    environment:
+      - "ES_JAVA_OPTS=-Xms1000m -Xmx1000m -XX:UseAVX=1" #Xms обязательно должно быть равно по размеру Xmx. Размер памяти на ноду
+    volumes:
+      - whattoread-elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+
   whattoread-redis:
     container_name: whattoread-redis
     ports:
@@ -27,4 +36,5 @@ services:
 
 volumes:
   whattoread-database-data: # данные БД
+  whattoread-elasticsearch-data: # данные Elasticsearch
   whattoread-redis-data: # данные Redis

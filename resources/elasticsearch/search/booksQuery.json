@@ -1,0 +1,24 @@
+{
+    "size": "{{size}}",
+    "query": {
+        "bool": {
+            "minimum_should_match": 1,
+            "should": [
+                {
+                    "dis_max": {
+                        "tie_breaker": 0.25,
+                        "queries": [
+                            { "match": { "title": { "query": "{{query}}", "boost": "1", "minimum_should_match": "100%" } } },
+                            { "match_bool_prefix": { "title": { "query": "{{query}}", "boost": "5", "minimum_should_match": "100%" } } },
+                            { "match": { "description": { "query": "{{query}}", "boost": "1", "minimum_should_match": "100%" } } },
+                            { "match_bool_prefix": { "description": { "query": "{{query}}", "boost": "5", "minimum_should_match": "100%" } } },
+                            { "match": { "author": { "query": "{{query}}", "boost": "1", "minimum_should_match": "100%" } } },
+                            { "match_bool_prefix": { "author": { "query": "{{query}}", "boost": "5", "minimum_should_match": "100%" } } }
+                        ]
+                    }
+                }
+            ],
+            "filter": []
+        }
+    }
+}

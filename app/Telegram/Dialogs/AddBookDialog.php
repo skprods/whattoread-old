@@ -3,6 +3,8 @@
 namespace App\Telegram\Dialogs;
 
 use App\Managers\BooksManager;
+use App\Models\Elasticsearch\ElasticBooks;
+use App\Services\ElasticsearchService;
 use Illuminate\Support\Facades\DB;
 
 class AddBookDialog extends Dialog
@@ -37,23 +39,31 @@ class AddBookDialog extends Dialog
         $author = $message;
         $whereAuthor = $this->getWhereString('author', explode(' ', $author));
 
-        $result = DB::select(DB::raw('
-            select s.* from (
-                select id, title, author from books where ' . $whereTitle . ' and status = "active"
-                union all
-                select id, title, author from books where ' . $whereAuthor . ' and status = "active"
-            ) as s group by s.id, s.title, s.author limit 9
-        '));
+        /** @var ElasticsearchService $searchService */
+        $searchService = app(ElasticsearchService::class);
+        /** @var ElasticBooks $searchModel */
+        $searchModel = app(ElasticBooks::class);
 
-        $text = "Вот что мы нашли:\n";
-        foreach ($result as $key => $item) {
-            $wrKey = $key + 1;
-            $text .= "#$wrKey: {$item->author} - {$item->title}\n";
-            $this->chatInfo->dialog->search[$wrKey] = $item->id;
+        $query = $searchModel->getTitleAuthorQuery($title, $author);
+        $result = $searchService->search($query);
+
+        if (!empty($result->hits)) {
+            $text = "Вот что мы нашли:\n";
+            foreach ($result->hits as $key => $item) {
+                $sourceId = $item->_source['id'];
+                $sourceAuthor = $item->_source['author'];
+                $sourceTitle = $item->_source['title'];
+
+                $wrKey = $key + 1;
+                $text .= "#$wrKey: {$sourceAuthor} - {$sourceTitle}\n";
+                $this->chatInfo->dialog->search[$wrKey] = $sourceId;
+            }
+
+            $text .= "\n";
+            $text .= "Если среди них есть нужная, отправьте её номер (без #). Если ни одна из книг не подходит, отправьте на 0";
+        } else {
+            $text = "К сожалению, такой книги ещё нет в нашей библиотеке. Мы автоматически добавим её. Для продолжения введите 0\n";
         }
-
-        $text .= "\n";
-        $text .= "Если среди них есть нужная, отправьте её номер (без #). Если ни одна из книг не подходит, отправьте на 0";
 
         $this->replyWithMessage(['text' => $text]);
     }

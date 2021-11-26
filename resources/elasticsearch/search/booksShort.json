@@ -1,0 +1,22 @@
+{
+    "size": "{{size}}",
+    "query": {
+        "bool": {
+            "minimum_should_match": 1,
+            "should": [
+                {
+                    "dis_max": {
+                        "tie_breaker": 0.25,
+                        "queries": [
+                            { "match": { "title": { "query": "{{title}}", "boost": "1", "minimum_should_match": "100%" } } },
+                            { "match_bool_prefix": { "title": { "query": "{{title}}", "boost": "5", "minimum_should_match": "100%" } } },
+                            { "match": { "author": { "query": "{{author}}", "boost": "1", "minimum_should_match": "100%" } } },
+                            { "match_bool_prefix": { "author": { "query": "{{author}}", "boost": "5", "minimum_should_match": "100%" } } }
+                        ]
+                    }
+                }
+            ],
+            "filter": []
+        }
+    }
+}
