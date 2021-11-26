@@ -33,6 +33,7 @@ services:
             - ./phpunit.xml:/opt/www/phpunit.xml
         depends_on:
             - whattoread-percona
+            - whattoread-elasticsearch
             - whattoread-redis
         environment:
             TZ: "Europe/Moscow"
@@ -51,6 +52,18 @@ services:
             - ./deploy/percona/dump.sh:/dump.sh
             - ./deploy/percona/restore.sh:/restore.sh
             - ./backups:/home
+
+    whattoread-elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+        restart: unless-stopped
+        environment:
+            - "discovery.type=single-node"
+            - "bootstrap.memory_lock=true" #в этой ситуации узел выберет себя ведущим и не присоединится к кластеру с любым другим узлом.
+        ulimits:
+            memlock:
+                soft: -1
+                hard: -1
+        tty: true
 
     whattoread-redis:
         image: redis:6
