@@ -22,6 +22,7 @@ class ReindexBooksJob extends Job
 
     public function handle()
     {
+        $time = time();
         $this->log("Начинается переиндексация книг...");
 
         $lastIndex = $this->service->getLastIndexByAlias($this->model->alias);
@@ -59,9 +60,12 @@ class ReindexBooksJob extends Job
         $this->service->createAlias($this->model->alias, $newIndex);
         $this->log("Объединение индекса с алиасом завершено.");
 
-        $this->log("Удаление индекса $lastIndex...");
-        $this->service->deleteIndexIfExists($lastIndex);
+        if ($lastIndex) {
+            $this->log("Удаление индекса $lastIndex...");
+            $this->service->deleteIndexIfExists($lastIndex);
+        }
 
-        $this->log("Переиндексация {$this->model->alias} завершена.");
+        $workTime = time() - $time;
+        $this->log("Переиндексация {$this->model->alias} завершена за {$workTime}с.");
     }
 }
