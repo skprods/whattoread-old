@@ -54,5 +54,6 @@ services:
 
     whattoread-redis:
         image: redis:6
+        restart: always
         environment:
             TZ: "Europe/Moscow"
