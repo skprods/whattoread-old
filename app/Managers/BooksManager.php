@@ -54,7 +54,7 @@ class BooksManager
                 $book = Book::find($dialog->selectedBookId);
                 $this->bookManager->book = $book;
             } else {
-                $book = $this->bookManager->create([
+                $book = $this->bookManager->firstOrCreate([
                     'title' => $dialog->messages['title'][0],
                     'author' => $dialog->messages['author'][0],
                 ]);

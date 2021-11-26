@@ -33,11 +33,9 @@ class AddBookDialog extends Dialog
 
         /** Название книги мы получили на предыдущем шаге */
         $title = $this->chatInfo->dialog->messages['title'][0];
-        $whereTitle = $this->getWhereString('title', explode(' ', $title));
 
         /** Автора нам прислали только что */
         $author = $message;
-        $whereAuthor = $this->getWhereString('author', explode(' ', $author));
 
         /** @var ElasticsearchService $searchService */
         $searchService = app(ElasticsearchService::class);
@@ -154,15 +152,5 @@ class AddBookDialog extends Dialog
                 $this->chatInfo->dialog->messages[$this->currentStep][] = trim($message);
             }
         }
-    }
-
-    private function getWhereString(string $field, array $values): string
-    {
-        $where = [];
-        foreach ($values as $value) {
-            $where[] = $field . ' like "%' . $value . '%"';
-        }
-
-        return implode(' and ', $where);
     }
 }

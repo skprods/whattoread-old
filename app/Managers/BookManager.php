@@ -13,6 +13,20 @@ class BookManager
         $this->book = $book;
     }
 
+    public function firstOrCreate(array $params): Book
+    {
+        $this->book = Book::query()
+            ->where('title', '=', $params['title'])
+            ->where('author', '=', $params['author'])
+            ->first();
+
+        if ($this->book) {
+            return $this->book;
+        } else {
+            return $this->create($params);
+        }
+    }
+
     public function createOrUpdate(array $params): Book
     {
         $this->book = Book::query()
