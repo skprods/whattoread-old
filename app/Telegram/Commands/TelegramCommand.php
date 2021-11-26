@@ -64,7 +64,7 @@ abstract class TelegramCommand extends Command
                 'telegram_id' => $chat->id,
                 'first_name' => $chat->firstName,
                 'last_name' => $chat->lastName,
-                'username' => $chat->username,
+                'username' => $chat->username ?? $chat->id,
             ]);
         } else {
             $this->telegramUser = null;
