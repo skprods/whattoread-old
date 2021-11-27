@@ -1,6 +1,6 @@
 # Запуск приложения для разработки
 app-start-dev: app-build-dev app-up-dev
-app-start-prod: app-build-prod app-up-prod
+app-start-prod: app-build-prod app-up-prod php-reindex-books
 
 app-build-dev: # сборка проекта с указанием имени пользователя
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
@@ -23,6 +23,9 @@ app-stop-prod: # остановка проекта
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml stop
 app-down-prod: # удаление контейнеров проекта
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+
+php-reindex-books:
+    docker-compose exec whattoread-php-fpm php artisan reindex:books
 
 ### Команды для работы с контейнерами приложения (прод)
 exec-php-fpm: # заходим в контейнер с php
