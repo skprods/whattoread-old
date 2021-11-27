@@ -64,6 +64,9 @@ class Handler extends ExceptionHandler
                 'success' => false,
                 'error' => $error,
             ], 401);
+        } elseif ($e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
+            $e = new ForbiddenException();
+            return $e->render();
         } else {
             $errorDetail = [
                 'code' => $e->getCode(),
