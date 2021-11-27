@@ -1,6 +1,6 @@
 # Запуск приложения для разработки
 app-start-dev: app-build-dev app-up-dev
-app-start-prod: app-build-prod app-up-prod php-reindex-books
+app-start-prod: app-build-prod app-up-prod
 
 app-build-dev: # сборка проекта с указанием имени пользователя
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
