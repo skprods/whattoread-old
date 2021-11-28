@@ -1,0 +1,266 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "WhatToRead API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "api/v1/login": {
+            "post": {
+                "tags": [
+                    "Аутентификация"
+                ],
+                "summary": "Авторизация",
+                "description": "Авторизация по почте и паролю",
+                "operationId": "authLogin",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret"
+                                    },
+                                    "remember": {
+                                        "description": "Нужно ли запоминать пользователя (влияет на время жизни токена)",
+                                        "type": "boolean",
+                                        "example": "true"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Успешная авторизация",
+                        "headers": {
+                            "Authorization": {
+                                "description": "Bearer-токен для доступа к приложению",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Переданные данные невалидны",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "false"
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Переданные данные невалидны"
+                                                },
+                                                "validator": {
+                                                    "properties": {
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "Неверный email и/или пароль"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "api/v1/register": {
+            "post": {
+                "tags": [
+                    "Аутентификация"
+                ],
+                "summary": "Регистрация",
+                "description": "Регистрация в системе",
+                "operationId": "authRegister",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "first_name",
+                                    "email",
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string",
+                                        "example": "Олег"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "user@email.com"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password",
+                                        "example": "secret"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Успешная регистрация и авторизация",
+                        "headers": {
+                            "Authorization": {
+                                "description": "Bearer-токен для доступа к приложению",
+                                "schema": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Переданные данные невалидны",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": "false"
+                                        },
+                                        "error": {
+                                            "properties": {
+                                                "message": {
+                                                    "type": "string",
+                                                    "example": "Переданные данные невалидны"
+                                                },
+                                                "validator": {
+                                                    "properties": {
+                                                        "email": {
+                                                            "type": "string",
+                                                            "example": "Такой email уже существует"
+                                                        }
+                                                    },
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "api/v1/users": {
+            "get": {
+                "tags": [
+                    "Пользователи"
+                ],
+                "summary": "Информация о пользователе",
+                "description": "Получение информации об авторизованном пользователе",
+                "operationId": "users.users",
+                "responses": {
+                    "200": {
+                        "description": "Успешная выборка",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserResource"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "UserResource": {
+                "description": "Ресурс пользователя",
+                "properties": {
+                    "id": {
+                        "description": "Индетификатор пользователя",
+                        "type": "integer",
+                        "example": "1"
+                    },
+                    "username": {
+                        "description": "Имя пользователя (логин)",
+                        "type": "string",
+                        "example": "user"
+                    },
+                    "email": {
+                        "description": "Почта пользователя",
+                        "type": "string",
+                        "example": "user@email.com"
+                    },
+                    "first_name": {
+                        "description": "Имя",
+                        "type": "string",
+                        "example": "Олег"
+                    },
+                    "last_name": {
+                        "description": "Фамилия",
+                        "type": "string",
+                        "example": "Васнецов"
+                    },
+                    "email_verified_at": {
+                        "description": "Дата подтверждения почты (если есть)",
+                        "type": "string",
+                        "example": "2021-01-01 10:00:00"
+                    },
+                    "created_at": {
+                        "description": "Дата регистрации",
+                        "type": "string",
+                        "example": "2021-01-01 10:00:00"
+                    },
+                    "updated_at": {
+                        "description": "Дата последнего обновления",
+                        "type": "string",
+                        "example": "2021-01-01 10:00:00"
+                    }
+                },
+                "type": "object"
+            }
+        }
+    },
+    "security": [
+        []
+    ]
+}
