@@ -68,13 +68,6 @@ class Handler extends ExceptionHandler
         } elseif ($e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
             $e = new ForbiddenException();
             return $e->render();
-        } elseif ($e instanceof TelegramException) {
-//            $telegram = new Api(config('telegram.bots.whattoread.token'));
-//            $telegram->sendMessage([
-//                'chat_id' => env('ERROR_CHAT_ID'),
-//                'text' => "*ОШИБКА*:\nКод: {$e->getCode()}\n{$e->telegramText}",
-//                'parse_mode' => 'markdown',
-//            ]);
         } else {
             $errorDetail = [
                 'code' => $e->getCode(),

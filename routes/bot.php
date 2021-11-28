@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\TelegramException;
 use App\Services\DialogService;
 use Illuminate\Support\Facades\Route;
 use Telegram\Bot\BotsManager;
@@ -18,7 +19,14 @@ Route::post('/', function () {
             DialogService::initDialog($telegram, $update);
         }
     } catch (Exception $exception) {
-        throw new \App\Exceptions\TelegramException($exception->getMessage(), $exception->getCode(), $telegram->bot()->getWebhookUpdate());
+        $e = new TelegramException($exception->getMessage(), $exception->getCode(), $telegram->bot()->getWebhookUpdate());
+
+        $telegram->bot()->sendMessage([
+            'chat_id' => env('ERROR_CHAT_ID'),
+            'text' => "*ОШИБКА*:\nКод: {$e->getCode()}\n{$e->telegramText}",
+            'parse_mode' => 'markdown',
+        ]);
+        return 'ok';
     }
 
     return 'ok';
