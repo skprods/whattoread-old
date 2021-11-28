@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Objects\Update;
 
 class TelegramException extends Exception
@@ -11,7 +12,8 @@ class TelegramException extends Exception
     {
         $text = $message;
         $text .= "\n\n";
-        $text .= "Данные из Telegram:\n ```" . json_encode($update) . "```";
+        Log::info(json_encode($update));
+        $text .= "Данные из Telegram:\n```" . json_encode($update) . "```";
 
         parent::__construct($text, $code);
     }
