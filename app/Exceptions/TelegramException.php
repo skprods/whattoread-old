@@ -3,18 +3,18 @@
 namespace App\Exceptions;
 
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Objects\Update;
 
 class TelegramException extends Exception
 {
+    public string $telegramText;
+
     public function __construct(string $message, int $code, Update $update)
     {
-        $text = $message;
-        $text .= "\n\n";
-        Log::info(json_encode($update));
-        $text .= "Данные из Telegram:\n```" . json_encode($update) . "```";
+        $this->telegramText = $message;
+        $this->telegramText .= "\n\n";
+        $this->telegramText .= "```" . json_encode($update) . "```";
 
-        parent::__construct($text, $code);
+        parent::__construct($message, $code);
     }
 }

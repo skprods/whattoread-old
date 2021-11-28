@@ -72,7 +72,7 @@ class Handler extends ExceptionHandler
             $telegram = new Api(config('telegram.bots.whattoread.token'));
             $telegram->sendMessage([
                 'chat_id' => env('ERROR_CHAT_ID'),
-                'text' => "*ОШИБКА*:\nКод: {$e->getCode()}\n{$e->getMessage()}",
+                'text' => "*ОШИБКА*:\nКод: {$e->getCode()}\n{$e->telegramText}",
                 'parse_mode' => 'markdown',
             ]);
         } else {
