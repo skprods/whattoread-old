@@ -7,6 +7,7 @@
     "require": {
         "php": "^8.0",
         "ext-redis": "*",
+        "darkaonline/l5-swagger": "^8.0",
         "doctrine/dbal": "^3.1",
         "elasticsearch/elasticsearch": "^7.9",
         "fruitcake/laravel-cors": "^2.0",
