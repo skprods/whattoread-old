@@ -11,7 +11,7 @@ class TelegramException extends Exception
     {
         $text = $message;
         $text .= "\n\n";
-        $text .= "Данные из Telegram:\n```" . $update->toJson() . "```";
+        $text .= "Данные из Telegram:\n```" . json_encode($update) . "```";
 
         parent::__construct($text, $code);
     }
