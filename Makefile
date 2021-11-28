@@ -1,6 +1,6 @@
 # Запуск приложения для разработки
 app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev
-app-start-prod: rm-vendor app-build-prod app-up-prod load-vendor
+app-start-prod: app-build-prod app-up-prod
 
 app-build-dev: # сборка проекта с указанием имени пользователя
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
