@@ -73,10 +73,12 @@ abstract class TelegramCommand extends Command
 
     public function logMessage(array $responses)
     {
-        app(TelegramMessageManager::class)->create([
-            'command' => $this->name,
-            'responses' => $responses
-        ], $this->telegramUser);
+        if ($this->telegramUser) {
+            app(TelegramMessageManager::class)->create([
+                'command' => $this->name,
+                'responses' => $responses
+            ], $this->telegramUser);
+        }
     }
 
     protected function addResponse(array $response)

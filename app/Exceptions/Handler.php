@@ -8,6 +8,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Telegram\Bot\Api;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -67,6 +68,13 @@ class Handler extends ExceptionHandler
         } elseif ($e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
             $e = new ForbiddenException();
             return $e->render();
+        } elseif ($e instanceof TelegramException) {
+            $telegram = new Api(config('telegram.bots.whattoread.token'));
+            $telegram->sendMessage([
+                'chat_id' => env('ERROR_CHAT_ID'),
+                'text' => "[ошибка]: [{$e->getCode()}] {$e->getMessage()}",
+                'parse_mode' => 'markdown',
+            ]);
         } else {
             $errorDetail = [
                 'code' => $e->getCode(),
