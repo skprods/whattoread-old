@@ -13,7 +13,7 @@ Route::post('/', function () {
     $update = $telegram->commandsHandler(true);
 
     /** Если входящее сообщение - не команда, инициализируем диалог */
-    if ($update->message->text[0] !== '/') {
+    if (isset($update->message) && $update->message->text[0] !== '/') {
         DialogService::initDialog($telegram, $update);
     }
 
