@@ -14,6 +14,16 @@ class UserController
      * description="Получение информации об авторизованном пользователе",
      * operationId="users.users",
      * tags={"Пользователи"},
+     * security={ {"bearer":{}} },
+     * @OA\Parameter(
+     *     name="Authorization",
+     *     in="header",
+     *     required=true,
+     *     description="Bearer {token}",
+     *     @OA\Schema(
+     *         type="bearerAuth"
+     *     )
+     * ),
      * @OA\Response(
      *     response=200,
      *     description="Успешная выборка",

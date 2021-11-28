@@ -195,6 +195,17 @@
                 "summary": "Информация о пользователе",
                 "description": "Получение информации об авторизованном пользователе",
                 "operationId": "users.users",
+                "parameters": [
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "description": "Bearer {token}",
+                        "required": true,
+                        "schema": {
+                            "type": "bearerAuth"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Успешная выборка",
@@ -206,7 +217,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
             }
         }
     },
