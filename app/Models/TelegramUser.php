@@ -3,12 +3,24 @@
 namespace App\Models;
 
 use App\Traits\HasDiffCount;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
+/**
+ * @property int $id
+ * @property int $telegram_id
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $username
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class TelegramUser extends Model
 {
+    use HasFactory;
     use HasDiffCount;
 
     protected $fillable = [

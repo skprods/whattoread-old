@@ -75,12 +75,11 @@ class BooksManager
             }
 
             /** @var TelegramUser $telegramUser */
-
             $telegramUser = TelegramUser::getUserByTelegramId($chatInfo->id);
             app(TelegramUserBookManager::class)->createOrUpdate(['rating' => $dialog->bookRating], $telegramUser, $book);
 
             if (isset($dialog->messages['associations'])) {
-                app(BookAssociationManager::class)->bulkCreate($dialog->messages['associations'], $book);
+                app(AssociationManager::class)->addForTelegramUser($dialog->messages['associations'], $book, $telegramUser);
             }
 
             DB::commit();
