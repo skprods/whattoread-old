@@ -26,6 +26,12 @@ Route::post('/', function () {
             'text' => "*ОШИБКА*:\nКод: {$e->getCode()}\n{$e->telegramText}",
             'parse_mode' => 'markdown',
         ]);
+
+        $telegram->bot()->sendMessage([
+            'chat_id' => $e->update->getChat()->id,
+            'text' => "Что-то пошло не так... Наши администраторы уже в курсе, скоро мы всё исправим.\nПриносим свои извинения. Пожалуйста, попробуйте чуть позже."
+        ]);
+
         return 'ok';
     }
 
