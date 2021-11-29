@@ -2,8 +2,10 @@
 
 namespace App\Managers;
 
+use App\Models\TelegramChat;
 use App\Models\TelegramMessage;
 use App\Models\TelegramUser;
+use Illuminate\Support\Facades\Log;
 
 class TelegramMessageManager
 {
@@ -14,9 +16,15 @@ class TelegramMessageManager
         $this->telegramMessage = $telegramMessage;
     }
 
-    public function create(array $params, TelegramUser $telegramUser): TelegramMessage
+    public function create(array $params, TelegramUser $telegramUser, TelegramChat $telegramChat = null): TelegramMessage
     {
         $this->telegramMessage = app(TelegramMessage::class);
+
+        if ($telegramChat) {
+            Log::info(json_encode($telegramChat));
+            $this->telegramMessage->telegramChat()->associate($telegramChat);
+        }
+
         $this->telegramMessage->telegramUser()->associate($telegramUser);
         $this->telegramMessage->fill($params);
         $this->telegramMessage->save();

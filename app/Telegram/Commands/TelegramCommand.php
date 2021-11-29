@@ -3,11 +3,14 @@
 namespace App\Telegram\Commands;
 
 use App\Entities\ChatInfo;
+use App\Managers\TelegramChatManager;
 use App\Managers\TelegramMessageManager;
 use App\Managers\TelegramUserManager;
+use App\Models\TelegramChat;
 use App\Models\TelegramUser;
 use App\Services\RedisService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\Chat;
 
@@ -15,6 +18,7 @@ abstract class TelegramCommand extends Command
 {
     private RedisService $redisService;
     protected ?TelegramUser $telegramUser;
+    protected ?TelegramChat $telegramChat = null;
     protected ChatInfo $chatInfo;
 
     private array $responses = [];
@@ -67,18 +71,26 @@ abstract class TelegramCommand extends Command
                 'username' => $chat->username ?? $chat->id,
             ]);
         } else {
-            $this->telegramUser = null;
+            $this->telegramUser = app(TelegramUserManager::class)->createOrUpdate([
+                'telegram_id' => $this->update->message->from->id,
+                'first_name' => $this->update->message->from->firstName,
+                'last_name' => $this->update->message->from->lastName,
+                'username' => $this->update->message->from->username,
+            ]);
+
+            $this->telegramChat = app(TelegramChatManager::class)->createOrUpdate([
+                'chat_id' => $chat->id,
+                'title' => $chat->title,
+            ]);
         }
     }
 
     public function logMessage(array $responses)
     {
-        if ($this->telegramUser) {
-            app(TelegramMessageManager::class)->create([
-                'command' => $this->name,
-                'responses' => $responses
-            ], $this->telegramUser);
-        }
+        app(TelegramMessageManager::class)->create([
+            'command' => $this->name,
+            'responses' => $responses
+        ], $this->telegramUser, $this->telegramChat);
     }
 
     protected function addResponse(array $response)

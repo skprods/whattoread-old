@@ -24,4 +24,9 @@ class TelegramMessage extends Model
     {
         return $this->belongsTo(TelegramUser::class);
     }
+
+    public function telegramChat(): BelongsTo
+    {
+        return $this->belongsTo(TelegramChat::class);
+    }
 }

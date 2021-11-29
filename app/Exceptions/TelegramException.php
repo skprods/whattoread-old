@@ -9,12 +9,12 @@ class TelegramException extends Exception
 {
     public string $telegramText;
 
-    public function __construct(string $message, int $code, Update $update)
+    public function __construct(string $message, $code, Update $update)
     {
         $this->telegramText = $message;
         $this->telegramText .= "\n\n";
         $this->telegramText .= "```" . json_encode($update) . "```";
 
-        parent::__construct($message, $code);
+        parent::__construct($message, (int) $code);
     }
 }
