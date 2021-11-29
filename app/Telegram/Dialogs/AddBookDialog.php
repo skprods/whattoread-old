@@ -14,7 +14,6 @@ class AddBookDialog extends Dialog
         'author',
         'confirm',
         'rating',
-        'genres',
         'associations',
     ];
 
@@ -90,39 +89,12 @@ class AddBookDialog extends Dialog
         $this->chatInfo->dialog->bookRating = $answer;
         $this->completeStep();
 
-        $text = "У нас есть ещё пара вопросов. Отвечать на них необязательно, но ваши ответы помогут нам давать более персонализированные рекомендации.\n\n";
+        $text = "[необязательно]\n";
+        $text .= "С чем у вас ассоциируется эта книга?\n\n";
+        $text .= "Напишите одну или несколько ассоциаций (по одной в сообщении или через запятую). ";
+        $text .= "Можно использовать словосочетания или обычные слова. Когда закончите, в отдельном сообщении напишите Конец.\n\n";
         $text .= "Если вы не хотите отвечать, напишите Пропустить";
         $this->replyWithMessage(['text' => $text]);
-
-        sleep(1);
-
-        $text = "[необязательно]\n";
-        $text .= "Какие жанры охватывает эта книга на ваш взгляд? Напишите один или несколько (по одному в сообщении или через запятую).\n";
-        $text .= "Например, классика, фэнтези.\n\n";
-        $text .= "Как закончите, напишите Конец";
-        $this->replyWithMessage(['text' => $text]);
-    }
-
-    public function genresStep(string $message)
-    {
-        if (
-            mb_strtolower($message) === "конец"
-            || mb_strtolower($message) === "пропустить"
-        ) {
-            $this->completeStep();
-            $this->endOfStep = true;
-
-            $text = "[необязательно]\n";
-            $text .= "С чем у вас ассоциируется эта книга?\n\n";
-            $text .= "Можно использовать словосочетания или обычные слова. Когда закончите, напишите Конец";
-            $this->replyWithMessage(['text' => $text]);
-        } else {
-            $messages = explode(',', $this->message->text);
-
-            foreach ($messages as $message) {
-                $this->chatInfo->dialog->messages[$this->currentStep][] = trim($message);
-            }
-        }
     }
 
     public function associationsStep(string $message)

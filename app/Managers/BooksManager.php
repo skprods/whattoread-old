@@ -60,20 +60,6 @@ class BooksManager
                 ]);
             }
 
-            if (isset($dialog->messages['genres'])) {
-                $genres = collect();
-                /** @var GenreManager $genreManager */
-                $genreManager = app(GenreManager::class);
-
-                foreach ($dialog->messages['genres'] as $genre) {
-                    $genres->push(
-                        $genreManager->firstOrCreate(['name' => $genre])
-                    );
-                }
-
-                $this->bookManager->addGenres($genres->pluck('id')->toArray());
-            }
-
             /** @var TelegramUser $telegramUser */
             $telegramUser = TelegramUser::getUserByTelegramId($chatInfo->id);
             app(TelegramUserBookManager::class)->createOrUpdate(['rating' => $dialog->bookRating], $telegramUser, $book);
