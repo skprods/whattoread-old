@@ -21,7 +21,6 @@ class TelegramMessageManager
         $this->telegramMessage = app(TelegramMessage::class);
 
         if ($telegramChat) {
-            Log::info(json_encode($telegramChat));
             $this->telegramMessage->telegramChat()->associate($telegramChat);
         }
 
