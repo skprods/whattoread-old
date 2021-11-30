@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\ResourceCollections;
+namespace App\Http\Collections;
 
 use App\Traits\CanPrepareData;
 use Illuminate\Http\Resources\Json\ResourceCollection;
@@ -50,8 +50,12 @@ class CollectionResource extends ResourceCollection
         return $exploded[1] ?? null;
     }
 
-    public static function fromDataTable(EloquentDataTable $dataTable, int $paginate): CollectionResource
+    public static function fromDataTable(EloquentDataTable $dataTable, int $paginate = null): CollectionResource
     {
-        return new static($dataTable->getFilteredQuery()->paginate($paginate));
+        if ($paginate) {
+            return new static($dataTable->getFilteredQuery()->paginate($paginate));
+        } else {
+            return new static($dataTable->getFilteredQuery()->get());
+        }
     }
 }

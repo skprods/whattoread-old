@@ -49,7 +49,7 @@ class ReindexBooksJob extends Job
                 $this->log("Вставка данных в индекс $newIndex: {$data->count()} строк...");
 
                 $loadIndexQuery = $this->model->getIndexLoadQuery($data->toArray(), $newIndex);
-                $this->service->addData($loadIndexQuery);
+                $this->service->bulkAdd($loadIndexQuery);
                 unset($loadIndexQuery);
 
                 $count = $this->service->getIndexSize($newIndex);

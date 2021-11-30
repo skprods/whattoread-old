@@ -2,20 +2,17 @@
 
 namespace App\Http\Resources\Admin;
 
-use App\Http\Collections\Admin\GenresCollection;
 use App\Http\Resources\SingleResource;
 
-class BookResource extends SingleResource
+class GenreResource extends SingleResource
 {
     public function toArray($request): array
     {
         return [
             'id' => $this->resource->id,
-            'title' => $this->resource->title,
-            'description' => $this->resource->description,
-            'author' => $this->resource->author,
+            'name' => $this->resource->name,
+            'parent' => new self($this->resource->parent),
             'status' => $this->resource->status,
-            'genres' => new GenresCollection($this->whenLoaded('genres')),
             'created_at' => $this->prepareDateTime($this->resource->created_at),
             'updated_at' => $this->prepareDateTime($this->resource->updated_at),
         ];

@@ -13,4 +13,10 @@ Route::group(['prefix' => 'system'], function () {
 
 Route::group(['prefix' => 'books'], function () {
     Route::get('/', 'BooksController@index');
+    Route::put('{book}', 'BooksController@update');
+    Route::delete('{book}', 'BooksController@delete');
+});
+
+Route::group(['prefix' => 'genres'], function () {
+    Route::get('/', 'GenresController@index');
 });

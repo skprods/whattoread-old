@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Events\BookDeleted;
+use App\Events\BookUpdated;
+use App\Listeners\DeleteElasticBook;
+use App\Listeners\UpdateElasticBook;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -17,6 +21,14 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+
+        BookUpdated::class => [
+            UpdateElasticBook::class,
+        ],
+
+        BookDeleted::class => [
+            DeleteElasticBook::class,
         ],
     ];
 
