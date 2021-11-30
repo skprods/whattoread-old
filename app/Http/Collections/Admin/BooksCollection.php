@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\ResourceCollections\Admin;
+namespace App\Http\Collections\Admin;
 
-use App\Http\ResourceCollections\CollectionResource;
+use App\Http\Collections\CollectionResource;
 use App\Http\Resources\Admin\BookResource;
 
 class BooksCollection extends CollectionResource

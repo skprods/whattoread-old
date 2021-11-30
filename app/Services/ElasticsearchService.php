@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Support\ElasticQuery;
 use App\Support\ElasticSearchResult;
 use Elasticsearch\Client;
+use Elasticsearch\Common\Exceptions\Missing404Exception;
+use Illuminate\Support\Facades\Log;
 
 class ElasticsearchService
 {
@@ -65,13 +67,40 @@ class ElasticsearchService
     }
 
     /** Добавление нескольких элементов в индекс */
-    public function addData(ElasticQuery $query): bool
+    public function bulkAdd(ElasticQuery $query): bool
     {
         $response = $this->client->bulk([
             'body' => $query->body,
         ]);
 
         return !$response['errors'];
+    }
+
+    public function createOrUpdate(string $index, string $id, array $data)
+    {
+        try {
+            $this->client->update([
+                'index' => $index,
+                'id' => $id,
+                'body' => [
+                    'doc' => $data,
+                ],
+            ]);
+        } catch (\Exception $exception) {
+            $this->client->create([
+                'index' => $index,
+                'id' => $id,
+                'body' => $data,
+            ]);
+        }
+    }
+
+    public function delete(string $index, string $id)
+    {
+        $this->client->delete([
+            'index' => $index,
+            'id' => $id
+        ]);
     }
 
     public function search(ElasticQuery $query): ElasticSearchResult

@@ -26,6 +26,7 @@ abstract class ElasticModel
             $params[] = [
                 'index' => [
                     '_index' => $index,
+                    '_id' => $item['id'],
                 ],
             ];
 

@@ -17,6 +17,7 @@ services:
             dockerfile: ./deploy/php-fpm/Dockerfile
         volumes:
             - ./deploy/php-fpm/php.ini:/usr/local/etc/php/php.ini
+            - ./deploy/php-fpm/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
             - ./app:/opt/www/app
             - ./bootstrap:/opt/www/bootstrap
             - ./config:/opt/www/config

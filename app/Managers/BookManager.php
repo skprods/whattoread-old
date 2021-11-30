@@ -2,6 +2,8 @@
 
 namespace App\Managers;
 
+use App\Events\BookDeleted;
+use App\Events\BookUpdated;
 use App\Models\Book;
 
 class BookManager
@@ -55,7 +57,25 @@ class BookManager
         $this->book->fill($params);
         $this->book->save();
 
+        if (isset($params['genres'])) {
+            $this->book->genres()->sync($params['genres']);
+        }
+
+        BookUpdated::dispatch($this->book);
+
         return $this->book;
+    }
+
+    public function delete(): ?bool
+    {
+        $this->book->genres()->sync([]);
+        $this->book->categories()->sync([]);
+        $this->book->telegramUsers()->delete();
+        $this->book->associations()->delete();
+
+        BookDeleted::dispatch($this->book->id);
+
+        return $this->book->delete();
     }
 
     public function addGenres(array $genreIds)

@@ -1,6 +1,6 @@
 # Запуск приложения для разработки
 app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev
-app-start-prod: app-build-prod app-up-prod
+app-start-prod: app-build-prod app-up-prod app-supervisor-start
 
 app-build-dev: # сборка проекта с указанием имени пользователя
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
@@ -32,6 +32,15 @@ exec-php-fpm: # заходим в контейнер с php
 	docker-compose exec whattoread-php-fpm bash
 exec-nginx: # заходим в контейнер с nginx
 	docker-compose exec whattoread-nginx bash
+
+app-supervisor-start: # запуск supervisor для очередей
+	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor start
+app-supervisor-stop: # остановка supervisor
+	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor stop
+app-supervisor-restart: # рестарт supervisor
+	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor restart
+app-supervisor-status: # статус supervisor
+	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor status
 
 ### Копирование зависимостей локально из контейнера
 rm-vendor:

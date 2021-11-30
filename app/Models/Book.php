@@ -32,10 +32,16 @@ class Book extends Model
     public const MODERATION_STATUS = 'moderation';
     public const ACTIVE_STATUS = 'active';
 
+    public const STATUSES = [
+        self::MODERATION_STATUS,
+        self::ACTIVE_STATUS,
+    ];
+
     protected $fillable = [
         'title',
         'description',
         'author',
+        'status',
     ];
 
     public function genres(): BelongsToMany
