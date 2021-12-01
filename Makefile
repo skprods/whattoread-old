@@ -1,6 +1,6 @@
 # Запуск приложения для разработки
-app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev
-app-start-prod: app-build-prod app-up-prod app-supervisor-start
+app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev redis-config
+app-start-prod: app-build-prod app-up-prod app-supervisor-start redis-config
 
 app-build-dev: # сборка проекта с указанием имени пользователя
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
@@ -53,3 +53,7 @@ load-vendor:
 load-vendor-dev:
 	rm -rf ./vendor/*
 	docker cp whattoread-php-fpm-dev:/opt/www/vendor/. ./vendor
+
+redis-config:
+	docker-compose exec whattoread-redis redis-cli config set stop-writes-on-bgsave-error no
+	docker-compose exec whattoread-redis redis-cli config get stop-writes-on-bgsave-error

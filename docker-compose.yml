@@ -67,9 +67,7 @@ services:
         tty: true
 
     whattoread-redis:
-        build:
-            context: .
-            dockerfile: ./deploy/redis/Dockerfile
+        image: redis:6
         restart: always
         environment:
             TZ: "Europe/Moscow"
