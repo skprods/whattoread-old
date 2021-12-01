@@ -27,11 +27,13 @@ app-down-prod: # удаление контейнеров проекта
 php-reindex-books:
     docker-compose exec whattoread-php-fpm php artisan reindex:books
 
-### Команды для работы с контейнерами приложения (прод)
+### Команды для работы с контейнерами приложения
 exec-php-fpm: # заходим в контейнер с php
 	docker-compose exec whattoread-php-fpm bash
 exec-nginx: # заходим в контейнер с nginx
 	docker-compose exec whattoread-nginx bash
+exec-redis: # заходим в контейнер с redis
+	docker-compose exec whattoread-redis bash
 
 app-supervisor-start: # запуск supervisor для очередей
 	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor start
