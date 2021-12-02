@@ -17,24 +17,32 @@ class NotificationService
 
     public function notifyForException(Throwable $e)
     {
-        $text = $this->prepareResponse($e->getCode(), $e->getMessage(), get_class($e));
+        $text = $this->prepareResponse($e->getCode(), $e->getMessage(), get_class($e), true);
 
         $this->sendMessage($text);
     }
 
     public function notifyForTelegramException(TelegramException $e)
     {
-        $text = $this->prepareResponse($e->getCode(), $e->getText(), get_class($e->getBaseException()));
+        $text = $this->prepareResponse($e->getCode(), $e->getText(), get_class($e->getBaseException()), false);
 
         $this->sendMessage($text);
     }
 
-    private function prepareResponse(int $code, string $message, string $errorClass): string
+    private function prepareResponse(int $code, string $message, string $errorClass, bool $needReplace): string
     {
         $text = "*ОШИБКА*:\n";
         $text .= "Код: $code\n";
         $text .= "Класс: $errorClass\n";
         $text .= "\n";
+
+        if ($needReplace) {
+            $message = str_replace('_', '\\_', $message);
+            $message = str_replace('*', '\\*', $message);
+            $message = str_replace('[', '\\[', $message);
+            $message = str_replace('`', '\\`', $message);
+        }
+
         $text .= $message;
 
         return $text;
