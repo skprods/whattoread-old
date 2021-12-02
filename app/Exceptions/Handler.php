@@ -2,35 +2,38 @@
 
 namespace App\Exceptions;
 
+use App\Services\NotificationService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Telegram\Bot\Api;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Throwable;
 
 class Handler extends ExceptionHandler
 {
-    /**
-     * A list of the exception types that are not reported.
-     *
-     * @var array
-     */
     protected $dontReport = [
         //
     ];
 
-    /**
-     * A list of the inputs that are never flashed for validation exceptions.
-     *
-     * @var array
-     */
     protected $dontFlash = [
         'current_password',
         'password',
         'password_confirmation',
+    ];
+
+    private array $notNotifiable = [
+        BaseException::class,
+        ModelNotFoundException::class,
+        NotFoundHttpException::class,
+        ValidationException::class,
+        UnauthorizedException::class,
+        TelegramSDKException::class,
     ];
 
     /**
@@ -41,7 +44,22 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
-            //
+            $notify = true;
+
+            foreach ($this->notNotifiable as $exception) {
+                if ($e instanceof $exception) {
+                    $notify = false;
+                    break;
+                }
+            }
+
+            if ($e->getMessage() === 'Token has expired') {
+                $notify = false;
+            }
+
+            if ($notify) {
+                $this->sendNotificationToTelegram($e);
+            }
         });
     }
 
@@ -68,6 +86,8 @@ class Handler extends ExceptionHandler
         } elseif ($e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
             $e = new ForbiddenException();
             return $e->render();
+        } elseif ($e instanceof TelegramSDKException) {
+            return 'ok';
         } else {
             $errorDetail = [
                 'code' => $e->getCode(),
@@ -121,5 +141,14 @@ class Handler extends ExceptionHandler
             'success' => false,
             'error' => $errorDetail,
         ], $trace);
+    }
+
+    private function sendNotificationToTelegram(Throwable $e)
+    {
+        $token = config('telegram.bots.whattoread.token');
+
+        /** @var NotificationService $notificationService */
+        $notificationService = app(NotificationService::class, ['telegram' => new Api($token)]);
+        $notificationService->notifyForException($e);
     }
 }
