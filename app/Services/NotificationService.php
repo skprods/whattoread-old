@@ -17,31 +17,32 @@ class NotificationService
 
     public function notifyForException(Throwable $e)
     {
-        $text = $this->prepareResponse($e->getCode(), $e->getMessage(), get_class($e), true);
+        $text = $this->prepareResponse($e, $e->getMessage(), get_class($e));
 
         $this->sendMessage($text);
     }
 
     public function notifyForTelegramException(TelegramException $e)
     {
-        $text = $this->prepareResponse($e->getCode(), $e->getText(), get_class($e->getBaseException()), false);
+        $text = $this->prepareResponse($e, $e->getText(), get_class($e->getBaseException()));
 
         $this->sendMessage($text);
     }
 
-    private function prepareResponse(int $code, string $message, string $errorClass, bool $needReplace): string
+    private function prepareResponse(Throwable $e, string $message, string $errorClass): string
     {
         $text = "*ОШИБКА*:\n";
-        $text .= "Код: $code\n";
+        $text .= "Код: {$e->getCode()}\n";
         $text .= "Класс: $errorClass\n";
         $text .= "\n";
+        $text .= "Файл: {$e->getFile()}\n";
+        $text .= "Линия: {$e->getLine()}\n";
+        $text .= "\n";
 
-        if ($needReplace) {
-            $message = str_replace('_', '\\_', $message);
-            $message = str_replace('*', '\\*', $message);
-            $message = str_replace('[', '\\[', $message);
-            $message = str_replace('`', '\\`', $message);
-        }
+        $message = str_replace('_', '\\_', $message);
+        $message = str_replace('*', '\\*', $message);
+        $message = str_replace('[', '\\[', $message);
+        $message = str_replace('`', '\\`', $message);
 
         $text .= $message;
 

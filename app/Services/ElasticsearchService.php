@@ -103,14 +103,18 @@ class ElasticsearchService
         ]);
     }
 
-    public function search(ElasticQuery $query): ElasticSearchResult
+    public function search(ElasticQuery $query): ?ElasticSearchResult
     {
-        $result = $this->client->search([
-            'index' => $query->key,
-            'body' => $query->body,
-        ]);
+        try {
+            $result = $this->client->search([
+                'index' => $query->key,
+                'body' => $query->body,
+            ]);
 
-        return new ElasticSearchResult($result);
+            return new ElasticSearchResult($result);
+        } catch (Missing404Exception $exception) {
+            return null;
+        }
     }
 
     public function getIndexSize(string $index): int

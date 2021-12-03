@@ -44,7 +44,7 @@ class AddBookDialog extends Dialog
         $query = $searchModel->getTitleAuthorQuery($title, $author);
         $result = $searchService->search($query);
 
-        if (!empty($result->hits)) {
+        if ($result && !empty($result->hits)) {
             $text = "Вот что мы нашли:\n";
             foreach ($result->hits as $key => $item) {
                 $sourceId = $item->_source['id'];

@@ -10,7 +10,6 @@ use App\Models\TelegramChat;
 use App\Models\TelegramUser;
 use App\Services\RedisService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\Chat;
 
@@ -19,6 +18,7 @@ abstract class TelegramCommand extends Command
     private RedisService $redisService;
     protected ?TelegramUser $telegramUser;
     protected ?TelegramChat $telegramChat = null;
+    protected TelegramMessageManager $telegramMessageManager;
     protected ChatInfo $chatInfo;
 
     private array $responses = [];
@@ -26,18 +26,34 @@ abstract class TelegramCommand extends Command
     public function __construct()
     {
         $this->redisService = app(RedisService::class);
+        $this->telegramMessageManager = app(TelegramMessageManager::class);
     }
 
     abstract public function handleCommand();
 
     public function handle()
     {
+        /** Если возвращается пустая коллекция - значит, чата нет и это системное уведомление Telegram */
+        if (!$this->getChat()->count()) {
+            return;
+        }
+
+        /** Создаём объект с информацией о чате (ChatInfo) и логируем пользователя и сообщение */
         $this->setChatInfo();
         $this->logUser();
+        $this->logMessage();
 
+        /** Блокировка групп за исключением админской */
+        if ($this->checkIsGroup($this->getChat())) {
+            return;
+        }
+
+        /** Обработка команды */
         $this->handleCommand();
 
-        $this->logMessage($this->responses);
+        /** Логируем ответ в ту же строку, куда записали запрос */
+        $this->logResponses($this->responses);
+        /** Проставляем в Redis последнюю команду для чата */
         $this->setLastCommand();
     }
 
@@ -85,12 +101,16 @@ abstract class TelegramCommand extends Command
         }
     }
 
-    public function logMessage(array $responses)
+    public function logMessage()
     {
-        app(TelegramMessageManager::class)->create([
-            'command' => $this->name,
-            'responses' => $responses
+        $this->telegramMessageManager->create([
+            'command' => $this->name
         ], $this->telegramUser, $this->telegramChat);
+    }
+
+    public function logResponses(array $responses)
+    {
+        $this->telegramMessageManager->update(['responses' => $responses]);
     }
 
     protected function addResponse(array $response)
@@ -102,5 +122,11 @@ abstract class TelegramCommand extends Command
     {
         $this->addResponse($use_sendMessage_parameters);
         return parent::replyWithMessage($use_sendMessage_parameters);
+    }
+
+    private function checkIsGroup(Chat $chat): bool
+    {
+        return $chat->type !== 'private'
+            && $chat->id !== env('ERROR_CHAT_ID');
     }
 }

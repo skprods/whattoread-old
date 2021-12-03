@@ -24,12 +24,14 @@ abstract class Dialog
     protected array $responses = [];
 
     protected BotsManager $botsManager;
+    protected TelegramMessageManager $telegramMessageManager;
     protected Api $telegram;
     protected RedisService $redisService;
 
     public function __construct(BotsManager $telegram, ChatInfo $chatInfo, Message $message)
     {
         $this->botsManager = $telegram;
+        $this->telegramMessageManager = app(TelegramMessageManager::class);
         $this->telegram = $telegram->bot();
         $this->chatInfo = $chatInfo;
         $this->message = $message;
@@ -54,9 +56,11 @@ abstract class Dialog
         }
 
         $message = htmlspecialchars(trim($this->message->text));
+        $this->logMessage($message);
+
         $this->{$this->currentStep . "Step"}($message);
 
-        $this->logMessage($message, $this->responses);
+        $this->logResponses($this->responses);
         $this->redisService->setChatInfo($this->chatInfo);
     }
 
@@ -99,14 +103,18 @@ abstract class Dialog
         $this->responses[] = $response;
     }
 
-    private function logMessage(string $message, array $responses)
+    private function logMessage(string $message)
     {
         $user = TelegramUser::getUserByTelegramId($this->chatInfo->id);
 
-        app(TelegramMessageManager::class)->create([
+        $this->telegramMessageManager->create([
             'command' => $this->chatInfo->lastCommand,
-            'message' => $message,
-            'responses' => $responses
+            'message' => $message
         ], $user);
+    }
+
+    public function logResponses(array $responses)
+    {
+        $this->telegramMessageManager->update(['responses' => $responses]);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\TelegramException;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\BotsManager;
 use Telegram\Bot\Objects\Update;
 
@@ -54,10 +55,16 @@ class TelegramBotService
 
         $this->notificationService->notifyForTelegramException($e);
 
-        $this->telegram->bot()->sendMessage([
-            'chat_id' => $e->update->getChat()->id,
-            'text' => "Что-то пошло не так... Наши администраторы уже в курсе, скоро мы всё исправим.\nПожалуйста, попробуйте чуть позже."
-        ]);
+        /**
+         * В обновлениях не всегда есть чат, иногда бывает информация о статусе бота - заблокировали или нет,
+         * тогда getChat() вернёт пустую коллекцию. В таких случаях не нужно отвечать.
+         */
+        if ($e->update->getChat()->count()) {
+            $this->telegram->bot()->sendMessage([
+                'chat_id' => $e->update->getChat()->id,
+                'text' => "Что-то пошло не так... Наши администраторы уже в курсе, скоро мы всё исправим.\nПожалуйста, попробуйте чуть позже."
+            ]);
+        }
 
         return 'ok';
     }

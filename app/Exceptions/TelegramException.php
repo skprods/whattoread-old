@@ -18,7 +18,7 @@ class TelegramException extends Exception
 
         $this->telegramText = $baseException->message;
         $this->telegramText .= "\n\n";
-        $this->telegramText .= "```" . json_encode($update, JSON_UNESCAPED_UNICODE) . "```";
+        $this->telegramText .= json_encode($update, JSON_UNESCAPED_UNICODE);
 
         parent::__construct($baseException->getMessage(), (int) $baseException->getCode());
     }
