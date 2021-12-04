@@ -2,15 +2,18 @@
 
 namespace App\Managers;
 
+use App\Models\Stat;
 use App\Models\TelegramUser;
 
 class TelegramUserManager
 {
     protected ?TelegramUser $telegramUser;
+    private StatManager $statManager;
 
     public function __construct(TelegramUser $telegramUser = null)
     {
         $this->telegramUser = $telegramUser;
+        $this->statManager = app(StatManager::class);
     }
 
     public function createOrUpdate(array $params): TelegramUser
@@ -29,6 +32,8 @@ class TelegramUserManager
         $this->telegramUser = app(TelegramUser::class);
         $this->telegramUser->fill($params);
         $this->telegramUser->save();
+
+        $this->statManager->create(Stat::TELEGRAM_USER_MODEL, $this->telegramUser->id, Stat::CREATED_ACTION);
 
         return $this->telegramUser;
     }

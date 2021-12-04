@@ -4,15 +4,18 @@ namespace App\Managers;
 
 use App\Exceptions\UserBookAssociationException;
 use App\Models\Book;
+use App\Models\Stat;
 use App\Models\UserBookAssociation;
 
 class UserBookAssociationManager
 {
     private ?UserBookAssociation $userBookAssociation;
+    private StatManager $statManager;
 
     public function __construct(UserBookAssociation $userBookAssociation = null)
     {
         $this->userBookAssociation = $userBookAssociation;
+        $this->statManager = app(StatManager::class);
     }
 
     /**
@@ -63,6 +66,8 @@ class UserBookAssociationManager
         }
 
         $this->userBookAssociation->save();
+
+        $this->statManager->create(Stat::USER_BOOK_ASSOCIATION_MODEL, $this->userBookAssociation->id, Stat::CREATED_ACTION);
 
         return $this->userBookAssociation;
     }

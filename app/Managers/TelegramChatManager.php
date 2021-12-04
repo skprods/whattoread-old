@@ -2,15 +2,18 @@
 
 namespace App\Managers;
 
+use App\Models\Stat;
 use App\Models\TelegramChat;
 
 class TelegramChatManager
 {
     private ?TelegramChat $telegramChat;
+    private StatManager $statManager;
 
     public function __construct(TelegramChat $telegramChat = null)
     {
         $this->telegramChat = $telegramChat;
+        $this->statManager = app(StatManager::class);
     }
 
     public function createOrUpdate(array $params): TelegramChat
@@ -29,6 +32,8 @@ class TelegramChatManager
         $this->telegramChat = app(TelegramChat::class);
         $this->telegramChat->fill($params);
         $this->telegramChat->save();
+
+        $this->statManager->create(Stat::TELEGRAM_CHAT_MODEL, $this->telegramChat->id, Stat::CREATED_ACTION);
 
         return $this->telegramChat;
     }

@@ -5,14 +5,19 @@ namespace App\Managers;
 use App\Events\BookDeleted;
 use App\Events\BookUpdated;
 use App\Models\Book;
+use App\Models\Stat;
+use Exception;
+use Illuminate\Support\Facades\DB;
 
 class BookManager
 {
     public ?Book $book;
+    private StatManager $statManager;
 
     public function __construct(Book $book = null)
     {
         $this->book = $book;
+        $this->statManager = app(StatManager::class);
     }
 
     public function firstOrCreate(array $params): Book
@@ -49,6 +54,8 @@ class BookManager
         $this->book->fill($params);
         $this->book->save();
 
+        $this->statManager->create(Stat::BOOK_MODEL, $this->book->id, Stat::CREATED_ACTION);
+
         return $this->book;
     }
 
@@ -68,14 +75,26 @@ class BookManager
 
     public function delete(): ?bool
     {
-        $this->book->genres()->sync([]);
-        $this->book->categories()->sync([]);
-        $this->book->telegramUsers()->delete();
-        $this->book->associations()->delete();
+        try {
+            DB::beginTransaction();
+            $this->book->genres()->sync([]);
+            $this->book->categories()->sync([]);
+            $this->book->telegramUsers()->delete();
+            $this->book->associations()->delete();
+            $this->book->userAssociations()->delete();
 
-        BookDeleted::dispatch($this->book->id);
+            BookDeleted::dispatch($this->book->id);
 
-        return $this->book->delete();
+            $delete = $this->book->delete();
+            $this->statManager->create(Stat::BOOK_MODEL, $this->book->id, Stat::DELETED_ACTION);
+
+            DB::commit();
+
+            return $delete;
+        } catch (Exception $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
     }
 
     public function addGenres(array $genreIds)

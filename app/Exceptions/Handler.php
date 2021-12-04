@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Managers\ExceptionManager;
 use App\Services\NotificationService;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -44,6 +45,17 @@ class Handler extends ExceptionHandler
     public function register()
     {
         $this->reportable(function (Throwable $e) {
+            try {
+                app(ExceptionManager::class)->create([
+                    'code' => $e->getCode(),
+                    'message' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ]);
+            } catch (Exception $exception) {
+                Log::error(json_encode($exception, JSON_UNESCAPED_UNICODE));
+            }
+
             $notify = true;
 
             foreach ($this->notNotifiable as $exception) {

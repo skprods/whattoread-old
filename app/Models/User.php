@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasDiffCount;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -10,6 +11,16 @@ use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
+/**
+ * @property int $id
+ * @property string $username
+ * @property string $email
+ * @property string $first_name
+ * @property string $last_name
+ * @property Carbon $email_verified_at
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ */
 class User extends Authenticatable implements JWTSubject
 {
     use HasFactory;

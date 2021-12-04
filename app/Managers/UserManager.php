@@ -2,6 +2,7 @@
 
 namespace App\Managers;
 
+use App\Models\Stat;
 use App\Models\User;
 use App\Traits\HasUsername;
 use Illuminate\Support\Facades\Hash;
@@ -12,10 +13,12 @@ class UserManager
     use HasUsername;
 
     private ?User $user;
+    private StatManager $statManager;
 
     public function __construct(?User $user = null)
     {
         $this->user = $user;
+        $this->statManager = app(StatManager::class);
     }
 
     /**
@@ -65,6 +68,8 @@ class UserManager
         $this->user->save();
 
         $this->user = RoleManager::setUserRole($this->user);
+
+        $this->statManager->create(Stat::USER_MODEL, $this->user->id, Stat::CREATED_ACTION);
 
         return $this->user;
     }

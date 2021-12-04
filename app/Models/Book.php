@@ -64,6 +64,11 @@ class Book extends Model
         return $this->hasMany(BookAssociation::class);
     }
 
+    public function userAssociations(): HasMany
+    {
+        return $this->hasMany(UserBookAssociation::class);
+    }
+
     public static function getAuthorsCount(): int
     {
         return self::query()

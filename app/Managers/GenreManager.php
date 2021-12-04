@@ -3,15 +3,18 @@
 namespace App\Managers;
 
 use App\Models\Genre;
+use App\Models\Stat;
 use Illuminate\Support\Collection;
 
 class GenreManager
 {
     private ?Genre $genre;
+    private StatManager $statManager;
 
     public function __construct(Genre $genre = null)
     {
         $this->genre = $genre;
+        $this->statManager = app(StatManager::class);
     }
 
     /**
@@ -64,6 +67,8 @@ class GenreManager
         $this->genre = app(Genre::class);
         $this->genre->fill($params);
         $this->genre->save();
+
+        $this->statManager->create(Stat::GENRE_MODEL, $this->genre->id, Stat::CREATED_ACTION);
 
         return $this->genre;
     }
