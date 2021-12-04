@@ -69,7 +69,7 @@ class Handler extends ExceptionHandler
                 $notify = false;
             }
 
-            if ($notify) {
+            if ($notify && env('APP_ENV') === 'production') {
                 $this->sendNotificationToTelegram($e);
             }
         });

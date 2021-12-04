@@ -53,7 +53,9 @@ class TelegramBotService
     {
         $e = new TelegramException($exception, $this->telegram->bot()->getWebhookUpdate());
 
-        $this->notificationService->notifyForTelegramException($e);
+        if (env('APP_ENV') === 'production') {
+            $this->notificationService->notifyForTelegramException($e);
+        }
 
         /**
          * В обновлениях не всегда есть чат, иногда бывает информация о статусе бота - заблокировали или нет,
