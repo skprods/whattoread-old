@@ -17,6 +17,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * @property string $description
  * @property string $author
  * @property string $status
+ * @property int|null $words_count
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Collection|Genre[] $genres
@@ -42,6 +43,7 @@ class Book extends Model
         'description',
         'author',
         'status',
+        'words_count',
     ];
 
     public function genres(): BelongsToMany

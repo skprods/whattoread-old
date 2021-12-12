@@ -4,12 +4,13 @@ namespace App\Providers;
 
 use App\Events\BookDeleted;
 use App\Events\BookUpdated;
+use App\Events\NewFrequencies;
+use App\Listeners\CreateNewFrequencies;
 use App\Listeners\DeleteElasticBook;
 use App\Listeners\UpdateElasticBook;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
-use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -30,6 +31,10 @@ class EventServiceProvider extends ServiceProvider
         BookDeleted::class => [
             DeleteElasticBook::class,
         ],
+
+        NewFrequencies::class => [
+            CreateNewFrequencies::class,
+        ]
     ];
 
     /**
