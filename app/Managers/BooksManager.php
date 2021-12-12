@@ -2,8 +2,8 @@
 
 namespace App\Managers;
 
-use App\Books\Samolit;
 use App\Entities\ChatInfo;
+use App\Entities\SamolitBook;
 use App\Models\Book;
 use App\Models\TelegramUser;
 use App\Parsers\SamolitParser;
@@ -22,7 +22,7 @@ class BooksManager
 
     public function addFromSamolit(string $content): bool
     {
-        /** @var Samolit $parsedBook */
+        /** @var SamolitBook $parsedBook */
         $parsedBook = app(SamolitParser::class)->getBook($content);
 
         try {
@@ -62,10 +62,12 @@ class BooksManager
 
             /** @var TelegramUser $telegramUser */
             $telegramUser = TelegramUser::getUserByTelegramId($chatInfo->id);
-            app(TelegramUserBookManager::class)->createOrUpdate(['rating' => $dialog->bookRating], $telegramUser, $book);
+            app(TelegramUserBookManager::class)
+                ->createOrUpdate(['rating' => $dialog->bookRating], $telegramUser, $book);
 
             if (isset($dialog->messages['associations'])) {
-                app(AssociationManager::class)->addForTelegramUser($dialog->messages['associations'], $book, $telegramUser);
+                app(AssociationManager::class)
+                    ->addForTelegramUser($dialog->messages['associations'], $book, $telegramUser);
             }
 
             DB::commit();

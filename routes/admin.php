@@ -15,6 +15,8 @@ Route::group(['prefix' => 'books'], function () {
     Route::get('/', 'BooksController@index');
     Route::put('{book}', 'BooksController@update');
     Route::delete('{book}', 'BooksController@delete');
+
+    Route::post('{book}/frequency', 'BooksController@createFrequency');
 });
 
 Route::group(['prefix' => 'genres'], function () {

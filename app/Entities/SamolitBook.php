@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Books;
+namespace App\Entities;
 
 use Illuminate\Contracts\Support\Arrayable;
 
-class Samolit implements Arrayable
+class SamolitBook implements Arrayable
 {
     public string $title;
     public string $description;

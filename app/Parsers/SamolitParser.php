@@ -2,13 +2,13 @@
 
 namespace App\Parsers;
 
-use App\Books\Samolit;
+use App\Entities\SamolitBook;
 
 class SamolitParser
 {
-    public function getBook(string $content): Samolit
+    public function getBook(string $content): SamolitBook
     {
-        $parsedBook = new Samolit();
+        $parsedBook = new SamolitBook();
 
         $parsedBook->title = $this->getTitle($content);
         $parsedBook->description = $this->getDescription($content);
