@@ -14,7 +14,7 @@ class AddWordsCountToBooksTable extends Migration
     public function up()
     {
         Schema::table('books', function (Blueprint $table) {
-            $table->integer('words_count')->nullable();
+            $table->integer('words_count')->nullable()->after('author');
         });
     }
 
