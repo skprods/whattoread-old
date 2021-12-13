@@ -139,48 +139,70 @@ class FrequenciesManager
     /** Сохранение частотного словника */
     private function saveThermDictionary(Collection $dictionary)
     {
-        $thermDictionary = collect();
+        $chunkedDictionary = $dictionary->chunk(1000);
+        $chunkedDictionary->each(function (Collection $bookWordsFrequency) {
+            $thermDictionary = collect();
+            $wordKeys = [];
 
-        $dictionary->each(function ($total, $word) use (&$thermDictionary) {
-            if ($thermDictionary->count() === 1000) {
-                $this->thermFrequencyManager->bulkCreate($thermDictionary, $this->book);
-                $thermDictionary = collect();
+            /** Формируем запрос на получение всех слов из базы данных */
+            $builder = Word::query();
+            $bookWordsFrequency->keys()->each(function ($word) use ($builder, &$wordKeys) {
+                $builder->orWhere('word', $word);
+                /** Для дальнейшей проверки также заполняем массив вида слово => слово */
+                $wordKeys[$word] = $word;
+            });
+            $words = $builder->get();
+
+            /** Проходим по каждому полученному из базы слову и добавляем его, если выполняются все условия */
+            $words->each(function (Word $word) use (&$thermDictionary, $bookWordsFrequency, &$wordKeys) {
+                /** Если нет типа (сущ, прл, гл и тд), получаем тип и сохраняем */
+                if (!$word->type) {
+                    $word->type = $this->getType($word->word);
+                    $word->save();
+                }
+
+                /** Для словаря терминов используем только существительные и прилагательные */
+                if ($word->type === 'сущ' || $word->type === 'прл') {
+                    $thermDictionary->put($word->id, $bookWordsFrequency->get($word->word) / $this->book->words_count);
+                }
+
+                /** Удаляем слово из массива - оно получено из базы */
+                unset($wordKeys[$word->word]);
+            });
+
+            /** Все остальные слова, которых не нашлось в базе, создаём и добавляем в базу */
+            foreach ($wordKeys as $wordKey) {
+                $word = $this->createWord($wordKey);
+
+                if ($word && ($word->type === 'сущ' || $word->type === 'прл')) {
+                    $thermDictionary->put($word->id, $bookWordsFrequency->get($word->word) / $this->book->words_count);
+                }
             }
 
-            $databaseWord = $this->getWord($word);
-
-            if ($databaseWord && ($databaseWord->type === "сущ" || $databaseWord->type === "прл")) {
-                $thermDictionary->put($databaseWord->id, $total / $this->book->words_count);
+            if ($thermDictionary->count()) {
+                $this->thermFrequencyManager->bulkCreate($thermDictionary, $this->book);
             }
         });
-
-        if ($thermDictionary->count()) {
-            $this->thermFrequencyManager->bulkCreate($thermDictionary, $this->book);
-        }
     }
 
-    private function getWord(string $word): ?Word
+    private function createWord(string $wordKey): ?Word
     {
-        /** @var Word $databaseWord */
-        $databaseWord = Word::query()->where('word', $word)->firstOrNew(['word' => $word]);
+        try {
+            $type = $this->getType($wordKey);
+        } catch (RequestException $exception) {
+            Log::error($exception->getMessage());
+            $this->setClient();
+            $type = $this->getType($wordKey);
+        }
 
-        if (!$databaseWord->id) {
-            try {
-                $type = $this->getType($word);
-            } catch (RequestException $exception) {
-                Log::error($exception->getMessage());
-                $this->setClient();
-                $type = $this->getType($word);
-            }
+        if ($type) {
+            /** @var Word $word */
+            $word = app(Word::class);
+            $word->word = $wordKey;
+            $word->type = $type;
+            $word->save();
 
-            if ($type) {
-                $databaseWord->type = $type;
-                $databaseWord->save();
-
-                return $databaseWord;
-            }
-        } else {
-            return $databaseWord;
+            return $word;
         }
 
         return null;
