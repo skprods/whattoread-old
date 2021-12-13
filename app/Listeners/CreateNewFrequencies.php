@@ -10,7 +10,7 @@ class CreateNewFrequencies implements ShouldQueue
 {
     private FrequenciesManager $manager;
 
-    public $timeout = 3600;
+    public $timeout = 7200;
 
     public function __construct()
     {
