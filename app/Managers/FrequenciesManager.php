@@ -52,7 +52,7 @@ class FrequenciesManager
         $this->thermFrequencyManager->deleteForBook($this->book);
         $this->saveThermDictionary($dictionary);
 
-        Storage::delete($filePath);
+        unlink(storage_path("app/$filePath"));
     }
 
     /**
