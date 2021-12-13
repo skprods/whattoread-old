@@ -6,7 +6,6 @@ use App\Events\NewFrequencies;
 use App\Http\Controllers\Controller;
 use App\Http\Collections\Admin\BooksCollection;
 use App\Http\Collections\CollectionResource;
-use App\Http\Requests\Admin\BookCreateFrequencyRequest;
 use App\Http\Requests\Admin\BookUpdateRequest;
 use App\Http\Resources\Admin\BookResource;
 use App\Http\Resources\SingleResource;
@@ -15,6 +14,7 @@ use App\Managers\FileManager;
 use App\Models\Book;
 use App\Traits\HasDataTableFilters;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -40,8 +40,12 @@ class BooksController extends Controller
         return BooksCollection::fromDataTable($dataTable, 30);
     }
 
-    public function createFrequency(BookCreateFrequencyRequest $request, Book $book): SingleResource
+    public function createFrequency(Request $request, Book $book): SingleResource
     {
+        $request->validate([
+            'file' => ['required', 'file'],
+        ]);
+
         $filepath = app(FileManager::class)->saveBookFile($request->file('file'));
         NewFrequencies::dispatch($filepath, $book->id);
 
