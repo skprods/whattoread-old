@@ -269,6 +269,10 @@ class FrequenciesManager
 
     public function log(string $message)
     {
-        Console::info("[frequencyBook #{$this->book->id}] $message");
+        if (config('app.debug')) {
+            Console::info("[frequencyBook #{$this->book->id}] $message");
+        }
+
+        Log::info("[frequencyBook #{$this->book->id}] $message");
     }
 }
