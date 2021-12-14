@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 class ThermFrequenciesManager
 {
-    public function bulkCreate(Collection $frequencies, Book $book)
+    public function bulkCreate(Collection $frequencies, Book $book): int
     {
         $data = $frequencies->map(function ($frequency, $wordId) use ($book) {
             return [
@@ -19,6 +19,8 @@ class ThermFrequenciesManager
         });
 
         ThermFrequency::query()->insert($data->toArray());
+
+        return $data->count();
     }
 
     public function deleteForBook(Book $book)

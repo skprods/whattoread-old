@@ -9,6 +9,7 @@ use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use SKprods\LaravelHelpers\Console;
 
 class FrequenciesManager
 {
@@ -42,15 +43,23 @@ class FrequenciesManager
     public function createFromFile(string $filePath, int $bookId)
     {
         $this->book = Book::findOrFail($bookId);
+        $this->log("Начинается составление частотного словника для книги {$this->book->author} - {$this->book->title}");
 
         $dictionary = $this->getDictionaryFromFile($filePath);
+        $this->log("Словарь подготовлен");
+
         $wordsCount = $this->totalWordsCount;
+        $this->log("Слов в книге: $wordsCount");
 
         $this->book = app(BookManager::class, ['book' => $this->book])->update(['words_count' => $wordsCount]);
         app(BookDictionaryManager::class)->createOrUpdate($dictionary, $this->book);
+        $this->log("Словарь сохранён в таблицу book_dictionary");
 
         $this->thermFrequencyManager->deleteForBook($this->book);
+        $this->log("Словарь терминов для книги очищен");
+
         $this->saveThermDictionary($dictionary);
+        $this->log("Словарь терминов успешно наполнен");
     }
 
     /**
@@ -178,7 +187,8 @@ class FrequenciesManager
             }
 
             if ($thermDictionary->count()) {
-                $this->thermFrequencyManager->bulkCreate($thermDictionary, $this->book);
+                $insertedCount = $this->thermFrequencyManager->bulkCreate($thermDictionary, $this->book);
+                $this->log("Вставлено $insertedCount терминов");
             }
         });
     }
@@ -255,5 +265,10 @@ class FrequenciesManager
     private function setClient()
     {
         $this->client = new RusTxtClient();
+    }
+
+    public function log(string $message)
+    {
+        Console::info("[frequencyBook #{$this->book->id}] $message");
     }
 }
