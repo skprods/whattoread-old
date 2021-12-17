@@ -38,12 +38,12 @@ class BooksController extends Controller
             ->filterColumn('frequency', function (Builder $query, $keyword) {
                 return match ($keyword) {
                     "exists" => $query->whereExists(function (\Illuminate\Database\Query\Builder $query) {
-                        return $query->select("*")
+                        return $query->select("therm_frequencies.id")
                             ->from('therm_frequencies')
                             ->whereRaw('therm_frequencies.book_id = books.id');
                     }),
                     "not-exists" => $query->whereNotExists(function (\Illuminate\Database\Query\Builder $query) {
-                        return $query->select("*")
+                        return $query->select("therm_frequencies.id")
                             ->from('therm_frequencies')
                             ->whereRaw('therm_frequencies.book_id = books.id');
                     }),
