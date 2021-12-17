@@ -43,7 +43,7 @@ class BooksController extends Controller
     public function createFrequency(Request $request, Book $book): SingleResource
     {
         $request->validate([
-            'file' => ['required', 'file'],
+            'file' => ['required', 'file', 'mimetypes:text/xml'],
         ]);
 
         $filepath = app(FileManager::class)->saveBookFile($request->file('file'));

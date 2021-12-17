@@ -71,6 +71,11 @@ class Book extends Model
         return $this->hasMany(UserBookAssociation::class);
     }
 
+    public function thermFrequencies(): HasMany
+    {
+        return $this->hasMany(ThermFrequency::class);
+    }
+
     public static function getAuthorsCount(): int
     {
         return self::query()
