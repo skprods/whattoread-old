@@ -24,7 +24,7 @@ class BooksController extends Controller
 
     public function index(): CollectionResource
     {
-        $builder = Book::query()->with('genres');
+        $builder = Book::query()->with(['genres', 'thermFrequencies']);
 
         $dataTable = DataTables::eloquent($builder)
             ->filterColumn(...$this->filterInteger('id'))
@@ -34,6 +34,21 @@ class BooksController extends Controller
                 }
 
                 return $query->where('status', $keyword);
+            })
+            ->filterColumn('frequency', function (Builder $query, $keyword) {
+                return match ($keyword) {
+                    "exists" => $query->whereExists(function (\Illuminate\Database\Query\Builder $query) {
+                        return $query->select("*")
+                            ->from('therm_frequencies')
+                            ->whereRaw('therm_frequencies.book_id = books.id');
+                    }),
+                    "not-exists" => $query->whereNotExists(function (\Illuminate\Database\Query\Builder $query) {
+                        return $query->select("*")
+                            ->from('therm_frequencies')
+                            ->whereRaw('therm_frequencies.book_id = books.id');
+                    }),
+                    default => $query,
+                };
             })
             ->filterColumn(...$this->filterDate('created_at'));
 
