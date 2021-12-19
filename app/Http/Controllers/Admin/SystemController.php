@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Collections\Admin\ExceptionsCollection;
 use App\Http\Controllers\Controller;
 use App\Managers\DashboardManager;
 use App\Models\Book;
+use App\Models\Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -20,12 +22,14 @@ class SystemController extends Controller
         $data = Cache::get('system.info');
         $botActivity = $dashboardManager->getBotActivity();
         $botActiveUsers = $dashboardManager->getBotActiveUsers();
+        $botActiveUsersLastYear = $dashboardManager->getBotActiveUsers(now()->year - 1);
 
         return new JsonResponse([
             'counter' => $data,
             'bot' => [
                 'activity' => $botActivity,
                 'users' => $botActiveUsers,
+                'users_prev_year' => $botActiveUsersLastYear,
             ]
         ]);
     }
@@ -44,5 +48,12 @@ class SystemController extends Controller
         $botActivity = app(DashboardManager::class)->getBotActiveUsers($request->date);
 
         return new JsonResponse($botActivity);
+    }
+
+    public function exceptions(Request $request)
+    {
+        $exceptions = Exception::query()->orderByDesc('id')->limit($request->limit ?? 10)->get();
+
+        return new ExceptionsCollection($exceptions);
     }
 }

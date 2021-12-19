@@ -11,8 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property-read Book $book
  * @property-read Word $word
- * @property int $total
- * @property int $rank
+ * @property double $frequency
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */

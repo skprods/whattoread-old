@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasDiffCount;
+use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class TelegramUser extends Model
 {
     use HasFactory;
-    use HasDiffCount;
+    use HasDatabaseCounter;
 
     protected $fillable = [
         'telegram_id',

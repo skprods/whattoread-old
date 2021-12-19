@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasDiffCount;
+use App\Traits\HasDatabaseCounter;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Genre extends Model
 {
     use HasFactory;
-    use HasDiffCount;
+    use HasDatabaseCounter;
 
     public const MODERATION_STATUS = 'moderation';
     public const ACTIVE_STATUS = 'active';

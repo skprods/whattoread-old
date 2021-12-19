@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasDiffCount;
+use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,17 +18,19 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * @property string $author
  * @property string $status
  * @property int|null $words_count
+ * @property int $therms_count
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Collection|Genre[] $genres
  * @property-read Collection|Category[] $categories
  * @property-read Collection|TelegramUser[] $telegramUsers
  * @property-read Collection|BookAssociation[] $associations
+ * @property-read Collection|ThermFrequency[] $thermFrequencies
  */
 class Book extends Model
 {
     use HasFactory;
-    use HasDiffCount;
+    use HasDatabaseCounter;
 
     public const MODERATION_STATUS = 'moderation';
     public const ACTIVE_STATUS = 'active';
@@ -44,6 +46,7 @@ class Book extends Model
         'author',
         'status',
         'words_count',
+        'therms_count',
     ];
 
     public function genres(): BelongsToMany
