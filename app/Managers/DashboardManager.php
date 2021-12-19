@@ -7,18 +7,19 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardManager
 {
-    public function getBotActivity(string $month = null): array
+    public function getBotActivity(string $datetime = null): array
     {
-        if (!$month) {
+        if (!$datetime) {
             $date = now();
         } else {
-            $date = Carbon::createFromFormat("Y-m-d", $month);
+            $date = Carbon::createFromFormat("Y-m-d", $datetime);
         }
 
         $month = $date->format('m');
         $year = $date->format('Y');
 
-        $nextDate = $date->addMonth();
+        $nextDate = clone $date;
+        $nextDate = $nextDate->addMonth();
         $nextMonth = $nextDate->format('m');
         $nextYear = $nextDate->format('Y');
 
@@ -40,8 +41,18 @@ class DashboardManager
             right join time_intervals ti on day(ti.interval_start) = tm.daynum"
         ));
 
+        $now = now();
+        $maxDay = null;
+        if ($now->year === $date->year && $now->month === $date->month) {
+            $maxDay = $now->day;
+        }
+
         $messages = [];
-        foreach ($res as $item) {
+        foreach ($res as $key => $item) {
+            if ($maxDay && $key === $maxDay - 1) {
+                break;
+            }
+
             $messages['days'][] = $item->daynum;
             $messages['total'][] = $item->total;
         }

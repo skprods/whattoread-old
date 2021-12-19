@@ -24,7 +24,7 @@ class BooksController extends Controller
 
     public function index(): CollectionResource
     {
-        $builder = Book::query()->with(['genres', 'thermFrequencies']);
+        $builder = Book::query()->with(['genres']);
 
         $dataTable = DataTables::eloquent($builder)
             ->filterColumn(...$this->filterInteger('id'))
@@ -53,6 +53,11 @@ class BooksController extends Controller
             ->filterColumn(...$this->filterDate('created_at'));
 
         return BooksCollection::fromDataTable($dataTable, 30);
+    }
+
+    public function show(Book $book): BookResource
+    {
+        return new BookResource($book->load(['genres']));
     }
 
     public function createFrequency(Request $request, Book $book): SingleResource

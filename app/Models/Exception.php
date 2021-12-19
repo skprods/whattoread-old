@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -18,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
 class Exception extends Model
 {
     use HasFactory;
+    use HasDatabaseCounter;
 
     protected $fillable = [
         'code',

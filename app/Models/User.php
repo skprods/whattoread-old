@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Traits\HasDiffCount;
+use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -25,7 +25,7 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasFactory;
     use Notifiable;
-    use HasDiffCount;
+    use HasDatabaseCounter;
     use HasRoles;
 
     protected $fillable = [

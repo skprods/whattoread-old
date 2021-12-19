@@ -58,8 +58,11 @@ class FrequenciesManager
         $this->thermFrequencyManager->deleteForBook($this->book);
         $this->log("Словарь терминов для книги очищен");
 
-        $this->saveThermDictionary($dictionary);
+        $thermsCount = $this->saveThermDictionary($dictionary);
         $this->log("Словарь терминов успешно наполнен");
+
+        app(BookManager::class, ['book' => $this->book])->update(['therms_count' => $thermsCount]);
+        $this->log("Количество терминов обновлено");
     }
 
     /**
@@ -144,10 +147,11 @@ class FrequenciesManager
     }
 
     /** Сохранение частотного словника */
-    private function saveThermDictionary(Collection $dictionary)
+    private function saveThermDictionary(Collection $dictionary): int
     {
+        $thermsCount = 0;
         $chunkedDictionary = $dictionary->chunk(1000);
-        $chunkedDictionary->each(function (Collection $bookWordsFrequency) {
+        $chunkedDictionary->each(function (Collection $bookWordsFrequency) use (&$thermsCount) {
             $thermDictionary = collect();
             $wordKeys = [];
 
@@ -189,8 +193,11 @@ class FrequenciesManager
             if ($thermDictionary->count()) {
                 $insertedCount = $this->thermFrequencyManager->bulkCreate($thermDictionary, $this->book);
                 $this->log("Вставлено $insertedCount терминов");
+                $thermsCount += $insertedCount;
             }
         });
+
+        return $thermsCount;
     }
 
     private function createWord(string $wordKey): ?Word
