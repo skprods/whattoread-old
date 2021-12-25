@@ -25,7 +25,7 @@ USER $user
 
 COPY composer.json composer.lock ./
 RUN composer install --no-scripts --no-interaction
-COPY --chown=$user:$user . ./
+COPY --chown=$user:www . ./
 RUN composer dump-autoload
 
 RUN chmod -R 775 /opt/www/bootstrap
