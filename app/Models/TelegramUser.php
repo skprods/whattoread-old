@@ -45,7 +45,7 @@ class TelegramUser extends Model
         return $this->hasOne(User::class);
     }
 
-    public static function getUserByTelegramId(int $telegramId): TelegramUser|null
+    public static function findByTelegramId(int $telegramId): TelegramUser|null
     {
         return self::query()->where('telegram_id', $telegramId)->first();
     }

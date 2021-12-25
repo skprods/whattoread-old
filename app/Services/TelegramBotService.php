@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Exceptions\TelegramException;
 use Exception;
-use Illuminate\Support\Facades\Log;
 use Telegram\Bot\BotsManager;
+use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\Update;
 
 class TelegramBotService
@@ -35,6 +35,14 @@ class TelegramBotService
             $update = $this->telegram->commandsHandler(true);
 
             /**
+             * Если в обновлении есть callbackQuery, значит, пришел ответ
+             * из клавиатуры у сообщения (inline-keyboard)
+             */
+            if ($update->callbackQuery) {
+                return $this->handleCallback($update);
+            }
+
+            /**
              * Если входящее сообщение - не команда, инициализируем диалог.
              * Это кастомный обработчик сообщений, завязанный на Redis
              */
@@ -44,6 +52,32 @@ class TelegramBotService
         } catch (Exception $exception) {
             return $this->handleException($exception);
         }
+
+        return 'ok';
+    }
+
+    /** Обработка ответа через inline-keyboard */
+    private function handleCallback(Update $update): string
+    {
+        $callbackData = $update->callbackQuery->data;
+        [$commandName, $data] = explode('_', $callbackData);
+
+        $neededCommand = null;
+        /** @var Command $command */
+        foreach ($this->telegram->getCommands() as $command) {
+            if ($command->getName() === $commandName) {
+                $neededCommand = $command;
+                break;
+            }
+        }
+
+        if (!$neededCommand) {
+            return 'ok';
+        }
+
+        $neededCommand->setTelegram($this->telegram->bot());
+        $neededCommand->setCallbackProperties($update->callbackQuery, $update->callbackQuery->message->chat);
+        $neededCommand->handle();
 
         return 'ok';
     }

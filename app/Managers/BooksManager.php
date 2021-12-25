@@ -61,7 +61,7 @@ class BooksManager
             }
 
             /** @var TelegramUser $telegramUser */
-            $telegramUser = TelegramUser::getUserByTelegramId($chatInfo->id);
+            $telegramUser = TelegramUser::findByTelegramId($chatInfo->id);
             app(TelegramUserBookManager::class)
                 ->createOrUpdate(['rating' => $dialog->bookRating], $telegramUser, $book);
 

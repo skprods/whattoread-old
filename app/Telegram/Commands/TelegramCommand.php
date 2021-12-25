@@ -9,12 +9,19 @@ use App\Managers\TelegramUserManager;
 use App\Models\TelegramChat;
 use App\Models\TelegramUser;
 use App\Services\RedisService;
+use App\Traits\HasTelegramCallback;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Commands\Command;
+use Telegram\Bot\Objects\CallbackQuery;
 use Telegram\Bot\Objects\Chat;
 
 abstract class TelegramCommand extends Command
 {
+    use HasTelegramCallback;
+
+    protected ?Chat $chat = null;
+
     private RedisService $redisService;
     protected ?TelegramUser $telegramUser;
     protected ?TelegramChat $telegramChat = null;
@@ -30,6 +37,11 @@ abstract class TelegramCommand extends Command
     }
 
     abstract public function handleCommand();
+
+    public function handleCallback(CallbackQuery $callbackQuery)
+    {
+        // TODO: переопределить в дочерней команде для обработки ответов от inline-клавиатуры
+    }
 
     public function handle()
     {
@@ -48,8 +60,13 @@ abstract class TelegramCommand extends Command
             return;
         }
 
-        /** Обработка команды */
-        $this->handleCommand();
+        if (!$this->callbackQuery) {
+            /** Обработка команды */
+            $this->handleCommand();
+        } else {
+            /** Обработка запроса из inline-keyboard */
+            $this->handleCallback($this->callbackQuery);
+        }
 
         /** Логируем ответ в ту же строку, куда записали запрос */
         $this->logResponses($this->responses);
@@ -72,7 +89,11 @@ abstract class TelegramCommand extends Command
 
     protected function getChat(): Collection|Chat
     {
-        return $this->getUpdate()->getChat();
+        if (!$this->chat) {
+            $this->chat = $this->getUpdate()->getChat();
+        }
+
+        return $this->chat;
     }
 
     protected function logUser()
@@ -121,12 +142,51 @@ abstract class TelegramCommand extends Command
     public function replyWithMessage(array $use_sendMessage_parameters): mixed
     {
         $this->addResponse($use_sendMessage_parameters);
-        return parent::replyWithMessage($use_sendMessage_parameters);
+
+        try {
+            return parent::replyWithMessage($use_sendMessage_parameters);
+        } catch (\Exception $exception) {
+            $this->logError($use_sendMessage_parameters, $exception);
+
+            throw $exception;
+        }
+    }
+
+    public function editMessageText(array $params): \Telegram\Bot\Objects\Message|bool
+    {
+        $this->addResponse($params);
+
+        try {
+            return $this->getTelegram()->editMessageText($params);
+        } catch (\Exception $exception) {
+            $this->logError($params, $exception);
+            throw $exception;
+        }
     }
 
     private function checkIsGroup(Chat $chat): bool
     {
         return $chat->type !== 'private'
             && $chat->id !== env('ERROR_CHAT_ID');
+    }
+
+    private function logError(array $params, \Exception $exception)
+    {
+        Log::info(json_encode([
+            'request' => $params,
+            'answer' => [
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+            ],
+        ], JSON_UNESCAPED_UNICODE));
+    }
+
+    protected function getDataFromCallbackQuery(CallbackQuery $callbackQuery): string
+    {
+        [$commandName, $data] = explode('_', $callbackQuery->data);
+
+        return $data;
     }
 }

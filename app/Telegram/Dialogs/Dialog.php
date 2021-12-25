@@ -105,7 +105,7 @@ abstract class Dialog
 
     private function logMessage(string $message)
     {
-        $user = TelegramUser::getUserByTelegramId($this->chatInfo->id);
+        $user = TelegramUser::findByTelegramId($this->chatInfo->id);
 
         $this->telegramMessageManager->create([
             'command' => $this->chatInfo->lastCommand,

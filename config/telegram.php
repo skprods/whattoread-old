@@ -12,6 +12,7 @@ return [
                 \App\Telegram\Commands\StartCommand::class,
                 \App\Telegram\Commands\HelpCommand::class,
                 \App\Telegram\Commands\AboutCommand::class,
+                \App\Telegram\Commands\MyBooksCommand::class,
                 \App\Telegram\Commands\AddBookCommand::class,
             ],
         ],

@@ -18,7 +18,7 @@ class TelegramUserManager
 
     public function createOrUpdate(array $params): TelegramUser
     {
-        $this->telegramUser = TelegramUser::getUserByTelegramId($params['telegram_id']);
+        $this->telegramUser = TelegramUser::findByTelegramId($params['telegram_id']);
 
         if ($this->telegramUser) {
             return $this->update($params);
