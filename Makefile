@@ -3,9 +3,9 @@ app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev redis-config
 app-start-prod: app-build-prod app-up-prod app-supervisor-start redis-config
 
 app-build-dev: # сборка проекта с указанием имени пользователя
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build
 app-build-no-cache-dev: # сборка без кэша
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u) --no-cache
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml build --no-cache
 app-up-dev: # запуск проекта
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 app-stop-dev: # остановка проекта
@@ -14,9 +14,9 @@ app-down-dev: # удаление контейнеров проекта
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 app-build-prod: # сборка проекта для прода
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u)
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build
 app-build-no-cache-prod: # сборка без кэша
-	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --build-arg user=$(shell whoami) --build-arg uid=$(shell id -u) --no-cache
+	docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
 app-up-prod: # запуск проекта
 	docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 app-stop-prod: # остановка проекта
