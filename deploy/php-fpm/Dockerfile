@@ -11,10 +11,10 @@ RUN apt-get update && apt-get install -y git \
     && docker-php-ext-enable redis\
     && docker-php-ext-enable xdebug
 
-ENV PATH="$PATH:/opt/www/vendor/bin"
+ENV PATH="$PATH:/var/www/vendor/bin"
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /opt/www
+WORKDIR /var/www
 RUN chown $user ./
 
 USER $user
@@ -24,5 +24,5 @@ RUN composer install --no-scripts --no-interaction
 COPY --chown=$user:www-data . ./
 RUN composer dump-autoload
 
-RUN chmod -R 775 /opt/www/bootstrap
-RUN chmod -R 775 /opt/www/storage
+RUN chmod -R 775 /var/www/bootstrap
+RUN chmod -R 775 /var/www/storage

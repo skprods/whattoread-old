@@ -49,10 +49,10 @@ rm-vendor:
 	rm -rf ./vendor/*
 load-vendor:
 	rm -rf ./vendor/*
-	docker cp whattoread-php-fpm:/opt/www/vendor/. ./vendor
+	docker cp whattoread-php-fpm:/var/www/vendor/. ./vendor
 load-vendor-dev:
 	rm -rf ./vendor/*
-	docker cp whattoread-php-fpm-dev:/opt/www/vendor/. ./vendor
+	docker cp whattoread-php-fpm-dev:/var/www/vendor/. ./vendor
 
 redis-config:
 	docker-compose exec whattoread-redis redis-cli config set stop-writes-on-bgsave-error no
