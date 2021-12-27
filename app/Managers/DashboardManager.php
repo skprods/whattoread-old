@@ -35,7 +35,7 @@ class DashboardManager
                     day(created_at) as daynum
                 from telegram_messages tm
                 where tm.created_at >= date('$start')
-                and tm.created_at <= date('$end')
+                and tm.created_at < date('$end')
                 group by daynum
             ) as tm
             right join time_intervals ti on day(ti.interval_start) = tm.daynum"
@@ -77,7 +77,7 @@ class DashboardManager
                     month(created_at) as mon
                 from telegram_messages tm
                 where tm.created_at >= date('$start')
-                and tm.created_at <= date('$end')
+                and tm.created_at < date('$end')
                 group by mon
             ) as tm
             right join time_intervals ti on month(ti.interval_start) = tm.mon"
