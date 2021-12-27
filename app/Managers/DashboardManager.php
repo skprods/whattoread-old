@@ -49,7 +49,7 @@ class DashboardManager
 
         $messages = [];
         foreach ($res as $key => $item) {
-            if ($maxDay && $key === $maxDay - 1) {
+            if ($maxDay && $key === $maxDay) {
                 break;
             }
 
