@@ -3,7 +3,9 @@
 namespace App\Services;
 
 use App\Exceptions\TelegramException;
+use App\Managers\ExceptionManager;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\BotsManager;
 use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\Update;
@@ -89,6 +91,17 @@ class TelegramBotService
 
         if (env('APP_ENV') === 'production') {
             $this->notificationService->notifyForTelegramException($e);
+        }
+
+        try {
+            app(ExceptionManager::class)->create([
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+            ]);
+        } catch (Exception $exception) {
+            Log::error(json_encode($exception, JSON_UNESCAPED_UNICODE));
         }
 
         /**
