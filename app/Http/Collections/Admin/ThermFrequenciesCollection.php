@@ -3,9 +3,9 @@
 namespace App\Http\Collections\Admin;
 
 use App\Http\Collections\CollectionResource;
-use App\Models\ThermFrequency;
+use App\Models\BookContentFrequency;
 
 class ThermFrequenciesCollection extends CollectionResource
 {
-    public $collects = ThermFrequency::class;
+    public $collects = BookContentFrequency::class;
 }

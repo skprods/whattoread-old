@@ -23,7 +23,7 @@ class FileManager
 
         Storage::put($path . $filename, $source);
 
-        return $path . $filename;
+        return storage_path('app/' . $path . $filename);
     }
 
     private function prepareSlashes(string $path): string

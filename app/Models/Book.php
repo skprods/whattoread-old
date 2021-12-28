@@ -25,7 +25,8 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * @property-read Collection|Category[] $categories
  * @property-read Collection|TelegramUser[] $telegramUsers
  * @property-read Collection|BookAssociation[] $associations
- * @property-read Collection|ThermFrequency[] $thermFrequencies
+ * @property-read Collection|BookContentFrequency[] $contentFrequencies
+ * @property-read Collection|BookDescriptionFrequency[] $descriptionFrequencies
  */
 class Book extends Model
 {
@@ -74,9 +75,14 @@ class Book extends Model
         return $this->hasMany(UserBookAssociation::class);
     }
 
-    public function thermFrequencies(): HasMany
+    public function contentFrequencies(): HasMany
     {
-        return $this->hasMany(ThermFrequency::class);
+        return $this->hasMany(BookContentFrequency::class);
+    }
+
+    public function descriptionFrequencies(): HasMany
+    {
+        return $this->hasMany(BookDescriptionFrequency::class);
     }
 
     public static function getAuthorsCount(): int
