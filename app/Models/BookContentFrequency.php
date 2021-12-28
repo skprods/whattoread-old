@@ -15,10 +15,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class ThermFrequency extends Model
+class BookContentFrequency extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'frequency',
     ];
