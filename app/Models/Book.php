@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\BookFrequencies\BookContentFrequency;
+use App\Models\BookFrequencies\BookDescriptionFrequency;
 use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;

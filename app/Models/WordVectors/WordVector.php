@@ -1,33 +1,36 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\WordVectors;
 
+use App\Models\Word;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property-read Book $book
  * @property-read Word $word
- * @property double $frequency
+ * @property array $vector
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class BookDescriptionFrequency extends Model
+abstract class WordVector extends Model
 {
     protected $fillable = [
-        'frequency',
+        'vector',
     ];
 
-    public function book(): BelongsTo
-    {
-        return $this->belongsTo(Book::class);
-    }
+    protected $casts = [
+        'vector' => 'array',
+    ];
 
     public function word(): BelongsTo
     {
         return $this->belongsTo(Word::class);
+    }
+
+    public static function findByWordId(int $wordId): ?WordVector
+    {
+        return self::query()->where('word_id', $wordId)->first();
     }
 }

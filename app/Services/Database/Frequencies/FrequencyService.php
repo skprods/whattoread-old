@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Managers\Dictionaries;
+namespace App\Services\Database\Frequencies;
 
 use App\Clients\RusTxtClient;
 use App\Facades\Dictionary;
 use App\Managers\BookDictionaryManager;
-use App\Managers\BookFrequenciesManager;
+use App\Managers\Dictionaries\DictionaryManager;
 use App\Managers\BookManager;
 use App\Models\Book;
 use App\Models\Word;
@@ -14,7 +14,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use SKprods\LaravelHelpers\Console;
 
-class FrequencyManager
+class FrequencyService
 {
     /** Симолы, которые необходимо заменить на пустую строку */
     private array $replacingSymbols;
@@ -29,7 +29,7 @@ class FrequencyManager
     /** Клиент для проверки морфологии */
     private RusTxtClient $client;
 
-    private BookFrequenciesManager $bookFrequenciesManager;
+    private BookFrequenciesService $bookFrequenciesManager;
 
     public function __construct()
     {
@@ -39,7 +39,7 @@ class FrequencyManager
         $this->nbsp = html_entity_decode("&nbsp;");
 
         $this->setClient();
-        $this->bookFrequenciesManager = app(BookFrequenciesManager::class);
+        $this->bookFrequenciesManager = app(BookFrequenciesService::class);
     }
 
     /** Формирование словника из файла */

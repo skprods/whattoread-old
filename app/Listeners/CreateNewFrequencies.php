@@ -3,22 +3,22 @@
 namespace App\Listeners;
 
 use App\Events\NewFrequencies;
-use App\Managers\Dictionaries\FrequencyManager;
+use App\Services\Database\Frequencies\FrequencyService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class CreateNewFrequencies implements ShouldQueue
 {
-    private FrequencyManager $manager;
+    private FrequencyService $service;
 
     public $timeout = 7200;
 
     public function __construct()
     {
-        $this->manager = app(FrequencyManager::class);
+        $this->service = app(FrequencyService::class);
     }
 
     public function handle(NewFrequencies $event)
     {
-        $this->manager->createContentFrequencyFromFile($event->filePath, $event->bookId);
+        $this->service->createContentFrequencyFromFile($event->filePath, $event->bookId);
     }
 }

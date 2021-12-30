@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 
 class DeleteNotDistinctWordsCommand extends Command
 {
-    protected $signature = 'delete:not-distinct {--start=} {--end=}';
+    protected $signature = 'delete:not-distinct';
 
     protected $description = 'Удаление повторяющихся словоформ';
 
@@ -24,7 +24,7 @@ class DeleteNotDistinctWordsCommand extends Command
             ->orderBy('id');
 
         $builder
-            ->chunk(1000, function (Collection $data) use (&$ids) {
+            ->chunk(100000, function (Collection $data) use (&$ids) {
                 $ids[] = $data->pluck('id')->implode(',');
             });
 
