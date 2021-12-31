@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Database\Frequencies;
+namespace App\Services\Frequencies;
 
 use App\Clients\RusTxtClient;
 use App\Facades\Dictionary;

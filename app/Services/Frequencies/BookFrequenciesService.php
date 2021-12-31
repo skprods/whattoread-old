@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\Database\Frequencies;
+namespace App\Services\Frequencies;
 
 use App\Models\Book;
 use App\Models\BookFrequencies\FrequenciesModelManager;

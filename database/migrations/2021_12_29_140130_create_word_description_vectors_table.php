@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBookDescriptionWordVectorsTable extends Migration
+class CreateWordDescriptionVectorsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateBookDescriptionWordVectorsTable extends Migration
      */
     public function up()
     {
-        Schema::create('book_description_word_vectors', function (Blueprint $table) {
+        Schema::create('word_description_vectors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('word_id')->unique()->constrained();
             $table->json('vector');
@@ -28,6 +28,6 @@ class CreateBookDescriptionWordVectorsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('book_description_word_vectors');
+        Schema::dropIfExists('word_description_vectors');
     }
 }

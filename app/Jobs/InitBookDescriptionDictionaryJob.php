@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\Database\Frequencies\FrequencyService;
+use App\Services\Frequencies\FrequencyService;
 use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
 

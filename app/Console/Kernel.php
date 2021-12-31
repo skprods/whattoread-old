@@ -3,7 +3,7 @@
 namespace App\Console;
 
 use App\Console\Commands\BookDescription\InitBookDescriptionDictionary;
-use App\Console\Commands\BookDescription\InitBookDescriptionWordVectors;
+use App\Console\Commands\Vectors\InitWordDescriptionVectors;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -17,7 +17,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         /** Команды для словарей по описанию книг */
         InitBookDescriptionDictionary::class,
-        InitBookDescriptionWordVectors::class,
+        InitWordDescriptionVectors::class,
     ];
 
     /**

@@ -3,7 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\NewFrequencies;
-use App\Services\Database\Frequencies\FrequencyService;
+use App\Services\Frequencies\FrequencyService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 
 class CreateNewFrequencies implements ShouldQueue

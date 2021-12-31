@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Models\WordVectors;
+namespace App\Models\Vectors;
 
-use App\Models\Word;
+use App\Models\Book;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
- * @property-read Word $word
+ * @property-read Book $book
  * @property array $vector
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-abstract class WordVector extends Model
+abstract class BookVector extends Model
 {
     protected $fillable = [
         'vector',
@@ -24,13 +24,13 @@ abstract class WordVector extends Model
         'vector' => 'array',
     ];
 
-    public function word(): BelongsTo
+    public function book(): BelongsTo
     {
-        return $this->belongsTo(Word::class);
+        return $this->belongsTo(Book::class);
     }
 
-    public static function findByWordId(int $wordId): ?WordVector
+    public static function findByBookId(int $bookId): ?BookVector
     {
-        return self::query()->where('word_id', $wordId)->first();
+        return self::query()->where('book_id', $bookId)->first();
     }
 }

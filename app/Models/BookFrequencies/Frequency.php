@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property-read Book $book
  * @property-read Word $word
+ * @property int $book_id
+ * @property int $word_id
  * @property double $frequency
  * @property Carbon $created_at
  * @property Carbon $updated_at
@@ -37,6 +39,15 @@ abstract class Frequency extends Model
     {
         return static::query()
             ->where('word_id', $wordId)
+            ->orderByDesc('frequency')
+            ->limit($limit)
+            ->get();
+    }
+
+    public static function getByBookId(int $bookId, int $limit = 50): Collection
+    {
+        return static::query()
+            ->where('book_id', $bookId)
             ->orderByDesc('frequency')
             ->limit($limit)
             ->get();
