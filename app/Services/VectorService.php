@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\Vectors;
+use App\Exceptions\WordFrequenciesNotExistsException;
 use App\Models\BookFrequencies\FrequenciesModelManager;
 use App\Models\BookFrequencies\Frequency;
 use App\Models\Vectors\BookVector;
@@ -59,6 +60,10 @@ class VectorService
             return [$item->word_id => $item->frequency];
         })->toArray();
 
+        if (!count($wordFrequencies)) {
+            throw new WordFrequenciesNotExistsException($bookId, $type);
+        }
+
         $bookVector = [];
 
         $vectorModel = $this->vectorServiceManager
@@ -67,6 +72,7 @@ class VectorService
             ->getModel();
 
         $wordVectors = $vectorModel::getByWordIds($wordIds);
+
         $wordVectors->each(function (WordVector $wordVector) use (&$bookVector, $wordFrequencies) {
             $vector = $wordVector->vector;
             foreach ($vector as $point => $value) {
@@ -84,6 +90,10 @@ class VectorService
             }
         });
 
-        dd($bookVector);
+        $vectorTypeService = $this->vectorServiceManager
+            ->entity(Vectors::BOOK_ENTITY)
+            ->type($type);
+
+        return $vectorTypeService->createOrUpdate($bookVector, $bookId);
     }
 }

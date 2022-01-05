@@ -264,7 +264,9 @@ class FrequencyService
                 $word->save();
             }
 
-            $thermDictionary->put($word->id, $dictionary->get($word->word) / $total);
+            if ($word->type === 'сущ' || $word->type === 'прл') {
+                $thermDictionary->put($word->id, $dictionary->get($word->word) / $total);
+            }
 
             /** Удаляем слово из массива - оно получено из базы */
             unset($wordKeys[$word->word]);
@@ -274,7 +276,7 @@ class FrequencyService
         foreach ($wordKeys as $wordKey) {
             $word = $this->createWord($wordKey);
 
-            if ($word) {
+            if ($word && ($word->type === 'сущ' || $word->type === 'прл')) {
                 $thermDictionary->put($word->id, $dictionary->get($word->word) / $total);
             }
         }

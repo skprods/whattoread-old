@@ -5,6 +5,7 @@ namespace App\Services\Vectors;
 use App\Enums\Vectors;
 use App\Exceptions\InvalidVectorClassException;
 use App\Exceptions\InvalidVectorException;
+use App\Models\Book;
 use App\Models\Vectors\BookContentVector;
 use App\Models\Vectors\BookVector;
 use App\Models\Vectors\BookDescriptionVector;
@@ -15,6 +16,8 @@ use App\Models\Vectors\WordVector;
 
 class VectorTypeService
 {
+    private string $entity;
+
     /** Класс модели вектора */
     protected ?string $vectorClass = null;
 
@@ -23,6 +26,8 @@ class VectorTypeService
 
     public function __construct(string $entity, string $type)
     {
+        $this->entity = $entity;
+
         switch ($entity) {
             case Vectors::BOOK_ENTITY:
                 $class = $this->getBookModel($type);
@@ -78,31 +83,41 @@ class VectorTypeService
      * @throws InvalidVectorException
      * @throws InvalidVectorClassException
      */
-    public function createOrUpdate(array $vector, Word|int $word): WordVector
+    public function createOrUpdate(array $vector, Word|Book|int $baseItem): WordVector|BookVector
     {
-        $wordId = is_numeric($word) ? $word : $word->id;
-        $wordVector = app($this->vectorClass)::findByWordId($wordId);
+        $baseItemId = is_numeric($baseItem) ? $baseItem : $baseItem->id;
 
-        if ($wordVector) {
-            $this->vector = $wordVector;
+        if ($this->entity === Vectors::WORD_ENTITY) {
+            $vectorEntity = app($this->vectorClass)::findByWordId($baseItemId);
+        } else {
+            $vectorEntity = app($this->vectorClass)::findByBookId($baseItemId);
+        }
+
+        if ($vectorEntity) {
+            $this->vector = $vectorEntity;
             return $this->update($vector);
         } else {
-            return $this->create($vector, $wordId);
+            return $this->create($vector, $baseItemId);
         }
     }
 
     /** @throws InvalidVectorClassException */
-    public function create(array $vector, Word|int $word): WordVector
+    public function create(array $vector, Word|Book|int $baseItem): WordVector|BookVector
     {
         if (!$this->vectorClass) {
             throw new InvalidVectorClassException();
         }
 
         $this->vector = app($this->vectorClass);
-        $this->vector->word()->associate($word);
         $this->vector->fill([
             'vector' => $vector,
         ]);
+
+        if ($this->entity === Vectors::WORD_ENTITY) {
+            $this->vector->word()->associate($baseItem);
+        } else {
+            $this->vector->book()->associate($baseItem);
+        }
 
         $this->vector->save();
 
@@ -110,7 +125,7 @@ class VectorTypeService
     }
 
     /** @throws InvalidVectorException */
-    public function update(array $vector): WordVector
+    public function update(array $vector): WordVector|BookVector
     {
         if (!$this->vector->id) {
             throw new InvalidVectorException();
