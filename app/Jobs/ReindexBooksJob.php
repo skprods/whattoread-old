@@ -7,7 +7,7 @@ use App\Models\Elasticsearch\ElasticBooks;
 use App\Services\ElasticsearchService;
 use Illuminate\Database\Eloquent\Collection;
 
-class ReindexBooksJob extends Job
+class ReindexBooksJob extends QueueJob
 {
     private ElasticsearchService $service;
     private ElasticBooks $model;

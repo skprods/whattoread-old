@@ -15,6 +15,7 @@ class CreateUserBookAssociationsTable extends Migration
     {
         Schema::create('user_book_associations', function (Blueprint $table) {
             $table->id();
+            // TODO: добавить отдельной миграцией cascadeOnUpdate
             $table->foreignId('book_id')->constrained();
             $table->foreignId('user_id')->nullable()->constrained();
             $table->foreignId('telegram_user_id')->nullable()->constrained();

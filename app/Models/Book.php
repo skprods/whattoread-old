@@ -118,4 +118,15 @@ class Book extends Model
 
         return $builder->paginate($perPage, null, null, $page);
     }
+
+    public static function getByBookIds(array $bookIds): Collection
+    {
+        $builder = self::query()->select();
+
+        foreach ($bookIds as $bookId) {
+            $builder->orWhere('id', $bookId);
+        }
+
+        return $builder->get();
+    }
 }

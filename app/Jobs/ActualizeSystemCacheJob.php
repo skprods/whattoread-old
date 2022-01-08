@@ -8,20 +8,14 @@ use App\Models\Genre;
 use App\Models\TelegramMessage;
 use App\Models\TelegramUser;
 use App\Models\User;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 
-class ActualizeSystemCacheJob implements ShouldQueue
+class ActualizeSystemCacheJob extends QueueJob
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
     public function handle()
     {
+        $this->log("Начинается актуализация кеша с системной информацией");
+
         $data = [
             'books' => [
                 'total' => Book::query()->count(),
@@ -66,5 +60,7 @@ class ActualizeSystemCacheJob implements ShouldQueue
         ];
 
         Cache::put('system.info', $data);
+
+        $this->log("Актуализация кеша с системной информацией успешно завершена");
     }
 }

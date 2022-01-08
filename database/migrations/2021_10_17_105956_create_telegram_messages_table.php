@@ -15,6 +15,7 @@ class CreateTelegramMessagesTable extends Migration
     {
         Schema::create('telegram_messages', function (Blueprint $table) {
             $table->id();
+            // TODO: добавить отдельной миграцией cascadeOnUpdate
             $table->foreignId('telegram_user_id')->constrained();
             $table->string('command', 45);
             $table->json('responses');
