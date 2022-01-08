@@ -21,6 +21,7 @@ class CreateTelegramChatsTable extends Migration
         });
 
         Schema::table('telegram_messages', function (Blueprint $table) {
+            // TODO: добавить отдельной миграцией cascadeOnUpdate
             $table->foreignId('telegram_chat_id')->nullable()->after('id')->constrained();
         });
     }

@@ -22,6 +22,7 @@ class CreateCategoriesTable extends Migration
         });
 
         Schema::create('book_category', function (Blueprint $table) {
+            // TODO: добавить отдельной миграцией cascadeOnUpdate
             $table->foreignId('book_id')->constrained();
             $table->foreignId('category_id')->constrained();
         });

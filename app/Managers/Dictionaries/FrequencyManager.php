@@ -16,14 +16,7 @@ use SKprods\LaravelHelpers\Console;
 
 class FrequencyManager
 {
-    /** Симолы, которые необходимо заменить на пустую строку */
-    private array $replacingSymbols;
-
-    private int $totalWordsCount = 0;
-
-    /** Символ неразрывного пробела, который часто встречается в тексте */
-    private string $nbsp;
-
+    private bool $debug;
     private Book $book;
 
     /** Клиент для проверки морфологии */
@@ -31,13 +24,9 @@ class FrequencyManager
 
     private BookFrequenciesManager $bookFrequenciesManager;
 
-    public function __construct()
+    public function __construct(bool $debug = false)
     {
-        $replacingSymbolsFile = file_get_contents(resource_path("dictionary/replacingSymbols.json"));
-        $this->replacingSymbols = json_decode($replacingSymbolsFile, true);
-
-        $this->nbsp = html_entity_decode("&nbsp;");
-
+        $this->debug = $debug;
         $this->setClient();
         $this->bookFrequenciesManager = app(BookFrequenciesManager::class);
     }
@@ -64,7 +53,7 @@ class FrequencyManager
         $this->bookFrequenciesManager->deleteContentFrequency($this->book);
         $this->log("Словарь терминов по содержимому для книги очищен");
 
-        $thermsCount = $this->saveContentDictionary($dictionary);
+        $thermsCount = $this->saveDictionary($dictionary, $this->book->words_count, 'content');
         $this->log("Словарь терминов по содержимому успешно наполнен");
 
         app(BookManager::class, ['book' => $this->book])->update(['therms_count' => $thermsCount]);
@@ -101,101 +90,32 @@ class FrequencyManager
 
         $dictionary = $dictionary->all();
 
-        $this->saveDescriptionDictionary($dictionary, $wordsCount);
+        $this->saveDictionary($dictionary, $wordsCount, 'description');
         $this->log("Словарь терминов по описанию успешно наполнен");
     }
 
-    /**
-     * Состаление словаря из файла
-     * Структура файла - fb2, т.е. обычный xml.
-     *
-     * Нужно пройти по каждой строке внутри тега <body> в файле и распарсить
-     * слова по пробелам. Из них составляется коллекция, которая сортируется
-     * по убыванию частотности (сначала самые частые).
-     */
-    private function getDictionaryFromFile(string $filePath): Collection
+    /** Сохранение частотного словника  */
+    private function saveDictionary(Collection $dictionary, int $wordsCount, string $type): int
     {
-        $file = fopen(storage_path('app/') . $filePath, 'r');
-
-        /** Флаг, указывающий, что текущая строка находится внутри <body> */
-        $isBody = false;
-        $dictionary = [];
-
-        while ($row = fgets($file)) {
-            /** Не во всех файлах идёт чистый <body>, иногда с доп параметрами, поэтому без > */
-            if (str_contains($row, '<body')) {
-                $isBody = true;
-            }
-
-            /** После </body> иногда бывает картинка, её парсить не нужно */
-            if (str_contains($row, '</body>')) {
-                $isBody = false;
-            }
-
-            if ($isBody) {
-                $this->setWordsFromRow($row, $dictionary);
-            }
-        }
-
-        return collect($dictionary)->sortDesc();
-    }
-
-    /** Извлечение слов из строки + обновление общего числа слов */
-    private function setWordsFromRow(string $row, array &$dictionary)
-    {
-        /** Удаление ненужных символов и тегов */
-        $row = $this->prepareRow($row);
-
-        $words = preg_split('/ +/', $row);
-
-        foreach ($words as $word) {
-            if ($word === '') {
-                continue;
-            }
-
-            $this->totalWordsCount++;
-
-            if (isset($dictionary[$word])) {
-                $dictionary[$word] += 1;
-            } else {
-                $dictionary[$word] = 1;
-            }
-        }
-    }
-
-    /** Подготовка строки к разбивке на частотный словник */
-    private function prepareRow(string $row): string
-    {
-        /** убираем теги */
-        $row = strip_tags($row);
-
-        /** удаляем запрещённые символы */
-        $row = $this->deleteForbiddenSymbols($row);
-
-        return mb_strtolower(trim($row));
-    }
-
-    private function deleteForbiddenSymbols(string $row): string
-    {
-        $row = str_replace($this->nbsp, '', $row);
-
-        foreach ($this->replacingSymbols as $symbol) {
-            $row = str_replace($symbol, '', $row);
-        }
-
-        return $row;
-    }
-
-    /** Сохранение частотного словника по содержанию */
-    private function saveContentDictionary(Collection $dictionary): int
-    {
+        /** Количество отобранных терминов */
         $thermsCount = 0;
+        /** Чтобы не грузить базу огромным запросом, разбиваем на коллекции по 1000 слов */
         $chunkedDictionary = $dictionary->chunk(1000);
-        $chunkedDictionary->each(function (Collection $bookWordsFrequency) use (&$thermsCount) {
+
+        /**
+         * Начало обработки, проходим по каждому элементу (т.е. по коллекции), определяем нужные
+         * термины и вставляем их в БД
+         */
+        $chunkedDictionary->each(function (Collection $bookWordsFrequency) use (&$thermsCount, $wordsCount, $type) {
+            /** Коллекция отобранных терминов, наполняется по принципу word => frequency */
             $thermDictionary = collect();
+            /** Вспомогательный массив для фиксации, какие слова нужно добавить в БД (если таких ещё нет) */
             $wordKeys = [];
 
-            /** Формируем запрос на получение всех слов из базы данных */
+            /**
+             * Формируем запрос на получение тех слов из словаря, которые уже
+             * есть в базе данных. Получаем их в коллекцию $words
+             */
             $builder = Word::query();
             $bookWordsFrequency->keys()->each(function ($word) use ($builder, &$wordKeys) {
                 $builder->orWhere('word', $word);
@@ -204,8 +124,11 @@ class FrequencyManager
             });
             $words = $builder->get();
 
-            /** Проходим по каждому полученному из базы слову и добавляем его, если выполняются все условия */
-            $words->each(function (Word $word) use (&$thermDictionary, $bookWordsFrequency, &$wordKeys) {
+            /**
+             * Проходим по каждому полученному из базы слову и добавляем его в
+             * $thermDictionary, если выполняются все условия
+             */
+            $words->each(function (Word $word) use (&$thermDictionary, $bookWordsFrequency, &$wordKeys, $wordsCount) {
                 /** Если нет типа (сущ, прл, гл и тд), получаем тип и сохраняем */
                 if (!$word->type) {
                     $word->type = $this->getType($word->word);
@@ -214,75 +137,46 @@ class FrequencyManager
 
                 /** Для словаря терминов используем только существительные и прилагательные */
                 if ($word->type === 'сущ' || $word->type === 'прл') {
-                    $thermDictionary->put($word->id, $bookWordsFrequency->get($word->word) / $this->book->words_count);
+                    $thermDictionary->put($word->id, $bookWordsFrequency->get($word->word) / $wordsCount);
                 }
 
                 /** Удаляем слово из массива - оно получено из базы */
                 unset($wordKeys[$word->word]);
             });
 
-            /** Все остальные слова, которых не нашлось в базе, создаём и добавляем в базу */
+            /**
+             * Все остальные слова, которых не нашлось в базе, создаём и добавляем в базу.
+             * Вместе с этим проверяем выполнение условий и добавляем их в $thermDictionary
+             */
             foreach ($wordKeys as $wordKey) {
                 $word = $this->createWord($wordKey);
 
                 if ($word && ($word->type === 'сущ' || $word->type === 'прл')) {
-                    $thermDictionary->put($word->id, $bookWordsFrequency->get($word->word) / $this->book->words_count);
+                    $thermDictionary->put($word->id, $bookWordsFrequency->get($word->word) / $wordsCount);
                 }
             }
 
+            /**
+             * Если есть отобранные слова, добавляем их в БД
+             */
             if ($thermDictionary->count()) {
-                $insertedCount = $this->bookFrequenciesManager->addContentFrequencies($thermDictionary, $this->book);
+                switch ($type) {
+                    case "content":
+                        $insertedCount = $this->bookFrequenciesManager
+                            ->addContentFrequencies($thermDictionary, $this->book);
+                        break;
+                    case "description":
+                        $insertedCount = $this->bookFrequenciesManager
+                            ->addDescriptionFrequencies($thermDictionary, $this->book);
+                        break;
+                    default:
+                        $insertedCount = 0;
+                }
+
                 $this->log("Вставлено $insertedCount терминов");
                 $thermsCount += $insertedCount;
             }
         });
-
-        return $thermsCount;
-    }
-
-    /** Сохранение частотного словника по описанию */
-    private function saveDescriptionDictionary(Collection $dictionary, int $total): int
-    {
-        $thermsCount = 0;
-        $thermDictionary = collect();
-        $wordKeys = [];
-
-        /** Формируем запрос на получение всех слов из базы данных */
-        $builder = Word::query();
-        $dictionary->keys()->each(function ($word) use ($builder, &$wordKeys) {
-            $builder->orWhere('word', $word);
-            /** Для дальнейшей проверки также заполняем массив вида слово => слово */
-            $wordKeys[$word] = $word;
-        });
-        $words = $builder->get();
-
-        /** Проходим по каждому полученному из базы слову и добавляем его, если выполняются все условия */
-        $words->each(function (Word $word) use (&$thermDictionary, $dictionary, &$wordKeys, $total) {
-            /** Если нет типа (сущ, прл, гл и тд), получаем тип и сохраняем */
-            if (!$word->type) {
-                $word->type = $this->getType($word->word);
-                $word->save();
-            }
-
-            $thermDictionary->put($word->id, $dictionary->get($word->word) / $total);
-
-            /** Удаляем слово из массива - оно получено из базы */
-            unset($wordKeys[$word->word]);
-        });
-
-        /** Все остальные слова, которых не нашлось в базе, создаём и добавляем в базу */
-        foreach ($wordKeys as $wordKey) {
-            $word = $this->createWord($wordKey);
-
-            if ($word) {
-                $thermDictionary->put($word->id, $dictionary->get($word->word) / $total);
-            }
-        }
-
-        if ($thermDictionary->count()) {
-            $insertedCount = $this->bookFrequenciesManager->addDescriptionFrequencies($thermDictionary, $this->book);
-            $this->log("Вставлено $insertedCount терминов");
-        }
 
         return $thermsCount;
     }
@@ -363,7 +257,7 @@ class FrequencyManager
 
     public function log(string $message)
     {
-        if (config('app.debug')) {
+        if ($this->debug) {
             Console::info("[frequencyBook #{$this->book->id}] $message");
         }
 

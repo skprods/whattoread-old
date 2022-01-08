@@ -7,12 +7,12 @@ use Illuminate\Console\Command;
 
 class ActualizeSystemCacheCommand extends Command
 {
-    protected $signature = 'actualize:systemCache';
+    protected $signature = 'actualize:systemCache {--debug}';
 
     protected $description = 'Обновляет кэш с информацией о системе';
 
     public function handle()
     {
-        dispatch(new ActualizeSystemCacheJob());
+        dispatch(new ActualizeSystemCacheJob($this->option('debug')));
     }
 }

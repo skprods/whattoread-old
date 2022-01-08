@@ -19,7 +19,7 @@ abstract class Job
     protected bool $debugMode;
     protected string $jobId;
 
-    public function __construct(bool $debug)
+    public function __construct(bool $debug = false)
     {
         $this->debugMode = $debug;
         $this->jobId = md5(static::class . time());
