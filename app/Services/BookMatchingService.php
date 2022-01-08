@@ -44,7 +44,7 @@ class BookMatchingService
      * 4. Очищаем предыдущие составленные совпадения;
      * 5. Сохраняем полученные совпадения.
      */
-    private function createForBook(Book $book)
+    public function createForBook(Book $book)
     {
         $this->log($book, "Начинается составление рекомендаций для книги {$book->author} - {$book->title}");
 

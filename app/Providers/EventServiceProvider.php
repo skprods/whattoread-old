@@ -3,10 +3,13 @@
 namespace App\Providers;
 
 use App\Events\BookDeleted;
+use App\Events\BookDescriptionUpdated;
 use App\Events\BookUpdated;
 use App\Events\NewFrequencies;
 use App\Listeners\CreateNewFrequencies;
 use App\Listeners\DeleteElasticBook;
+use App\Listeners\UpdateBookDescriptionFrequency;
+use App\Listeners\UpdateBookMatches;
 use App\Listeners\UpdateElasticBook;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -22,6 +25,11 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+
+        BookDescriptionUpdated::class => [
+            UpdateBookDescriptionFrequency::class,
+            UpdateBookMatches::class,
         ],
 
         BookUpdated::class => [

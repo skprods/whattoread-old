@@ -3,6 +3,7 @@
 namespace App\Managers;
 
 use App\Events\BookDeleted;
+use App\Events\BookDescriptionUpdated;
 use App\Events\BookUpdated;
 use App\Models\Book;
 use App\Models\Stat;
@@ -61,6 +62,8 @@ class BookManager
 
     public function update(array $params): Book
     {
+        $oldDescription = $this->book->description;
+
         $this->book->fill($params);
         $this->book->save();
 
@@ -69,6 +72,10 @@ class BookManager
         }
 
         BookUpdated::dispatch($this->book);
+
+        if ($oldDescription !== $this->book->description) {
+            BookDescriptionUpdated::dispatch($this->book);
+        }
 
         return $this->book;
     }
