@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Traits\HasDatabaseBooksCounter;
+use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +21,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class BookDescriptionFrequency extends Model
 {
+    use HasDatabaseCounter;
+    use HasDatabaseBooksCounter;
+
     protected $fillable = [
         'frequency',
     ];

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class BookMatching extends Model
 {
+    use HasDatabaseCounter;
+
     protected $table = 'book_matches';
 
     protected $fillable = [
