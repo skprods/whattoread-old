@@ -16,12 +16,13 @@ class ReindexBooksJob extends QueueJob
     {
         parent::__construct($debug);
 
-        $this->service = app(ElasticsearchService::class);
         $this->model = app(ElasticBooks::class);
     }
 
     public function handle()
     {
+        $this->service = app(ElasticsearchService::class);
+
         $time = time();
         $this->log("Начинается переиндексация книг...");
 
