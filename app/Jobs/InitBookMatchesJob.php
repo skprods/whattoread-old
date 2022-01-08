@@ -37,7 +37,7 @@ class InitBookMatchesJob extends Job
             $builder->where('id', '<=', $this->end);
         }
 
-        $builder->chunk(100, function (Collection $data) {
+        $builder->chunk(1000, function (Collection $data) {
             $bookIds = $data->pluck('id')->toArray();
             $this->bookMatchingService->createForBooks($bookIds);
         });
