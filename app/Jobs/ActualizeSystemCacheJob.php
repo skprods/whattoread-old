@@ -50,7 +50,7 @@ class ActualizeSystemCacheJob extends QueueJob
                 'diff' => BookContentFrequency::getDiffCount(),
             ],
             'content_frequency_books' => [
-                'percent' => round($contentFrequencyBooksCount / $booksCount, 4) * 100,
+                'percent' => round(($contentFrequencyBooksCount / $booksCount) * 100, 4),
                 'current' => $contentFrequencyBooksCount,
                 'total' => $booksCount,
                 'diff' => BookContentFrequency::getBookDiffCount(),
@@ -60,7 +60,7 @@ class ActualizeSystemCacheJob extends QueueJob
                 'diff' => BookDescriptionFrequency::getDiffCount(),
             ],
             'description_frequency_books' => [
-                'percent' => round($descriptionFrequencyBooksCount / $booksCount, 4) * 100,
+                'percent' => round(($descriptionFrequencyBooksCount / $booksCount) * 100, 4),
                 'current' => $descriptionFrequencyBooksCount,
                 'total' => $booksCount,
                 'diff' => BookDescriptionFrequency::getBookDiffCount(),
