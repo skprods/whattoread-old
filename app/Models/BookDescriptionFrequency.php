@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasDatabaseBooksCounter;
 use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,7 +39,7 @@ class BookDescriptionFrequency extends Model
         return $this->belongsTo(Word::class);
     }
 
-    public static function getBookFrequenciesByWordIds(array $wordIds): array
+    public static function getBookFrequenciesByWordIdsBuilder(array $wordIds): Builder
     {
         $builder = self::query()->select('book_id');
 
@@ -48,19 +49,6 @@ class BookDescriptionFrequency extends Model
 
         return self::query()
             ->select()
-            ->whereIn('book_id', $builder)
-            ->get()
-            ->mapToGroups(function (BookDescriptionFrequency $frequency) {
-                return [
-                    $frequency->book_id => [
-                        'word_id' => $frequency->word_id,
-                        'frequency' => $frequency->frequency,
-                    ]
-                ];
-            })
-            ->map(function (Collection $item) {
-                return $item->pluck('frequency', 'word_id');
-            })
-            ->toArray();
+            ->whereIn('book_id', $builder);
     }
 }

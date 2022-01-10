@@ -29,13 +29,21 @@ class BookMatchingManager
             }
 
             if (count($allowed) === 1000) {
-                DB::table('book_matches')->insert($allowed);
+                DB::table('book_matches')->upsert(
+                    $allowed,
+                    ['comparing_book_id', 'matching_book_id'],
+                    ['author_score', 'description_score', 'total_score']
+                );
                 $allowed = [];
             }
         }
 
         if (count($allowed)) {
-            DB::table('book_matches')->insert($allowed);
+            DB::table('book_matches')->upsert(
+                $allowed,
+                ['comparing_book_id', 'matching_book_id'],
+                ['author_score', 'description_score', 'total_score']
+            );
         }
     }
 

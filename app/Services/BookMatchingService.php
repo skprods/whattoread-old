@@ -16,6 +16,8 @@ class BookMatchingService
     private bool $debug;
     private BookMatchingManager $bookMatchingManager;
 
+    private bool $bookFrequenciesCleared;
+
     public function __construct(bool $debug = false)
     {
         $this->debug = $debug;
@@ -46,6 +48,7 @@ class BookMatchingService
      */
     public function createForBook(Book $book)
     {
+        $this->bookFrequenciesCleared = false;
         $this->log($book, "Начинается составление рекомендаций для книги {$book->author} - {$book->title}");
 
         /** Получаем частотный словник сравниваемой книги и ID всех слов из него */
@@ -63,15 +66,47 @@ class BookMatchingService
          * $bookFrequencies - массив массивов вида [book_id => [word_id => frequency]]
          * - словники всех книг, в которых есть слова из $wordIds
          */
-        $bookFrequencies = BookDescriptionFrequency::getBookFrequenciesByWordIds($comparingWordIds);
+        $bookFrequenciesBuilder = BookDescriptionFrequency::getBookFrequenciesByWordIdsBuilder($comparingWordIds);
+
+        $count = 0;
+        $bookFrequenciesBuilder->chunk(
+            1000,
+            function (Collection $data) use ($book, $comparingWordFrequencies, $comparingWordIds, &$count) {
+                $this->createMatchesFromBookFrequencies($data, $book, $comparingWordFrequencies, $comparingWordIds);
+                $count += $data->count();
+            }
+        );
+
+        if ($count === 0) {
+            $this->error($book, "[отменено] Частотные словники похожих книг не найдены");
+        } else {
+            $this->log($book, "Данные по совпадениям с книгами сохранены: найдено $count совпадений");
+        }
+    }
+
+    private function createMatchesFromBookFrequencies(
+        Collection $data,
+        Book $book,
+        array $comparingWordFrequencies,
+        array $comparingWordIds
+    ) {
+        $bookFrequencies = $data->mapToGroups(function (BookDescriptionFrequency $frequency) {
+            return [
+                $frequency->book_id => [
+                    'word_id' => $frequency->word_id,
+                    'frequency' => $frequency->frequency,
+                ]
+            ];
+        })
+        ->map(function (Collection $item) {
+            return $item->pluck('frequency', 'word_id');
+        })
+        ->toArray();
+
         unset($bookFrequencies[$book->id]);
 
-        if (count($bookFrequencies) === 0) {
-            $this->error($book, "[отменено] Частотные словники похожих книг не найдены");
-            return;
-        }
-
-        $this->log($book, "Частотные словники похожих книг получены");
+        $dataCount = count($bookFrequencies);
+        $this->log($book, "Частотные словники похожих книг получены ($dataCount шт.)");
 
         /** Сумма всех частот сравниваемой книги */
         $wordTotalFrequency = $this->getExactTotalFrequency($comparingWordFrequencies);
@@ -114,7 +149,7 @@ class BookMatchingService
             }
         }
 
-        $this->log($book, "Данные по совпадениям с книгами наполнены");
+        $this->log($book, "Данные по совпадениям с книгами наполнены для $dataCount книг");
 
         foreach ($bookScores as $matchingBookId => $params) {
             $bookScores[$matchingBookId] = array_merge($params, [
@@ -123,11 +158,14 @@ class BookMatchingService
             ]);
         }
 
-        $this->bookMatchingManager->deleteForBook($book->id);
-        $this->log($book, "Данные по совпадениям для книги очищены");
+        if (!$this->bookFrequenciesCleared) {
+            $this->bookMatchingManager->deleteForBook($book->id);
+            $this->log($book, "Данные по совпадениям для книги очищены");
+            $this->bookFrequenciesCleared = true;
+        }
 
         $this->bookMatchingManager->bulkCreate($bookScores);
-        $this->log($book, "Данные по совпадениям с книгами сохранены");
+        $this->log($book, "Данные по совпадениям с книгами сохранены для $dataCount книг");
     }
 
     private function getExactTotalFrequency(array $frequencies): float
