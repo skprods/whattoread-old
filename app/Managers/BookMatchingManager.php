@@ -3,6 +3,7 @@
 namespace App\Managers;
 
 use App\Models\BookMatching;
+use Illuminate\Support\Facades\DB;
 
 class BookMatchingManager
 {
@@ -18,9 +19,44 @@ class BookMatchingManager
      */
     public function bulkCreate(array $matching)
     {
+        $allowed = [];
+
         foreach ($matching as $params) {
-            $this->createOrUpdate($params);
+            $item = $this->prepareParams($params);
+
+            if ($item) {
+                $allowed[] = $item;
+            }
+
+            if (count($allowed) === 1000) {
+                DB::table('book_matches')->insert($allowed);
+                $allowed = [];
+            }
         }
+
+        if (count($allowed)) {
+            DB::table('book_matches')->insert($allowed);
+        }
+    }
+
+    private function prepareParams(array $params): ?array
+    {
+        if (!isset($params['comparing_book_id']) || !isset($params['matching_book_id'])) {
+            return null;
+        }
+
+        $total = $params['author_score'] + $params['description_score'];
+        if ($total === 0) {
+            return null;
+        }
+
+        return [
+            'comparing_book_id' => $params['comparing_book_id'],
+            'matching_book_id' => $params['matching_book_id'],
+            'author_score' => $params['author_score'] > 0 ? 1 : 0,
+            'description_score' => $params['description_score'],
+            'total_score' => $total,
+        ];
     }
 
     public function createOrUpdate(array $params)
