@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Book;
 use App\Services\BookMatchingService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -27,7 +28,7 @@ class InitBookMatchesJob extends Job
 
         $this->bookMatchingService = app(BookMatchingService::class, ['debug' => $this->debugMode]);
 
-        $builder = DB::table('books')->orderBy('id');
+        $builder = DB::table('books')->orderBy('id')->where('status', Book::ACTIVE_STATUS);
 
         if ($this->start) {
             $builder->where('id', '>=', $this->start);
