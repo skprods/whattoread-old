@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Managers\BookMatchingManager;
 use App\Models\Book;
 use App\Models\BookDescriptionFrequency;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use SKprods\LaravelHelpers\Console;
 
@@ -15,8 +15,6 @@ class BookMatchingService
 
     private bool $debug;
     private BookMatchingManager $bookMatchingManager;
-
-    private bool $bookFrequenciesCleared;
 
     public function __construct(bool $debug = false)
     {
@@ -48,7 +46,6 @@ class BookMatchingService
      */
     public function createForBook(Book $book)
     {
-        $this->bookFrequenciesCleared = false;
         $this->log($book, "Начинается составление рекомендаций для книги {$book->author} - {$book->title}");
 
         /** Получаем частотный словник сравниваемой книги и ID всех слов из него */
@@ -62,63 +59,58 @@ class BookMatchingService
 
         $this->log($book, "Частотный словник книги по описанию получен");
 
-        /**
-         * $bookFrequencies - массив массивов вида [book_id => [word_id => frequency]]
-         * - словники всех книг, в которых есть слова из $wordIds
-         */
-        $bookFrequenciesBuilder = BookDescriptionFrequency::getBookFrequenciesByWordIdsBuilder($comparingWordIds);
+        $bookIds = BookDescriptionFrequency::getBookIdsByWordIds($comparingWordIds);
+        $bookIds->forget($book->id);
 
+        if ($bookIds->count()) {
+            $this->log($book, "Найдено {$bookIds->count()} книг");
+            $this->bookMatchingManager->deleteForBook($book->id);
+            $this->log($book, "Данные по совпадениям для книги очищены");
+        } else {
+            $this->error($book, "[отменено] Похожие книги не найдены");
+            return;
+        }
+
+        /** Разбиваем коллекцию книг на группы и получаем словники для группы книг */
         $count = 0;
-        $bookFrequenciesBuilder->chunk(
-            env('BOOK_MATCHING_CHUNK', 100000),
-            function (Collection $data) use ($book, $comparingWordFrequencies, $comparingWordIds, &$count) {
-                $this->createMatchesFromBookFrequencies($data, $book, $comparingWordFrequencies, $comparingWordIds);
-                $count += $data->count();
+        $bookIds->chunk(env('BOOK_MATCHING_CHUNK', 100))->each(
+            function (Collection $matchingBookIds) use ($book, $comparingWordFrequencies, $comparingWordIds, &$count) {
+                /**
+                 * $bookFrequencies - массив массивов вида [book_id => [word_id => frequency]]
+                 * - словники всех книг, в которых есть слова из $wordIds
+                 */
+                $bookFrequencies = BookDescriptionFrequency::getBookFrequenciesByBookIds($matchingBookIds->toArray());
+                $this->log($book, "Частотные словники похожих книг получены (для {$matchingBookIds->count()} книг)");
+
+                $this->createMatchesFromBookFrequencies(
+                    $bookFrequencies,
+                    $book,
+                    $comparingWordFrequencies,
+                    $comparingWordIds
+                );
+
+                $count += $matchingBookIds->count();
             }
         );
-
-        if ($count === 0) {
-            $this->error($book, "[отменено] Частотные словники похожих книг не найдены");
-        } else {
-            $this->log($book, "Данные по совпадениям с книгами сохранены: найдено $count совпадений");
-        }
     }
 
     private function createMatchesFromBookFrequencies(
-        Collection $data,
+        Collection $bookFrequencies,
         Book $book,
         array $comparingWordFrequencies,
         array $comparingWordIds
     ) {
-        $bookFrequencies = $data->mapToGroups(function (BookDescriptionFrequency $frequency) {
-            return [
-                $frequency->book_id => [
-                    'word_id' => $frequency->word_id,
-                    'frequency' => $frequency->frequency,
-                ]
-            ];
-        })
-        ->map(function (Collection $item) {
-            return $item->pluck('frequency', 'word_id');
-        })
-        ->toArray();
-
-        unset($bookFrequencies[$book->id]);
-
-        $dataCount = count($bookFrequencies);
-        $this->log($book, "Частотные словники похожих книг получены ($dataCount шт.)");
-
         /** Сумма всех частот сравниваемой книги */
         $wordTotalFrequency = $this->getExactTotalFrequency($comparingWordFrequencies);
         /** Процент описания */
         $bookScores = [];
 
-        /** @var Collection|Book[] $books */
-        $books = Book::getByBookIds(array_keys($bookFrequencies))->mapWithKeys(function (Book $book) {
+        /** @var \Illuminate\Database\Eloquent\Collection|Book[] $books */
+        $books = Book::getByBookIds($bookFrequencies->keys()->toArray())->mapWithKeys(function (Book $book) {
             return [$book->id => $book];
         });
 
-        foreach ($bookFrequencies as $bookId => $matchingWordFrequencies) {
+        foreach ($bookFrequencies->toArray() as $bookId => $matchingWordFrequencies) {
             /**
              * Сумма частот сравниваемой и совпадающей книги. Это число отличается от 2,
              * потому что в словнике используются не все слова из текста
@@ -149,7 +141,7 @@ class BookMatchingService
             }
         }
 
-        $this->log($book, "Данные по совпадениям с книгами наполнены для $dataCount книг");
+        $this->log($book, "Данные по совпадениям с книгами дополнены: {$bookFrequencies->count()} книг");
 
         foreach ($bookScores as $matchingBookId => $params) {
             $bookScores[$matchingBookId] = array_merge($params, [
@@ -158,14 +150,8 @@ class BookMatchingService
             ]);
         }
 
-        if (!$this->bookFrequenciesCleared) {
-            $this->bookMatchingManager->deleteForBook($book->id);
-            $this->log($book, "Данные по совпадениям для книги очищены");
-            $this->bookFrequenciesCleared = true;
-        }
-
         $this->bookMatchingManager->bulkCreate($bookScores);
-        $this->log($book, "Данные по совпадениям с книгами сохранены для $dataCount книг");
+        $this->log($book, "Сохранены совпадения: {$bookFrequencies->count()} книг");
     }
 
     private function getExactTotalFrequency(array $frequencies): float

@@ -39,16 +39,35 @@ class BookDescriptionFrequency extends Model
         return $this->belongsTo(Word::class);
     }
 
-    public static function getBookFrequenciesByWordIdsBuilder(array $wordIds): Builder
+    public static function getBookIdsByWordIds(array $wordIds): \Illuminate\Support\Collection
     {
-        $builder = self::query()->select('book_id');
+        $builder = self::query()->select('book_id')->groupBy('book_id');
 
         foreach ($wordIds as $wordId) {
             $builder->orWhere('word_id', $wordId);
         }
 
+        return $builder->get()->pluck('book_id')->mapWithKeys(function ($bookId) {
+            return [$bookId => $bookId];
+        });
+    }
+
+    public static function getBookFrequenciesByBookIds(array $bookIds): \Illuminate\Support\Collection
+    {
         return self::query()
             ->select()
-            ->whereIn('book_id', $builder);
+            ->whereIn('book_id', $bookIds)
+            ->get()
+            ->mapToGroups(function (BookDescriptionFrequency $frequency) {
+                return [
+                    $frequency->book_id => [
+                        'word_id' => $frequency->word_id,
+                        'frequency' => $frequency->frequency,
+                    ]
+                ];
+            })
+            ->map(function (Collection $item) {
+                return $item->pluck('frequency', 'word_id');
+            });
     }
 }
