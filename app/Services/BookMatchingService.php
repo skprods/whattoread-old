@@ -92,6 +92,8 @@ class BookMatchingService
                 $count += $matchingBookIds->count();
             }
         );
+
+        $this->log($book, "Совпадения подобраны и сохранены: $count книг");
     }
 
     private function createMatchesFromBookFrequencies(
