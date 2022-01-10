@@ -70,7 +70,7 @@ class BookMatchingService
 
         $count = 0;
         $bookFrequenciesBuilder->chunk(
-            1000,
+            env('BOOK_MATCHING_CHUNK', 100000),
             function (Collection $data) use ($book, $comparingWordFrequencies, $comparingWordIds, &$count) {
                 $this->createMatchesFromBookFrequencies($data, $book, $comparingWordFrequencies, $comparingWordIds);
                 $count += $data->count();
