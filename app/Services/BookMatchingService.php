@@ -73,7 +73,7 @@ class BookMatchingService
 
         /** Разбиваем коллекцию книг на группы и получаем словники для группы книг */
         $count = 0;
-        $bookIds->chunk(env('BOOK_MATCHING_CHUNK', 100))->each(
+        $bookIds->chunk(config('variables.matches.chunkSize'))->each(
             function (Collection $matchingBookIds) use ($book, $comparingWordFrequencies, $comparingWordIds, &$count) {
                 /**
                  * $bookFrequencies - массив массивов вида [book_id => [word_id => frequency]]

@@ -53,9 +53,10 @@ class BookMatchingManager
             return null;
         }
 
-        /** total - сумма очков за автора и описание, максимум 200. для оптимизации отсекаем всё, что меньше 5 из 200 */
+        /** total - сумма очков за автора и описание, максимум 200. для оптимизации отсекаем всё, что меньше $minTotal из 200 */
         $total = $params['author_score'] + $params['description_score'];
-        if ($total < 5) {
+        $minTotal = config('variables.matches.minTotalScore');
+        if ($total < $minTotal) {
             return null;
         }
 
