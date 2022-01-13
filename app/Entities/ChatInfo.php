@@ -4,19 +4,16 @@ namespace App\Entities;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
-use JetBrains\PhpStorm\ArrayShape;
-use JetBrains\PhpStorm\Pure;
 
 class ChatInfo implements Arrayable, Jsonable
 {
     public int $id;
-    public ?string $lastCommand = null;
+    public LastCommand $lastCommand;
     public Dialog $dialog;
 
-    public function __construct(int $chatId, string $lastCommand = null, array $data = [])
+    public function __construct(int $chatId, array $data = [])
     {
         $this->id = $chatId;
-        $this->lastCommand = $lastCommand;
         $this->setData($data);
     }
 
@@ -27,15 +24,22 @@ class ChatInfo implements Arrayable, Jsonable
         } else {
             $this->dialog = new Dialog();
         }
+
+        if (isset($data['lastCommand'])) {
+            $this->lastCommand = LastCommand::create($data['lastCommand']);
+        } else {
+            $this->lastCommand = new LastCommand();
+        }
     }
 
-    #[Pure] #[ArrayShape(['lastCommand' => "string", 'dialog' => "array"])]
     public function toArray(): array
     {
         $dialog = isset($this->dialog) ? $this->dialog->toArray() : null;
+        $lastCommand = isset($this->lastCommand) ? $this->lastCommand->toArray() : null;
 
         return [
-            'lastCommand' => $this->lastCommand,
+            'id' => $this->id,
+            'lastCommand' => $lastCommand,
             'dialog' => $dialog,
         ];
     }

@@ -78,7 +78,13 @@ abstract class TelegramCommand extends Command
             /** Обработка команды */
             $this->handleCommand();
         } else {
-            /** Обработка запроса из inline-keyboard */
+            /** Обработка запроса из inline-keyboard, если страница отличается от предыдущей */
+            $identName = $this->chatInfo->lastCommand->command === $this->name;
+            $identPage = $this->chatInfo->lastCommand->page === $this->getDataFromCallbackQuery($this->callbackQuery);
+            if ($identName && $identPage) {
+                return;
+            }
+
             $this->handleCallback($this->callbackQuery);
         }
 
@@ -97,7 +103,18 @@ abstract class TelegramCommand extends Command
 
     private function setLastCommand()
     {
-        $this->chatInfo = new ChatInfo($this->chatInfo->id, $this->name);
+        $paramKey = array_key_first($this->arguments);
+        $param = $this->arguments[$paramKey] ?? $this->chatInfo->lastCommand->param;
+
+        $data = [
+            'lastCommand' => [
+                'command' => $this->name,
+                'param' => $param,
+                'page' => $this->chatInfo->lastCommand->command === $this->name ? $this->callbackData : null,
+            ],
+        ];
+
+        $this->chatInfo = new ChatInfo($this->chatInfo->id, $data);
         $this->redisService->setChatInfo($this->chatInfo);
     }
 
@@ -200,6 +217,7 @@ abstract class TelegramCommand extends Command
     protected function getDataFromCallbackQuery(CallbackQuery $callbackQuery): string
     {
         [$commandName, $data] = explode('_', $callbackQuery->data);
+        $this->callbackData = $data;
 
         return $data;
     }

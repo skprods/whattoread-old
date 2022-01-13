@@ -15,6 +15,8 @@ return [
                 \App\Telegram\Commands\MyBooksCommand::class,
                 \App\Telegram\Commands\AddBookCommand::class,
                 \App\Telegram\Commands\BookCommand::class,
+                \App\Telegram\Commands\BookRecsCommand::class,
+                \App\Telegram\Commands\RecsCommand::class,
             ],
         ],
 
@@ -22,6 +24,7 @@ return [
 
     'dialogs' => [
         'addbook' => \App\Telegram\Dialogs\AddBookDialog::class,
+        'bookrecs' => \App\Telegram\Dialogs\BookRecsDialog::class,
     ],
 
     'default' => 'whattoread',

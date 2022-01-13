@@ -8,6 +8,7 @@ use Telegram\Bot\Objects\Chat;
 trait HasTelegramCallback
 {
     public ?CallbackQuery $callbackQuery = null;
+    public mixed $callbackData = null;
 
     public function setCallbackProperties(CallbackQuery $callbackQuery, ?Chat $chat)
     {
