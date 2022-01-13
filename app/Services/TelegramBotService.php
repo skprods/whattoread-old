@@ -4,22 +4,24 @@ namespace App\Services;
 
 use App\Exceptions\TelegramException;
 use App\Managers\ExceptionManager;
+use App\Telegram\BotsManager;
+use App\Telegram\Telegram;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Telegram\Bot\BotsManager;
 use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\Update;
 
 class TelegramBotService
 {
-    private BotsManager $telegram;
+    private Telegram $telegram;
     private NotificationService $notificationService;
 
     public function __construct()
     {
-        $this->telegram = app(BotsManager::class);
+        $this->telegram = app(BotsManager::class)->bot();
+
         $this->notificationService = app(NotificationService::class, [
-            'telegram' => $this->telegram->bot()
+            'telegram' => $this->telegram
         ]);
     }
 
@@ -77,7 +79,7 @@ class TelegramBotService
             return 'ok';
         }
 
-        $neededCommand->setTelegram($this->telegram->bot());
+        $neededCommand->setTelegram($this->telegram);
         $neededCommand->setCallbackProperties($update->callbackQuery, $update->callbackQuery->message->chat);
         $neededCommand->handle();
 
@@ -87,7 +89,7 @@ class TelegramBotService
     /** Обработка ошибок - отправка сообщения пользователю и в чат администрации */
     private function handleException(Exception $exception): string
     {
-        $e = new TelegramException($exception, $this->telegram->bot()->getWebhookUpdate());
+        $e = new TelegramException($exception, $this->telegram->getWebhookUpdate());
 
         if (env('APP_ENV') === 'production') {
             $this->notificationService->notifyForTelegramException($e);
@@ -109,7 +111,7 @@ class TelegramBotService
          * тогда getChat() вернёт пустую коллекцию. В таких случаях не нужно отвечать.
          */
         if ($e->update->getChat()->count()) {
-            $this->telegram->bot()->sendMessage([
+            $this->telegram->sendMessage([
                 'chat_id' => $e->update->getChat()->id,
                 'text' => "Что-то пошло не так... Наши администраторы уже в курсе, скоро мы всё исправим.\nПожалуйста, попробуйте чуть позже."
             ]);
