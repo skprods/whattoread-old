@@ -3,12 +3,12 @@
 namespace App\Services;
 
 use App\Telegram\Dialogs\Dialog;
-use Telegram\Bot\BotsManager;
+use App\Telegram\Telegram;
 use Telegram\Bot\Objects\Update;
 
 class DialogService
 {
-    public static function initDialog(BotsManager $telegram, Update $update)
+    public static function initDialog(Telegram $telegram, Update $update)
     {
         $chatId = $update->getChat()->id;
 

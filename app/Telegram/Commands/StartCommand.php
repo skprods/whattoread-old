@@ -17,8 +17,12 @@ class StartCommand extends TelegramCommand
         $response .= $this->getHelpCommand($commands);
         $response .= "\n";
 
+        // TODO: вынести в общее место, потому что используется здесь и в help
         foreach ($commands as $name => $command) {
-            $response .= sprintf('/%s - %s' . PHP_EOL, $name, $command->getDescription());
+            /* @var TelegramCommand $command */
+            if (!$command->hidden) {
+                $response .= sprintf('/%s - %s'.PHP_EOL, $name, $command->getDescription());
+            }
         }
 
         $this->replyWithMessage(['text' => $response]);

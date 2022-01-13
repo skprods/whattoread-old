@@ -6,8 +6,7 @@ use App\Entities\ChatInfo;
 use App\Managers\TelegramMessageManager;
 use App\Models\TelegramUser;
 use App\Services\RedisService;
-use Telegram\Bot\Api;
-use Telegram\Bot\BotsManager;
+use App\Telegram\Telegram;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Message;
 
@@ -23,16 +22,14 @@ abstract class Dialog
     protected ?string $currentStep = null;
     protected array $responses = [];
 
-    protected BotsManager $botsManager;
     protected TelegramMessageManager $telegramMessageManager;
-    protected Api $telegram;
+    protected Telegram $telegram;
     protected RedisService $redisService;
 
-    public function __construct(BotsManager $telegram, ChatInfo $chatInfo, Message $message)
+    public function __construct(Telegram $telegram, ChatInfo $chatInfo, Message $message)
     {
-        $this->botsManager = $telegram;
         $this->telegramMessageManager = app(TelegramMessageManager::class);
-        $this->telegram = $telegram->bot();
+        $this->telegram = $telegram;
         $this->chatInfo = $chatInfo;
         $this->message = $message;
 

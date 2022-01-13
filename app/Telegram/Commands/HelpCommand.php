@@ -22,8 +22,10 @@ class HelpCommand extends TelegramCommand
         $text .= "\n";
 
         foreach ($commands as $name => $handler) {
-            /* @var Command $handler */
-            $text .= sprintf('/%s - %s'.PHP_EOL, $name, $handler->getDescription());
+            /* @var TelegramCommand $handler */
+            if (!$handler->hidden) {
+                $text .= sprintf('/%s - %s'.PHP_EOL, $name, $handler->getDescription());
+            }
         }
 
         $this->replyWithMessage(['text' => $text]);

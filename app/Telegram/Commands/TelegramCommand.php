@@ -12,13 +12,18 @@ use App\Services\RedisService;
 use App\Traits\HasTelegramCallback;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Api;
 use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\CallbackQuery;
 use Telegram\Bot\Objects\Chat;
+use Telegram\Bot\Objects\Update;
 
 abstract class TelegramCommand extends Command
 {
     use HasTelegramCallback;
+
+    /** Нужно ли отображать команду в списке команд */
+    public bool $hidden = false;
 
     protected ?Chat $chat = null;
 
@@ -34,6 +39,15 @@ abstract class TelegramCommand extends Command
     {
         $this->redisService = app(RedisService::class);
         $this->telegramMessageManager = app(TelegramMessageManager::class);
+    }
+
+    public function make(Api $telegram, Update $update, array $entity)
+    {
+        $this->telegram = $telegram;
+        $this->update = $update;
+        $this->entity = $entity;
+
+        return call_user_func_array([$this, 'handle'], array_values($this->getArguments()));
     }
 
     abstract public function handleCommand();

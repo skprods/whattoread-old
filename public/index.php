@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+require_once "../resources/unicode-tools.php";
+
 /*
 |--------------------------------------------------------------------------
 | Check If The Application Is Under Maintenance
