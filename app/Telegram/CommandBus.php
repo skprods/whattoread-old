@@ -21,6 +21,10 @@ class CommandBus extends \Telegram\Bot\Commands\CommandBus
      */
     protected function execute(string $name, Update $update, array $entity): mixed
     {
+        if (!$update->message) {
+            return false;
+        }
+
         $command = $this->commands[$name] ?? $this->commandAliases[$name] ?? null;
 
         if (!$command) {

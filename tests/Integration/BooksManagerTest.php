@@ -15,7 +15,7 @@ class BooksManagerTest extends TestCase
     {
         $telegramUser = TelegramUser::factory()->create();
         $chatData = $this->getChatData();
-        $chatInfo = new ChatInfo($telegramUser->telegram_id, null, $chatData);
+        $chatInfo = new ChatInfo($telegramUser->telegram_id, $chatData);
 
         app(BooksManager::class)->addFromTelegram($chatInfo);
 
@@ -35,7 +35,7 @@ class BooksManagerTest extends TestCase
             'status' => Book::ACTIVE_STATUS,
         ]);
         $chatData['dialog'] = array_merge($chatData['dialog'], ['selectedBookId' => $book->id]);
-        $chatInfo = new ChatInfo($telegramUser->telegram_id, null, $chatData);
+        $chatInfo = new ChatInfo($telegramUser->telegram_id, $chatData);
 
         app(BooksManager::class)->addFromTelegram($chatInfo);
 

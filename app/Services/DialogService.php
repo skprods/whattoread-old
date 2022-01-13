@@ -16,7 +16,7 @@ class DialogService
         $redisService = app(RedisService::class);
         $chatInfo = $redisService->getChatInfo($chatId);
 
-        $dialogClass = config('telegram.dialogs.' . $chatInfo->lastCommand);
+        $dialogClass = config('telegram.dialogs.' . $chatInfo->lastCommand->command);
 
         if ($dialogClass) {
             /** @var Dialog $dialog */

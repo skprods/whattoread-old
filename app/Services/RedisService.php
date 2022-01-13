@@ -25,7 +25,7 @@ class RedisService
     {
         $data = json_decode($this->redis->get($chatId), true);
 
-        return new ChatInfo($chatId, $data['lastCommand'] ?? null, $data ?? []);
+        return new ChatInfo($chatId, $data ?? []);
     }
 
     public function setChatInfo(ChatInfo $chatInfo)
