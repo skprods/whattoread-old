@@ -5,10 +5,10 @@ namespace App\Services;
 use App\Exceptions\TelegramException;
 use App\Managers\ExceptionManager;
 use App\Telegram\BotsManager;
+use App\Telegram\Commands\TelegramCommand;
 use App\Telegram\Telegram;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Telegram\Bot\Commands\Command;
 use Telegram\Bot\Objects\Update;
 
 class TelegramBotService
@@ -67,7 +67,7 @@ class TelegramBotService
         [$commandName, $data] = explode('_', $callbackData);
 
         $neededCommand = null;
-        /** @var Command $command */
+        /** @var TelegramCommand $command */
         foreach ($this->telegram->getCommands() as $command) {
             if ($command->getName() === $commandName) {
                 $neededCommand = $command;

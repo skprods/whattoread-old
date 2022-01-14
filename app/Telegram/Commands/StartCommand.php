@@ -20,7 +20,7 @@ class StartCommand extends TelegramCommand
         // TODO: вынести в общее место, потому что используется здесь и в help
         foreach ($commands as $name => $command) {
             /* @var TelegramCommand $command */
-            if (!$command->hidden) {
+            if (!$command->hasParam) {
                 $response .= sprintf('/%s - %s'.PHP_EOL, $name, $command->getDescription());
             }
         }

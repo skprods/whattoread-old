@@ -9,7 +9,7 @@ use Telegram\Bot\Objects\CallbackQuery;
 
 class RecsCommand extends TelegramCommand
 {
-    public bool $hidden = true;
+    public bool $hasParam = true;
 
     protected $name = 'recs{id}';
 
