@@ -47,8 +47,13 @@ abstract class Dialog
 
             foreach ($this->steps as $key => $step) {
                 if ($step === $lastStep) {
-                    $this->currentStep = $this->steps[$key + 1];
+                    $this->currentStep = $this->steps[$key + 1] ?? null;
                 }
+            }
+
+            /** Для ситуаций, когда после окончания диалога пишут что-то ещё без команды нового диалога */
+            if (!$this->currentStep) {
+                return;
             }
         }
 

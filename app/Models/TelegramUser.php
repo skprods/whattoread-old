@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $first_name
  * @property string $last_name
  * @property string $username
+ * @property string $status
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
@@ -23,11 +24,15 @@ class TelegramUser extends Model
     use HasFactory;
     use HasDatabaseCounter;
 
+    public const ACTIVE_STATUS = 'active';
+    public const KICKED_STATUS = 'kicked';
+
     protected $fillable = [
         'telegram_id',
         'first_name',
         'last_name',
         'username',
+        'status',
     ];
 
     public function telegramMessages(): HasMany

@@ -140,6 +140,7 @@ abstract class TelegramCommand extends Command
                 'first_name' => $chat->firstName,
                 'last_name' => $chat->lastName,
                 'username' => $chat->username ?? $chat->id,
+                'status' => TelegramUser::ACTIVE_STATUS,
             ]);
         } else {
             $this->telegramUser = app(TelegramUserManager::class)->createOrUpdate([

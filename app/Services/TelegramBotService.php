@@ -4,8 +4,11 @@ namespace App\Services;
 
 use App\Exceptions\TelegramException;
 use App\Managers\ExceptionManager;
+use App\Managers\TelegramUserManager;
+use App\Models\TelegramUser;
 use App\Telegram\BotsManager;
 use App\Telegram\Commands\TelegramCommand;
+use App\Telegram\Entities\MyChatMember;
 use App\Telegram\Telegram;
 use Exception;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +41,10 @@ class TelegramBotService
              */
             $update = $this->telegram->commandsHandler(true);
 
+            if ($this->checkKicked($update)) {
+                return 'ok';
+            }
+
             /**
              * Если в обновлении есть callbackQuery, значит, пришел ответ
              * из клавиатуры у сообщения (inline-keyboard)
@@ -58,6 +65,29 @@ class TelegramBotService
         }
 
         return 'ok';
+    }
+
+    private function checkKicked(Update $update): bool
+    {
+        $data = $update->toArray();
+        if (!isset($data['my_chat_member'])) {
+            return false;
+        }
+
+        $chatMember = new MyChatMember($data['my_chat_member']);
+
+        if (
+            $chatMember->newChatMember->user->id === config('telegram.bots.whattoread.id')
+            && $chatMember->newChatMember->status === TelegramUser::KICKED_STATUS
+        ) {
+            $telegramUser = TelegramUser::findByTelegramId($chatMember->chat->id);
+            app(TelegramUserManager::class, ['telegramUser' => $telegramUser])
+                ->update(['status' => TelegramUser::KICKED_STATUS]);
+
+            return true;
+        } else {
+            return false;
+        }
     }
 
     /** Обработка ответа через inline-keyboard */
