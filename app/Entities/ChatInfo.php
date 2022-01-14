@@ -8,7 +8,8 @@ use Illuminate\Contracts\Support\Jsonable;
 class ChatInfo implements Arrayable, Jsonable
 {
     public int $id;
-    public LastCommand $lastCommand;
+    public Command $lastCommand;
+    public Command $currentCommand;
     public Dialog $dialog;
 
     public function __construct(int $chatId, array $data = [])
@@ -26,19 +27,27 @@ class ChatInfo implements Arrayable, Jsonable
         }
 
         if (isset($data['lastCommand'])) {
-            $this->lastCommand = LastCommand::create($data['lastCommand']);
+            $this->lastCommand = Command::create($data['lastCommand']);
         } else {
-            $this->lastCommand = new LastCommand();
+            $this->lastCommand = new Command();
+        }
+
+        if (isset($data['currentCommand'])) {
+            $this->currentCommand = Command::create($data['currentCommand']);
+        } else {
+            $this->currentCommand = new Command();
         }
     }
 
     public function toArray(): array
     {
         $dialog = isset($this->dialog) ? $this->dialog->toArray() : null;
+        $currentCommand = isset($this->currentCommand) ? $this->currentCommand->toArray() : null;
         $lastCommand = isset($this->lastCommand) ? $this->lastCommand->toArray() : null;
 
         return [
             'id' => $this->id,
+            'currentCommand' => $currentCommand,
             'lastCommand' => $lastCommand,
             'dialog' => $dialog,
         ];

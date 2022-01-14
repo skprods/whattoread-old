@@ -105,7 +105,7 @@ abstract class Dialog
         $user = TelegramUser::findByTelegramId($this->chatInfo->id);
 
         $this->telegramMessageManager->create([
-            'command' => $this->chatInfo->lastCommand->command,
+            'command' => $this->chatInfo->currentCommand->toArray(),
             'message' => $message
         ], $user);
     }

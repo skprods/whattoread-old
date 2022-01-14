@@ -7,7 +7,7 @@ use App\Models\Genre;
 
 class BookCommand extends TelegramCommand
 {
-    public bool $hidden = true;
+    public bool $hasParam = true;
 
     protected $name = 'book{id}';
 

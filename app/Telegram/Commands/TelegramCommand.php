@@ -3,6 +3,7 @@
 namespace App\Telegram\Commands;
 
 use App\Entities\ChatInfo;
+use App\Entities\Dialog;
 use App\Managers\TelegramChatManager;
 use App\Managers\TelegramMessageManager;
 use App\Managers\TelegramUserManager;
@@ -23,7 +24,7 @@ abstract class TelegramCommand extends Command
     use HasTelegramCallback;
 
     /** Нужно ли отображать команду в списке команд */
-    public bool $hidden = false;
+    public bool $hasParam = false;
 
     protected ?Chat $chat = null;
 
@@ -90,8 +91,7 @@ abstract class TelegramCommand extends Command
 
         /** Логируем ответ в ту же строку, куда записали запрос */
         $this->logResponses($this->responses);
-        /** Проставляем в Redis последнюю команду для чата */
-        $this->setLastCommand();
+        $this->redisService->setChatInfo($this->chatInfo);
     }
 
     private function setChatInfo()
@@ -99,23 +99,26 @@ abstract class TelegramCommand extends Command
         $chatId = $this->getChat()->id;
 
         $this->chatInfo = $this->redisService->getChatInfo($chatId);
-    }
 
-    private function setLastCommand()
-    {
+        /** Если вызов в команде, диалог очищается */
+        $this->chatInfo->dialog = Dialog::create([]);
+
+        /** Текущее в Redis = предыдущая команда */
+        $this->chatInfo->lastCommand = $this->chatInfo->currentCommand;
+
         $paramKey = array_key_first($this->arguments);
         $param = $this->arguments[$paramKey] ?? $this->chatInfo->lastCommand->param;
+        if (!$this->hasParam) {
+            $param = null;
+        }
 
-        $data = [
-            'lastCommand' => [
-                'command' => $this->name,
-                'param' => $param,
-                'page' => $this->chatInfo->lastCommand->command === $this->name ? $this->callbackData : null,
-            ],
-        ];
+        $page = $this->callbackData;
 
-        $this->chatInfo = new ChatInfo($this->chatInfo->id, $data);
-        $this->redisService->setChatInfo($this->chatInfo);
+        $this->chatInfo->currentCommand = \App\Entities\Command::create([
+            'command' => $this->name,
+            'param' => $param,
+            'page' => $page,
+        ]);
     }
 
     protected function getChat(): Collection|Chat
@@ -156,7 +159,7 @@ abstract class TelegramCommand extends Command
     public function logMessage()
     {
         $this->telegramMessageManager->create([
-            'command' => $this->name
+            'command' => $this->chatInfo->currentCommand->toArray(),
         ], $this->telegramUser, $this->telegramChat);
     }
 
@@ -212,13 +215,5 @@ abstract class TelegramCommand extends Command
                 'line' => $exception->getLine(),
             ],
         ], JSON_UNESCAPED_UNICODE));
-    }
-
-    protected function getDataFromCallbackQuery(CallbackQuery $callbackQuery): string
-    {
-        [$commandName, $data] = explode('_', $callbackQuery->data);
-        $this->callbackData = $data;
-
-        return $data;
     }
 }

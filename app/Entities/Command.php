@@ -5,7 +5,7 @@ namespace App\Entities;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 
-class LastCommand implements Arrayable, Jsonable
+class Command implements Arrayable, Jsonable
 {
     public ?string $command = null;
     public ?string $param = null;
