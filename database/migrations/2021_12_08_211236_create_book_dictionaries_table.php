@@ -15,7 +15,6 @@ class CreateBookDictionariesTable extends Migration
     {
         Schema::create('book_dictionaries', function (Blueprint $table) {
             $table->id();
-            // TODO: добавить отдельной миграцией cascadeOnUpdate
             $table->foreignId('book_id')->constrained();
             $table->json('words');
             $table->timestamps();
