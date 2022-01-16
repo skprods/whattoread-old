@@ -44,6 +44,25 @@ class BooksManager
         return true;
     }
 
+    public function create(array $params): Book
+    {
+        try {
+            DB::beginTransaction();
+
+            /** @var BookManager $booksManager */
+            $booksManager = app(BookManager::class);
+            $book = $booksManager->create($params);
+            $booksManager->addGenres($params['genres']);
+
+            DB::commit();
+        } catch (\Exception $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
+
+        return $book;
+    }
+
     public function addFromTelegram(ChatInfo $chatInfo)
     {
         try {

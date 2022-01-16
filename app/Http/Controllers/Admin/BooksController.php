@@ -6,10 +6,12 @@ use App\Events\NewFrequencies;
 use App\Http\Controllers\Controller;
 use App\Http\Collections\Admin\BooksCollection;
 use App\Http\Collections\CollectionResource;
+use App\Http\Requests\Admin\BookCreateRequest;
 use App\Http\Requests\Admin\BookUpdateRequest;
 use App\Http\Resources\Admin\BookResource;
 use App\Http\Resources\SingleResource;
 use App\Managers\BookManager;
+use App\Managers\BooksManager;
 use App\Managers\FileManager;
 use App\Models\Book;
 use App\Traits\HasDataTableFilters;
@@ -60,18 +62,11 @@ class BooksController extends Controller
         return new BookResource($book->load(['genres']));
     }
 
-    public function createFrequency(Request $request, Book $book): SingleResource
+    public function create(BookCreateRequest $request): BookResource
     {
-        $request->validate([
-            'file' => ['required', 'file', 'mimetypes:text/xml'],
-        ]);
+        $book = app(BooksManager::class)->create($request->validated());
 
-        $filepath = app(FileManager::class)->saveBookFile($request->file('file'));
-        NewFrequencies::dispatch($filepath, $book->id);
-
-        return new SingleResource([
-            'message' => "Файл успешно загружен, а частотный словник будет составлен в фоне.",
-        ]);
+        return new BookResource($book->load('genres'));
     }
 
     public function update(BookUpdateRequest $request, Book $book): BookResource
@@ -86,5 +81,19 @@ class BooksController extends Controller
         app(BookManager::class, ['book' => $book])->delete();
 
         return response()->noContent();
+    }
+
+    public function createFrequency(Request $request, Book $book): SingleResource
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimetypes:text/xml'],
+        ]);
+
+        $filepath = app(FileManager::class)->saveBookFile($request->file('file'));
+        NewFrequencies::dispatch($filepath, $book->id);
+
+        return new SingleResource([
+            'message' => "Файл успешно загружен, а частотный словник будет составлен в фоне.",
+        ]);
     }
 }

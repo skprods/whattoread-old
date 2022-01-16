@@ -34,6 +34,8 @@ exec-nginx: # заходим в контейнер с nginx
 	docker-compose exec whattoread-nginx bash
 exec-redis: # заходим в контейнер с redis
 	docker-compose exec whattoread-redis bash
+exec-percona: # заходим в контейнер с redis
+	docker-compose exec whattoread-percona bash
 
 app-supervisor-start: # запуск supervisor для очередей
 	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor start
