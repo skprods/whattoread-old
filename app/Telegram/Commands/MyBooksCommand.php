@@ -4,6 +4,8 @@ namespace App\Telegram\Commands;
 
 use App\Models\TelegramUserBook;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
+use Telegram\Bot\Exceptions\TelegramResponseException;
 use Telegram\Bot\Objects\CallbackQuery;
 
 class MyBooksCommand extends TelegramCommand
@@ -64,30 +66,38 @@ class MyBooksCommand extends TelegramCommand
 
         $keyboard = $this->getKeyboard($count, $pageNumber);
 
-        if (count($keyboard) < 2) {
-            $this->editMessageText([
-                'chat_id' => $this->getChat()->id,
-                'message_id' => $callbackQuery->message->messageId,
-                'text' => $text,
-                'parse_mode' => 'markdown',
-            ]);
-        } else {
-            $this->editMessageText([
-                'chat_id' => $this->getChat()->id,
-                'message_id' => $callbackQuery->message->messageId,
-                'text' => $text,
-                'parse_mode' => 'markdown',
-                'reply_markup' => json_encode([
-                    'inline_keyboard' => [
-                        $keyboard,
-                    ]
-                ])
-            ]);
+        try {
+            if (count($keyboard) < 2) {
+                $this->editMessageText([
+                    'chat_id' => $this->getChat()->id,
+                    'message_id' => $callbackQuery->message->messageId,
+                    'text' => $text,
+                    'parse_mode' => 'markdown',
+                ]);
+            } else {
+                $this->editMessageText([
+                    'chat_id' => $this->getChat()->id,
+                    'message_id' => $callbackQuery->message->messageId,
+                    'text' => $text,
+                    'parse_mode' => 'markdown',
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' => [
+                            $keyboard,
+                        ]
+                    ])
+                ]);
+            }
+        } catch (TelegramResponseException $exception) {
+            Log::error($exception->getMessage());
         }
     }
 
     private static function getBooksMessage(int $count): string
     {
+        if ($count >= 11 && $count < 20) {
+            return "$count книг";
+        }
+
         return match ($count % 10) {
             1 => "$count книгу",
             2, 3, 4 => "$count книги",
