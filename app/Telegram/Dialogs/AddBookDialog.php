@@ -111,12 +111,9 @@ class AddBookDialog extends Dialog
                 $this->replyWithMessage(['text' => 'Книга добавлена. Теперь мы сделаем рекомендации ещё более точными!']);
                 $this->endOfStep = true;
             } catch (\Exception $exception) {
-                $this->replyWithMessage(['text' => 'У нас что-то сломалось, поэтому мы не смогли добавить книгу. Приносим свои извиниения']);
                 $this->resetChatInfo();
-
                 throw $exception;
             }
-
         } else {
             $messages = explode(',', $this->message->text);
 

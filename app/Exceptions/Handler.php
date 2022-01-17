@@ -52,6 +52,7 @@ class Handler extends ExceptionHandler
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
                 ]);
+                Log::error(json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
             } catch (Exception $exception) {
                 Log::error(json_encode($exception, JSON_UNESCAPED_UNICODE));
             }
