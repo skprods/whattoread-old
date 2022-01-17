@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Exceptions\TelegramException;
+use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Api;
 use Throwable;
 
@@ -18,7 +19,7 @@ class NotificationService
     public function notify(string $message)
     {
         $text = "*УВЕДОМЛЕНИЕ*:\n\n";
-        $text .= $message;
+        $text .= $this->replaceSymbols($message);
 
         $this->sendMessage($text);
     }
@@ -47,14 +48,21 @@ class NotificationService
         $text .= "Линия: {$e->getLine()}\n";
         $text .= "\n";
 
+        $message = $this->replaceSymbols($message);
+
+        $text .= $message;
+
+        return $text;
+    }
+
+    private function replaceSymbols(string $message): array|string
+    {
         $message = str_replace('_', '\\_', $message);
         $message = str_replace('*', '\\*', $message);
         $message = str_replace('[', '\\[', $message);
         $message = str_replace('`', '\\`', $message);
 
-        $text .= $message;
-
-        return $text;
+        return $message;
     }
 
     private function sendMessage(string $text)
