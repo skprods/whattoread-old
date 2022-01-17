@@ -21,6 +21,14 @@ class BookManager
         $this->statManager = app(StatManager::class);
     }
 
+    public function checkBookExists(string $title, string $author): bool
+    {
+        return Book::query()
+            ->where('title', '=', $title)
+            ->where('author', '=', $author)
+            ->exists();
+    }
+
     public function firstOrCreate(array $params): Book
     {
         $this->book = Book::query()

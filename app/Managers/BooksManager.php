@@ -7,17 +7,23 @@ use App\Entities\SamolitBook;
 use App\Models\Book;
 use App\Models\TelegramUser;
 use App\Parsers\SamolitParser;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
+use Telegram\Bot\Api;
 
 class BooksManager
 {
     private BookManager $bookManager;
     private GenreManager $genreManager;
+    private NotificationService $notificationService;
 
     public function __construct()
     {
         $this->bookManager = app(BookManager::class);
         $this->genreManager = app(GenreManager::class);
+
+        $token = config('telegram.bots.whattoread.token');
+        $this->notificationService = app(NotificationService::class, ['telegram' => new Api($token)]);
     }
 
     public function addFromSamolit(string $content): bool
@@ -68,15 +74,17 @@ class BooksManager
         try {
             DB::beginTransaction();
             $dialog = $chatInfo->dialog;
+            $newBook = false;
 
             if ($dialog->selectedBookId) {
                 $book = Book::find($dialog->selectedBookId);
                 $this->bookManager->book = $book;
             } else {
-                $book = $this->bookManager->firstOrCreate([
-                    'title' => $dialog->messages['title'][0],
-                    'author' => $dialog->messages['author'][0],
-                ]);
+                $title = $dialog->messages['title'][0];
+                $author = $dialog->messages['author'][0];
+                $newBook = !$this->bookManager->checkBookExists($title, $author);
+
+                $book = $this->bookManager->firstOrCreate(['title' => $title, 'author' => $author]);
             }
 
             /** @var TelegramUser $telegramUser */
@@ -93,6 +101,14 @@ class BooksManager
         } catch (\Exception $exception) {
             DB::rollBack();
             throw $exception;
+        }
+
+        if ($newBook) {
+            $user = "{$telegramUser->first_name} {$telegramUser->last_name} ({$telegramUser->username})";
+            $text = "Пользователь $user добавил новую книгу:\n";
+            $text .= "{$book->author} - {$book->title}";
+
+            $this->notificationService->notify($text);
         }
     }
 }

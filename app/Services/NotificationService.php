@@ -15,6 +15,14 @@ class NotificationService
         $this->telegram = $telegram;
     }
 
+    public function notify(string $message)
+    {
+        $text = "*УВЕДОМЛЕНИЕ*:\n\n";
+        $text .= $message;
+
+        $this->sendMessage($text);
+    }
+
     public function notifyForException(Throwable $e)
     {
         $text = $this->prepareResponse($e, $e->getMessage(), get_class($e));
