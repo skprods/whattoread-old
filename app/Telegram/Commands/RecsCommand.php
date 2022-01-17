@@ -4,6 +4,8 @@ namespace App\Telegram\Commands;
 
 use App\Models\Book;
 use App\Models\BookMatching;
+use App\Models\TelegramUserBook;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 use Telegram\Bot\Exceptions\TelegramResponseException;
@@ -24,10 +26,7 @@ class RecsCommand extends TelegramCommand
         $bookId = $this->arguments['id'];
         $book = Book::findOrFail($bookId);
 
-        $builder = BookMatching::query()
-            ->where('comparing_book_id', $bookId)
-            ->orWhere('matching_book_id', $bookId)
-            ->orderByDesc('total_score');
+        $builder = $this->getBuilder($bookId);
 
         $count = $builder->count();
         if (!$count) {
@@ -76,10 +75,7 @@ class RecsCommand extends TelegramCommand
             return;
         }
 
-        $builder = BookMatching::query()
-            ->where('comparing_book_id', $bookId)
-            ->orWhere('matching_book_id', $bookId)
-            ->orderByDesc('total_score');
+        $builder = $this->getBuilder($bookId);
 
         $count = $builder->count();
         $bookMatches = $builder->limit($this->perPage)->offset($this->perPage * ($pageNumber - 1))->get();
@@ -115,6 +111,21 @@ class RecsCommand extends TelegramCommand
             Log::error($exception->getMessage());
         }
     }
+
+    private function getBuilder(int $bookId): Builder
+    {
+        /** Исключаем книги, которые уже прочитал (добавил) пользователь, за исключением $bookId, по которой ищут */
+        $excludedBookIds = TelegramUserBook::getUserBookIds($this->telegramUser->id);
+        unset($excludedBookIds[$bookId]);
+
+        return BookMatching::query()
+            ->where('comparing_book_id', $bookId)
+            ->orWhere('matching_book_id', $bookId)
+            ->whereNotIn('comparing_book_id', $excludedBookIds)
+            ->whereNotIn('comparing_book_id', $excludedBookIds)
+            ->orderByDesc('total_score');
+    }
+
     private static function getBooksMessage(int $count): string
     {
         if ($count >= 11 && $count < 20) {
@@ -139,7 +150,9 @@ class RecsCommand extends TelegramCommand
             }
 
             $score = round($bookMatching->total_score / 200 * 100, 2);
-            $description = mb_strlen($book->description) > 300 ? mb_substr($book->description, 0, 300) . "..." : $book->description;
+            $description = mb_strlen($book->description) > 300
+                ? mb_substr($book->description, 0, 300) . "..."
+                : $book->description;
 
             $text .= "*{$book->title}*\n";
             $text .= "{$book->author}\n";
