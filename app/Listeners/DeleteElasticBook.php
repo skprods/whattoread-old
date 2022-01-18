@@ -23,6 +23,11 @@ class DeleteElasticBook implements ShouldQueue
         $index = $this->service->getLastIndexByAlias($this->model->alias);
         $id = $event->bookId;
 
-        $this->service->delete($index, $id);
+        $query = $this->model->getIdQuery($id);
+        $booksResult = $this->service->getById($query);
+
+        if (!empty($booksResult->hits)) {
+            $this->service->delete($index, $id);
+        }
     }
 }

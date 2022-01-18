@@ -117,6 +117,20 @@ class ElasticsearchService
         }
     }
 
+    public function getById(ElasticQuery $query): ?ElasticSearchResult
+    {
+        try {
+            $result = $this->client->search([
+                'index' => $query->key,
+                'body' => $query->body,
+            ]);
+
+            return new ElasticSearchResult($result);
+        } catch (Missing404Exception $exception) {
+            return null;
+        }
+    }
+
     public function getIndexSize(string $index): int
     {
         $stats = $this->client->indices()->stats();

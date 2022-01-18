@@ -52,4 +52,15 @@ class ElasticBooks extends ElasticModel
             json_decode($template, true)
         );
     }
+
+    public function getIdQuery(int $id): ElasticQuery
+    {
+        $template = $this->getSearchTemplate('booksId');
+        $template = str_replace("{{id}}", $id, $template);
+
+        return new ElasticQuery(
+            $this->alias,
+            json_decode($template, true)
+        );
+    }
 }
