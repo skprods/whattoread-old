@@ -6,9 +6,7 @@ use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -39,13 +37,13 @@ class Genre extends Model
         return $this->belongsToMany(Book::class);
     }
 
-    public function parent(): BelongsTo
+    public function parent(): BelongsToMany
     {
-        return $this->belongsTo(Genre::class, 'parent_id');
+        return $this->belongsToMany(Genre::class, 'subgenres', 'child_id', 'child_id');
     }
 
-    public function child(): HasMany
+    public function child(): BelongsToMany
     {
-        return $this->hasMany(Genre::class, 'parent_id');
+        return $this->belongsToMany(Genre::class, 'subgenres', 'parent_id', 'child_id');
     }
 }
