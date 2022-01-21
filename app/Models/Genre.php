@@ -39,7 +39,7 @@ class Genre extends Model
 
     public function parent(): BelongsToMany
     {
-        return $this->belongsToMany(Genre::class, 'subgenres', 'child_id', 'child_id');
+        return $this->belongsToMany(Genre::class, 'subgenres', 'child_id', 'parent_id');
     }
 
     public function child(): BelongsToMany
