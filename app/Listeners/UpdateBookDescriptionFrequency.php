@@ -4,9 +4,8 @@ namespace App\Listeners;
 
 use App\Events\BookDescriptionUpdated;
 use App\Managers\Dictionaries\FrequencyManager;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class UpdateBookDescriptionFrequency implements ShouldQueue
+class UpdateBookDescriptionFrequency extends Listener
 {
     private FrequencyManager $frequencyManager;
 

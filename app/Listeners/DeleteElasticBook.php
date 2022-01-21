@@ -5,9 +5,8 @@ namespace App\Listeners;
 use App\Events\BookDeleted;
 use App\Models\Elasticsearch\ElasticBooks;
 use App\Services\ElasticsearchService;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class DeleteElasticBook implements ShouldQueue
+class DeleteElasticBook extends Listener
 {
     private ElasticsearchService $service;
     private ElasticBooks $model;
@@ -20,6 +19,9 @@ class DeleteElasticBook implements ShouldQueue
 
     public function handle(BookDeleted $event)
     {
+        $this->identifier = $event->bookId;
+        $this->log("Начинается удаление книги #{$event->bookId} из поискового индекса.");
+
         $index = $this->service->getLastIndexByAlias($this->model->alias);
         $id = $event->bookId;
 
@@ -29,5 +31,6 @@ class DeleteElasticBook implements ShouldQueue
         if (!empty($booksResult->hits)) {
             $this->service->delete($index, $id);
         }
+        $this->log("Книга #{$event->bookId} успешно удалена из поискового индекса.");
     }
 }

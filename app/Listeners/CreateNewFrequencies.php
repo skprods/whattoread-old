@@ -4,9 +4,8 @@ namespace App\Listeners;
 
 use App\Events\NewFrequencies;
 use App\Managers\Dictionaries\FrequencyManager;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class CreateNewFrequencies implements ShouldQueue
+class CreateNewFrequencies extends Listener
 {
     private FrequencyManager $manager;
 

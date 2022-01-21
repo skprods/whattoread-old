@@ -4,9 +4,8 @@ namespace App\Listeners;
 
 use App\Events\BookDescriptionUpdated;
 use App\Services\BookMatchingService;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
-class UpdateBookMatches implements ShouldQueue
+class UpdateBookMatches extends Listener
 {
     private BookMatchingService $service;
 
