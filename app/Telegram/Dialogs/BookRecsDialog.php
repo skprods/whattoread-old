@@ -25,7 +25,7 @@ class BookRecsDialog extends Dialog
         $result = $searchService->search($query);
 
         if ($result && !empty($result->hits)) {
-            $text = "Вот что мы нашли:\n\n";
+            $text = "Вот что мы нашли на наших книжных полках:\n\n";
             foreach ($result->hits as $key => $item) {
                 $sourceId = $item->_source['id'];
                 $sourceAuthor = $item->_source['author'];
@@ -37,9 +37,11 @@ class BookRecsDialog extends Dialog
                 $this->chatInfo->dialog->search[$wrKey] = $sourceId;
             }
 
-            $text .= "Если искомой книги нет в списке, не расстраивайтесь. Вы можете добавить её с помощью команды /addbook и мы подберём для неё рекомендации.";
+            $text .= "Если искомой книги нет в списке, не расстраивайтесь. ";
+            $text .= "Вы можете добавить её с помощью команды /addbook и мы подберём для неё рекомендации.";
         } else {
-            $text = "К сожалению, такой книги пока нет в нашей библиотеке. Мы автоматически добавим её и скоро она появится в рекомендациях.";
+            $text = "К сожалению, такой книги пока нет в нашей библиотеке. ";
+            $text .= "Мы автоматически добавим её и скоро она появится в рекомендациях.";
         }
 
         $this->completeStep();
