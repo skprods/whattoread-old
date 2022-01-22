@@ -178,4 +178,11 @@ class RecsCommand extends TelegramCommand
 
         return $keyboard;
     }
+
+    public static function getCommandNameForBook(int $bookId): string
+    {
+        $name = (new self)->name;
+
+        return str_replace("{id}", $bookId, $name);
+    }
 }

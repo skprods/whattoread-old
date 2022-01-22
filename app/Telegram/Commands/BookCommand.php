@@ -29,17 +29,21 @@ class BookCommand extends TelegramCommand
         }
 
         $text = "*{$book->title}*\n";
-        $text .= "{$book->author}\n\n";
+        $text .= "*{$book->author}*\n\n";
 
         $genres = $book->genres->map(function (Genre $genre) {
             return "#" . str_replace(' ', '', ucwords_unicode($genre->name));
         })->toArray();
 
         if (count($genres)) {
-            $text .= implode(' ', $genres) . "\n\n";
+            $text .= "Жанры: ";
+            $text .= implode(' ', $genres) . "\n";
         }
 
-        $text .= $book->description !== '' ? $book->description : "Описания пока нет";
+        $text .= "Рекомендации: /" . RecsCommand::getCommandNameForBook($bookId);
+        $text .= "\n\n";
+
+        $text .= $book->description !== '' ? "*Описание*: \n" . $book->description : "Описания пока нет";
 
         $this->replyWithMessage([
             'text' => $text,
