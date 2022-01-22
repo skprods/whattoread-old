@@ -2,13 +2,13 @@
 
 namespace App\Telegram\Dialogs;
 
-use App\Models\Elasticsearch\ElasticBooks;
-use App\Services\ElasticsearchService;
+use App\Services\BooksService;
 
 class BookRecsDialog extends Dialog
 {
     private string $name = 'bookrecs';
-    private int $perPage = 5;
+
+    private BooksService $booksService;
 
     protected array $steps = [
         'name', // название и автор книги
@@ -16,17 +16,12 @@ class BookRecsDialog extends Dialog
 
     public function nameStep(string $message)
     {
-        /** @var ElasticsearchService $searchService */
-        $searchService = app(ElasticsearchService::class);
-        /** @var ElasticBooks $searchModel */
-        $searchModel = app(ElasticBooks::class);
+        $this->booksService = app(BooksService::class);
+        $books = $this->booksService->findBookInElastic($message, 15);
 
-        $query = $searchModel->getSearchQuery($message);
-        $result = $searchService->search($query);
-
-        if ($result && !empty($result->hits)) {
+        if (!empty($books)) {
             $text = "Вот что мы нашли на наших книжных полках:\n\n";
-            foreach ($result->hits as $key => $item) {
+            foreach ($books as $key => $item) {
                 $sourceId = $item->_source['id'];
                 $sourceAuthor = $item->_source['author'];
                 $sourceTitle = $item->_source['title'];

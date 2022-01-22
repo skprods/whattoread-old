@@ -217,4 +217,18 @@ abstract class TelegramCommand extends Command
             ],
         ], JSON_UNESCAPED_UNICODE));
     }
+
+    protected function getKeyboard(int $count, int $perPage, int $currentPage = 1): array
+    {
+        $keyboard = [];
+        $pages = ceil($count / $perPage);
+
+        for ($page = 1; $page <= $pages; $page++) {
+            $pageText = $page === $currentPage ? " • $page • " : $page;
+
+            $keyboard[] = ['text' => $pageText, 'callback_data' => "{$this->name}_{$page}"];
+        }
+
+        return $keyboard;
+    }
 }

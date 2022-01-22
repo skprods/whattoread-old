@@ -43,7 +43,7 @@ class RecsCommand extends TelegramCommand
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $bookMatches, $bookId);
 
-        $keyboard = $this->getKeyboard($count);
+        $keyboard = $this->getKeyboard($count, $this->perPage);
 
         if (count($keyboard) < 2) {
             $this->replyWithMessage([
@@ -84,7 +84,7 @@ class RecsCommand extends TelegramCommand
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $bookMatches, $bookId);
 
-        $keyboard = $this->getKeyboard($count, $pageNumber);
+        $keyboard = $this->getKeyboard($count, $this->perPage, $pageNumber);
 
         try {
             if (count($keyboard) < 2) {
@@ -157,26 +157,12 @@ class RecsCommand extends TelegramCommand
             $text .= "*{$book->title}*\n";
             $text .= "{$book->author}\n";
             $text .= "Совпадение: *{$score}%*\n";
-            $text .= "/book{$book->id}\n\n";
+            $text .= "Подробнее: /book{$book->id}\n\n";
 
-            $text .= "$description\n\n";
+            $text .= "$description\n\n\n";
         });
 
         return $text;
-    }
-
-    private function getKeyboard(int $count, int $currentPage = 1): array
-    {
-        $keyboard = [];
-        $pages = ceil($count / $this->perPage);
-
-        for ($page = 1; $page <= $pages; $page++) {
-            $pageText = $page === $currentPage ? " • $page • " : $page;
-
-            $keyboard[] = ['text' => $pageText, 'callback_data' => "{$this->name}_{$page}"];
-        }
-
-        return $keyboard;
     }
 
     public static function getCommandNameForBook(int $bookId): string

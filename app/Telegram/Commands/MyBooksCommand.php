@@ -27,7 +27,7 @@ class MyBooksCommand extends TelegramCommand
         $text = "Вы добавили {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $books);
 
-        $keyboard = $this->getKeyboard($count);
+        $keyboard = $this->getKeyboard($count, $this->perPage);
 
         if (count($keyboard) < 2) {
             $this->replyWithMessage([
@@ -64,7 +64,7 @@ class MyBooksCommand extends TelegramCommand
         $text = "Вы добавили {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $books);
 
-        $keyboard = $this->getKeyboard($count, $pageNumber);
+        $keyboard = $this->getKeyboard($count, $this->perPage, $pageNumber);
 
         try {
             if (count($keyboard) < 2) {
@@ -118,19 +118,5 @@ class MyBooksCommand extends TelegramCommand
         });
 
         return $text;
-    }
-
-    private function getKeyboard(int $count, int $currentPage = 1): array
-    {
-        $keyboard = [];
-        $pages = ceil($count / $this->perPage);
-
-        for ($page = 1; $page <= $pages; $page++) {
-            $pageText = $page === $currentPage ? " • $page • " : $page;
-
-            $keyboard[] = ['text' => $pageText, 'callback_data' => "{$this->name}_{$page}"];
-        }
-
-        return $keyboard;
     }
 }
