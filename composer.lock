@@ -3810,16 +3810,16 @@
         },
         {
             "name": "skprods/laravel-telegram-sdk",
-            "version": "1.0.11",
+            "version": "1.0.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skprods/laravel-telegram-sdk.git",
-                "reference": "339ebd48299ff301914d72777a19ec991c683ea3"
+                "reference": "7f5e89db74f64eb7374abeaea709b0425ff99ba5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skprods/laravel-telegram-sdk/zipball/339ebd48299ff301914d72777a19ec991c683ea3",
-                "reference": "339ebd48299ff301914d72777a19ec991c683ea3",
+                "url": "https://api.github.com/repos/skprods/laravel-telegram-sdk/zipball/7f5e89db74f64eb7374abeaea709b0425ff99ba5",
+                "reference": "7f5e89db74f64eb7374abeaea709b0425ff99ba5",
                 "shasum": ""
             },
             "require": {
@@ -3860,9 +3860,9 @@
             ],
             "support": {
                 "issues": "https://github.com/skprods/laravel-telegram-sdk/issues",
-                "source": "https://github.com/skprods/laravel-telegram-sdk/tree/1.0.11"
+                "source": "https://github.com/skprods/laravel-telegram-sdk/tree/1.0.12"
             },
-            "time": "2022-01-31T20:56:23+00:00"
+            "time": "2022-01-31T21:44:28+00:00"
         },
         {
             "name": "spatie/laravel-permission",
@@ -9496,5 +9496,5 @@
         "ext-redis": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.1.0"
+    "plugin-api-version": "2.2.0"
 }
