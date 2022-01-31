@@ -3,31 +3,31 @@
 namespace App\Telegram\Commands;
 
 use App\Models\TelegramUserBook;
+use App\Telegram\TelegramCommand;
+use App\Traits\HasDeclination;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Log;
-use Telegram\Bot\Exceptions\TelegramResponseException;
-use Telegram\Bot\Objects\CallbackQuery;
 
 class MyBooksCommand extends TelegramCommand
 {
-    protected $name = 'mybooks';
+    use HasDeclination;
 
-    protected $description = 'Добавленные книги';
+    public string $name = 'mybooks';
+    public string $description = 'Добавленные книги';
 
     private int $perPage = 5;
 
-    public function handleCommand()
+    protected function handle()
     {
         $builder = $this->telegramUser->books()->orderByDesc('id');
 
         $count = $builder->count();
         $books = $builder->limit($this->perPage)->get();
 
-        $booksMessage = self::getBooksMessage($count);
+        $booksMessage = $this->getBooksDeclination($count);
         $text = "Вы добавили {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $books);
 
-        $keyboard = $this->getKeyboard($count, $this->perPage);
+        $keyboard = $this->getKeyboard($this->update->updateId, $count, $this->perPage);
 
         if (count($keyboard) < 2) {
             $this->replyWithMessage([
@@ -47,9 +47,10 @@ class MyBooksCommand extends TelegramCommand
         }
     }
 
-    public function handleCallback(CallbackQuery $callbackQuery)
+    protected function handleCallback()
     {
-        $pageNumber = (int) $this->getDataFromCallbackQuery($callbackQuery);
+        $callbackQuery = $this->update->callbackQuery;
+        $pageNumber = (int) $this->chatInfo->currentCommand->callbackData;
 
         if ($pageNumber <= 0) {
             return;
@@ -60,50 +61,32 @@ class MyBooksCommand extends TelegramCommand
         $count = $builder->count();
         $books = $builder->limit($this->perPage)->offset($this->perPage * ($pageNumber - 1))->get();
 
-        $booksMessage = self::getBooksMessage($count);
+        $booksMessage = $this->getBooksDeclination($count);
         $text = "Вы добавили {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $books);
 
-        $keyboard = $this->getKeyboard($count, $this->perPage, $pageNumber);
+        $keyboard = $this->getKeyboard($this->update->updateId, $count, $this->perPage, $pageNumber);
 
-        try {
-            if (count($keyboard) < 2) {
-                $this->editMessageText([
-                    'chat_id' => $this->getChat()->id,
-                    'message_id' => $callbackQuery->message->messageId,
-                    'text' => $text,
-                    'parse_mode' => 'markdown',
-                ]);
-            } else {
-                $this->editMessageText([
-                    'chat_id' => $this->getChat()->id,
-                    'message_id' => $callbackQuery->message->messageId,
-                    'text' => $text,
-                    'parse_mode' => 'markdown',
-                    'reply_markup' => json_encode([
-                        'inline_keyboard' => [
-                            $keyboard,
-                        ]
-                    ])
-                ]);
-            }
-        } catch (TelegramResponseException $exception) {
-            Log::error($exception->getMessage());
+        if (count($keyboard) < 2) {
+            $this->editMessageText([
+                'chat_id' => $this->getChat()->id,
+                'message_id' => $callbackQuery->message->messageId,
+                'text' => $text,
+                'parse_mode' => 'markdown',
+            ]);
+        } else {
+            $this->editMessageText([
+                'chat_id' => $this->getChat()->id,
+                'message_id' => $callbackQuery->message->messageId,
+                'text' => $text,
+                'parse_mode' => 'markdown',
+                'reply_markup' => json_encode([
+                    'inline_keyboard' => [
+                        $keyboard,
+                    ]
+                ])
+            ]);
         }
-    }
-
-    private static function getBooksMessage(int $count): string
-    {
-        if ($count >= 11 && $count < 20) {
-            return "$count книг";
-        }
-
-        return match ($count % 10) {
-            1 => "$count книгу",
-            2, 3, 4 => "$count книги",
-            5, 6, 7, 8, 9, 0 => "$count книг",
-            default => "",
-        };
     }
 
     private function getMessage(string $text, Collection $books): string

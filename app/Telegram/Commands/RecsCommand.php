@@ -5,23 +5,22 @@ namespace App\Telegram\Commands;
 use App\Models\Book;
 use App\Models\BookMatching;
 use App\Models\TelegramUserBook;
+use App\Telegram\TelegramCommand;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
-use Telegram\Bot\Exceptions\TelegramResponseException;
-use Telegram\Bot\Objects\CallbackQuery;
 
 class RecsCommand extends TelegramCommand
 {
-    public bool $hasParam = true;
+    public bool $show = false;
 
-    protected $name = 'recs{id}';
-
-    protected $description = 'Рекомендации для книги';
+    public string $name = 'recs';
+    public string $pattern = "recs{id}";
+    public string $description = 'Рекомендации для книги';
 
     private int $perPage = 5;
 
-    public function handleCommand()
+    protected function handle()
     {
         $bookId = $this->arguments['id'];
         $book = Book::findOrFail($bookId);
@@ -43,7 +42,7 @@ class RecsCommand extends TelegramCommand
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $bookMatches, $bookId);
 
-        $keyboard = $this->getKeyboard($count, $this->perPage);
+        $keyboard = $this->getKeyboard($this->update->updateId, $count, $this->perPage);
 
         if (count($keyboard) < 2) {
             $this->replyWithMessage([
@@ -63,10 +62,10 @@ class RecsCommand extends TelegramCommand
         }
     }
 
-    public function handleCallback(CallbackQuery $callbackQuery)
+    protected function handleCallback()
     {
-        $pageNumber = (int) $this->getDataFromCallbackQuery($callbackQuery);
-        $bookId = $this->chatInfo->lastCommand->param;
+        $pageNumber = (int) $this->chatInfo->currentCommand->callbackData;
+        $bookId = $this->chatInfo->previousCommand->arguments['id'];
 
         /** @var Book $book */
         $book = Book::findOrFail($bookId);
@@ -84,31 +83,27 @@ class RecsCommand extends TelegramCommand
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $bookMatches, $bookId);
 
-        $keyboard = $this->getKeyboard($count, $this->perPage, $pageNumber);
+        $keyboard = $this->getKeyboard($this->update->updateId, $count, $this->perPage, $pageNumber);
 
-        try {
-            if (count($keyboard) < 2) {
-                $this->editMessageText([
-                    'chat_id' => $this->chatInfo->id,
-                    'message_id' => $callbackQuery->message->messageId,
-                    'text' => $text,
-                    'parse_mode' => 'markdown',
-                ]);
-            } else {
-                $this->editMessageText([
-                    'chat_id' => $this->chatInfo->id,
-                    'message_id' => $callbackQuery->message->messageId,
-                    'text' => $text,
-                    'parse_mode' => 'markdown',
-                    'reply_markup' => json_encode([
-                        'inline_keyboard' => [
-                            $keyboard,
-                        ]
-                    ])
-                ]);
-            }
-        } catch (TelegramResponseException $exception) {
-            Log::error($exception->getMessage());
+        if (count($keyboard) < 2) {
+            $this->editMessageText([
+                'chat_id' => $this->chatInfo->id,
+                'message_id' => $this->update->callbackQuery->message->messageId,
+                'text' => $text,
+                'parse_mode' => 'markdown',
+            ]);
+        } else {
+            $this->editMessageText([
+                'chat_id' => $this->chatInfo->id,
+                'message_id' => $this->update->callbackQuery->message->messageId,
+                'text' => $text,
+                'parse_mode' => 'markdown',
+                'reply_markup' => json_encode([
+                    'inline_keyboard' => [
+                        $keyboard,
+                    ]
+                ])
+            ]);
         }
     }
 
@@ -167,8 +162,8 @@ class RecsCommand extends TelegramCommand
 
     public static function getCommandNameForBook(int $bookId): string
     {
-        $name = (new self)->name;
+        $pattern = (new self)->pattern;
 
-        return str_replace("{id}", $bookId, $name);
+        return str_replace("{id}", $bookId, $pattern);
     }
 }

@@ -3,15 +3,14 @@
 namespace App\Services;
 
 use App\Exceptions\TelegramException;
-use Illuminate\Support\Facades\Log;
-use Telegram\Bot\Api;
+use SKprods\Telegram\Core\Telegram;
 use Throwable;
 
 class NotificationService
 {
-    private Api $telegram;
+    private Telegram $telegram;
 
-    public function __construct(Api $telegram)
+    public function __construct(Telegram $telegram)
     {
         $this->telegram = $telegram;
     }

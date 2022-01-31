@@ -5,10 +5,15 @@ namespace App\Telegram\Dialogs;
 use App\Managers\BooksManager;
 use App\Models\Elasticsearch\ElasticBooks;
 use App\Services\ElasticsearchService;
-use Illuminate\Support\Facades\DB;
+use App\Telegram\TelegramDialog;
+use Illuminate\Support\Facades\Log;
 
-class AddBookDialog extends Dialog
+class AddBookDialog extends TelegramDialog
 {
+    public string $name = 'addbook';
+
+    public string $description = 'Добавить прочитанную книгу';
+
     protected array $steps = [
         'title',
         'author',
@@ -17,24 +22,29 @@ class AddBookDialog extends Dialog
         'associations',
     ];
 
-    public function titleStep(string $message)
+    public function handle()
     {
-        $this->chatInfo->dialog->messages[$this->currentStep][] = $message;
-        $this->completeStep();
+        $this->replyWithMessage([
+            'text' => "Давайте добавим новую книгу, которую вы прочитали. Для начала, напишите её название"
+        ]);
+    }
+
+    public function titleStep()
+    {
+        $message = $this->update->message->text;
+        $this->chatInfo->dialog->data['title'] = $message;
 
         $this->replyWithMessage(['text' => 'Кто автор этой книги?']);
     }
 
-    public function authorStep(string $message)
+    public function authorStep()
     {
-        $this->chatInfo->dialog->messages[$this->currentStep][] = $message;
-        $this->completeStep();
+        $author = $this->update->message->text;
+        Log::info(json_encode($author, JSON_UNESCAPED_UNICODE));
+        $this->chatInfo->dialog->data['author'] = $author;
 
         /** Название книги мы получили на предыдущем шаге */
-        $title = $this->chatInfo->dialog->messages['title'][0];
-
-        /** Автора нам прислали только что */
-        $author = $message;
+        $title = $this->chatInfo->dialog->data['title'];
 
         /** @var ElasticsearchService $searchService */
         $searchService = app(ElasticsearchService::class);
@@ -53,7 +63,7 @@ class AddBookDialog extends Dialog
 
                 $wrKey = $key + 1;
                 $text .= "#$wrKey: {$sourceAuthor} - {$sourceTitle}\n";
-                $this->chatInfo->dialog->search[$wrKey] = $sourceId;
+                $this->chatInfo->dialog->data['search'][$wrKey] = $sourceId;
             }
 
             $text .= "\n";
@@ -65,19 +75,22 @@ class AddBookDialog extends Dialog
         $this->replyWithMessage(['text' => $text]);
     }
 
-    public function confirmStep(string $message)
+    public function confirmStep()
     {
+        $message = $this->update->message->text;
         if ((int) $message !== 0) {
-            $bookId = $this->chatInfo->dialog->search[$message];
-            $this->chatInfo->dialog->selectedBookId = $bookId;
+            $bookId = $this->chatInfo->dialog->data['search'][$message];
+            $this->chatInfo->dialog->data['selectedBookId'] = $bookId;
         }
 
-        $this->completeStep();
-        $this->replyWithMessage(['text' => 'Хорошо. Оцените эту книгу по шкале от 1 (не понравилась) до 5 (понравилась)']);
+        $this->replyWithMessage([
+            'text' => 'Хорошо. Оцените эту книгу по шкале от 1 (не понравилась) до 5 (понравилась)'
+        ]);
     }
 
-    public function ratingStep(string $message)
+    public function ratingStep()
     {
+        $message = $this->update->message->text;
         $answer = (int) $message;
 
         if ($answer < 1) {
@@ -86,8 +99,7 @@ class AddBookDialog extends Dialog
             $answer = 5;
         }
 
-        $this->chatInfo->dialog->bookRating = $answer;
-        $this->completeStep();
+        $this->chatInfo->dialog->data['bookRating'] = $answer;
 
         $text = "[необязательно]\n";
         $text .= "С чем у вас ассоциируется эта книга?\n\n";
@@ -97,28 +109,24 @@ class AddBookDialog extends Dialog
         $this->replyWithMessage(['text' => $text]);
     }
 
-    public function associationsStep(string $message)
+    public function associationsStep()
     {
-        if (
-            mb_strtolower($message) === "конец"
-            || mb_strtolower($message) === "пропустить"
-        ) {
-            $this->completeStep();
+        $this->stepCompleted = false;
+        $message = $this->update->message->text;
 
+        if (mb_strtolower($message) === "конец" || mb_strtolower($message) === "пропустить") {
             $this->replyWithMessage(['text' => 'Добавляем книгу...']);
-            try {
-                app(BooksManager::class)->addFromTelegram($this->chatInfo);
-                $this->replyWithMessage(['text' => 'Книга добавлена. Теперь мы сделаем рекомендации ещё более точными!']);
-                $this->endOfStep = true;
-            } catch (\Exception $exception) {
-                $this->resetChatInfo();
-                throw $exception;
-            }
+            app(BooksManager::class)->addFromTelegram($this->chatInfo->dialog->data, $this->chatInfo->id);
+
+            $this->replyWithMessage([
+                'text' => 'Книга добавлена. Теперь мы сделаем рекомендации ещё более точными!'
+            ]);
+            $this->stepCompleted = true;
         } else {
-            $messages = explode(',', $this->message->text);
+            $messages = explode(',', $message);
 
             foreach ($messages as $message) {
-                $this->chatInfo->dialog->messages[$this->currentStep][] = trim($message);
+                $this->chatInfo->dialog->data['associations'][] = trim($message);
             }
         }
     }

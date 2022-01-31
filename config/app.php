@@ -168,6 +168,7 @@ return [
          * Package Service Providers...
          */
         SKprods\LaravelHelpers\LaravelHelpersServiceProvider::class,
+        SKprods\Telegram\TelegramServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Yajra\DataTables\DataTablesServiceProvider::class,
         Spatie\Permission\PermissionServiceProvider::class,

@@ -2,14 +2,13 @@
 
 namespace App\Managers;
 
-use App\Entities\ChatInfo;
 use App\Entities\SamolitBook;
 use App\Models\Book;
 use App\Models\TelegramUser;
 use App\Parsers\SamolitParser;
 use App\Services\NotificationService;
 use Illuminate\Support\Facades\DB;
-use Telegram\Bot\Api;
+use SKprods\Telegram\Core\Telegram;
 
 class BooksManager
 {
@@ -22,8 +21,7 @@ class BooksManager
         $this->bookManager = app(BookManager::class);
         $this->genreManager = app(GenreManager::class);
 
-        $token = config('telegram.bots.whattoread.token');
-        $this->notificationService = app(NotificationService::class, ['telegram' => new Api($token)]);
+        $this->notificationService = app(NotificationService::class, ['telegram' => new Telegram()]);
     }
 
     public function addFromSamolit(string $content): bool
@@ -69,32 +67,31 @@ class BooksManager
         return $book;
     }
 
-    public function addFromTelegram(ChatInfo $chatInfo)
+    public function addFromTelegram(array $chatData, int $telegramId)
     {
         try {
             DB::beginTransaction();
-            $dialog = $chatInfo->dialog;
             $newBook = false;
 
-            if ($dialog->selectedBookId) {
-                $book = Book::find($dialog->selectedBookId);
+            if (isset($chatData['selectedBookId'])) {
+                $book = Book::find($chatData['selectedBookId']);
                 $this->bookManager->book = $book;
             } else {
-                $title = $dialog->messages['title'][0];
-                $author = $dialog->messages['author'][0];
+                $title = $chatData['title'];
+                $author = $chatData['author'];
                 $newBook = !$this->bookManager->checkBookExists($title, $author);
 
                 $book = $this->bookManager->firstOrCreate(['title' => $title, 'author' => $author]);
             }
 
             /** @var TelegramUser $telegramUser */
-            $telegramUser = TelegramUser::findByTelegramId($chatInfo->id);
+            $telegramUser = TelegramUser::findByTelegramId($telegramId);
             app(TelegramUserBookManager::class)
-                ->createOrUpdate(['rating' => $dialog->bookRating], $telegramUser, $book);
+                ->createOrUpdate(['rating' => $chatData['bookRating']], $telegramUser, $book);
 
-            if (isset($dialog->messages['associations'])) {
+            if (isset($chatData['associations'])) {
                 app(AssociationManager::class)
-                    ->addForTelegramUser($dialog->messages['associations'], $book, $telegramUser);
+                    ->addForTelegramUser($chatData['associations'], $book, $telegramUser);
             }
 
             DB::commit();
