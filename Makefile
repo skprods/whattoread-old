@@ -48,12 +48,12 @@ app-supervisor-status: # статус supervisor
 
 ### Копирование зависимостей локально из контейнера
 rm-vendor:
-	rm -rf ./vendor/*
+	rm -rf ./vendor
 load-vendor:
-	rm -rf ./vendor/*
+	rm -rf ./vendor
 	docker cp whattoread-php-fpm:/var/www/vendor/. ./vendor
 load-vendor-dev:
-	rm -rf ./vendor/*
+	rm -rf ./vendor
 	docker cp whattoread-php-fpm-dev:/var/www/vendor/. ./vendor
 
 redis-config:

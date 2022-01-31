@@ -10,10 +10,10 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
+use SKprods\Telegram\Core\Telegram;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Spatie\Permission\Exceptions\UnauthorizedException;
-use Telegram\Bot\Api;
-use Telegram\Bot\Exceptions\TelegramSDKException;
+use SKprods\Telegram\Exceptions\TelegramException as SkprodsTelegramException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -34,7 +34,8 @@ class Handler extends ExceptionHandler
         NotFoundHttpException::class,
         ValidationException::class,
         UnauthorizedException::class,
-        TelegramSDKException::class,
+        \SKprods\Telegram\Exceptions\TelegramException::class,
+        TelegramException::class,
     ];
 
     /**
@@ -52,9 +53,10 @@ class Handler extends ExceptionHandler
                     'file' => $e->getFile(),
                     'line' => $e->getLine(),
                 ]);
+
                 Log::error(json_encode($e->getMessage(), JSON_UNESCAPED_UNICODE));
             } catch (Exception $exception) {
-                Log::error(json_encode($exception, JSON_UNESCAPED_UNICODE));
+                Log::error(json_encode($exception->getMessage(), JSON_UNESCAPED_UNICODE));
             }
 
             $notify = true;
@@ -99,8 +101,8 @@ class Handler extends ExceptionHandler
         } elseif ($e instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
             $e = new ForbiddenException();
             return $e->render();
-        } elseif ($e instanceof TelegramSDKException) {
-            return 'ok';
+        } elseif ($e instanceof TelegramException || $e instanceof SkprodsTelegramException) {
+            return response('ok');
         } else {
             $errorDetail = [
                 'code' => $e->getCode(),
@@ -158,10 +160,7 @@ class Handler extends ExceptionHandler
 
     private function sendNotificationToTelegram(Throwable $e)
     {
-        $token = config('telegram.bots.whattoread.token');
-
-        /** @var NotificationService $notificationService */
-        $notificationService = app(NotificationService::class, ['telegram' => new Api($token)]);
+        $notificationService = app(NotificationService::class, ['telegram' => new Telegram()]);
         $notificationService->notifyForException($e);
     }
 }

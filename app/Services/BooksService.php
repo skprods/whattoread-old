@@ -9,18 +9,20 @@ class BooksService
     private ElasticsearchService $elasticsearchService;
     private ElasticBooks $elasticBooks;
 
-    public function findBookInElastic(string $query, int $limit = null, int $offset = 0): array
+    public function __construct()
     {
         $this->elasticsearchService = app(ElasticsearchService::class);
         $this->elasticBooks = app(ElasticBooks::class);
+    }
 
-        $modelQuery = $this->elasticBooks->getSearchQuery($query);
+    public function findBookInElastic(string $query, int $limit = null, int $offset = 0): array
+    {
+        $modelQuery = $this->elasticBooks->getSearchQuery($query, $limit, $offset);
         $result = $this->elasticsearchService->search($modelQuery);
 
-        if ($result && !empty($result->hits)) {
-            return $limit ? array_slice($result->hits, $offset, $limit) : $result->hits;
-        } else {
-            return [];
-        }
+        return [
+            'total' => $result->totalHits,
+            'items' => $result->hits,
+        ];
     }
 }

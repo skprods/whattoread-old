@@ -17,6 +17,7 @@
         "laravel/framework": "^8.54",
         "laravel/tinker": "^2.5",
         "skprods/laravel-helpers": "^1.0",
+        "skprods/laravel-telegram-sdk": "^1.0",
         "spatie/laravel-permission": "^5.4",
         "squizlabs/php_codesniffer": "^3.6",
         "tymon/jwt-auth": "^1.0",
@@ -75,7 +76,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/package-versions-deprecated": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

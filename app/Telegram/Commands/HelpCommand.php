@@ -2,46 +2,22 @@
 
 namespace App\Telegram\Commands;
 
-use Telegram\Bot\Commands\Command;
+use App\Telegram\TelegramCommand;
+use App\Traits\HasCommandsList;
 
 class HelpCommand extends TelegramCommand
 {
-    protected $name = 'help';
+    use HasCommandsList;
 
-    protected $aliases = ['list'];
+    public string $name = 'help';
+    public array $aliases = ['list'];
+    public string $description = 'Список команд';
 
-    protected $description = 'Список команд';
-
-    public function handleCommand()
+    protected function handle()
     {
-        $commands = $this->telegram->getCommands();
-
-        $text = "Вот доступные команды: \n";
-        $text .= $this->getStartCommand($commands);
-        $text .= $this->getHelpCommand($commands);
-        $text .= "\n";
-
-        foreach ($commands as $name => $handler) {
-            /* @var TelegramCommand $handler */
-            if (!$handler->hasParam) {
-                $text .= sprintf('/%s - %s'.PHP_EOL, $name, $handler->getDescription());
-            }
-        }
+        $commands = array_merge($this->telegram->commands, $this->telegram->dialogs);
+        $text = $this->getCommandsMessage($commands);
 
         $this->replyWithMessage(['text' => $text]);
-    }
-
-    private function getStartCommand(&$commands): string
-    {
-        $start = $commands['start'];
-        unset($commands['start']);
-        return sprintf('/%s - %s' . PHP_EOL, 'start', $start->getDescription());
-    }
-
-    private function getHelpCommand(&$commands): string
-    {
-        $start = $commands['help'];
-        unset($commands['help']);
-        return sprintf('/%s - %s' . PHP_EOL, 'help', $start->getDescription());
     }
 }

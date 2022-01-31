@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use Exception;
-use Telegram\Bot\Objects\Update;
+use SKprods\Telegram\Objects\Update;
 
 class TelegramException extends Exception
 {

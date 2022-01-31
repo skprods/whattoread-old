@@ -2,41 +2,65 @@
 
 return [
     'bots' => [
-
         'whattoread' => [
-            'id'                  => (int) env('TELEGRAM_WHATTOREAD_BOT_ID'),
-            'username'            => 'WhatToReadBookBot',
-            'token'               => env('TELEGRAM_WHATTOREAD_BOT_TOKEN', 'YOUR-BOT-TOKEN'),
-            'certificate_path'    => env('TELEGRAM_WHATTOREAD_CERTIFICATE_PATH', 'YOUR-CERTIFICATE-PATH'),
-            'webhook_url'         => env('TELEGRAM_WHATTOREAD_WEBHOOK_URL', 'YOUR-BOT-WEBHOOK-URL'),
-            'commands'            => [
+            'token'         => env('TELEGRAM_WHATTOREAD_BOT_TOKEN'),
+            'webhook_url'   => env('TELEGRAM_WHATTOREAD_WEBHOOK_URL'),
+            'allow_dialog'  => true,
+            'commands'      => [
                 \App\Telegram\Commands\StartCommand::class,
                 \App\Telegram\Commands\HelpCommand::class,
                 \App\Telegram\Commands\AboutCommand::class,
                 \App\Telegram\Commands\MyBooksCommand::class,
-                \App\Telegram\Commands\AddBookCommand::class,
                 \App\Telegram\Commands\BookCommand::class,
-                \App\Telegram\Commands\BookRecsCommand::class,
                 \App\Telegram\Commands\RecsCommand::class,
             ],
+            'dialogs'       => [
+                \App\Telegram\Dialogs\AddBookDialog::class,
+                \App\Telegram\Dialogs\BookRecsDialog::class,
+            ],
+            'allowed_chats' => [
+                env('ERROR_CHAT_ID'),
+            ],
+            'allowed_users' => [],
+            'freeHandler' => \App\Telegram\CommonHandler::class,
         ],
-
     ],
 
-    'dialogs' => [
-        'addbook' => \App\Telegram\Dialogs\AddBookDialog::class,
-        'bookrecs' => \App\Telegram\Dialogs\BookRecsDialog::class,
-    ],
-
+    /** Default bot */
     'default' => 'whattoread',
 
-    'async_requests' => env('TELEGRAM_ASYNC_REQUESTS', false),
+    /**
+     * Http-клиент для отправки запросов в Telegram.
+     *
+     * Если встроенного функционала недостаточного, можно указать
+     * кастомный обработчик, который должен реализовывать интерфейс
+     * @see SKprods\Telegram\Clients\SkprodsHttpClient
+     */
+    'httpClient' => SKprods\Telegram\Clients\SkprodsHttpClient::class,
 
-    'http_client_handler' => null,
-
-    'resolve_command_dependencies' => true,
-
-    'commands' => [
-        Telegram\Bot\Commands\HelpCommand::class,
+    /**
+     * Конфигурация ChatInfo
+     *
+     * С помощью этой конфигурации можно настроить, где будет храниться
+     * информация о чатах, такая как текущая и предыдущая команда, а также
+     * информация о диалоге.
+     *
+     * По умолчанию поддерживаются три типа хранения: file, redis, custom.
+     *
+     * - file - хранение данных о чате в JSON-файле. Сам файл будет находиться
+     * в storage/app/chatInfo.json;
+     *
+     * - redis - хранение данных о чате в Redis. В таком случае нужно обязательно
+     * указать ключ connection, в котором указать название соединение. Найти его
+     * можно в config/database.php в секции 'redis';
+     *
+     * - custom - кастомный обработчик хранения. Определите класс-обработчик в
+     * ключе 'handler'. Он должен реализовывать этот интерфейс:
+     * @see SKprods\Telegram\Writers\Writer
+     */
+    'chatInfo' => [
+        'driver' => 'redis',
+        'connection' => 'default',
+        'handler' => null,
     ],
 ];

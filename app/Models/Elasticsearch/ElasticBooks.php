@@ -28,11 +28,12 @@ class ElasticBooks extends ElasticModel
         );
     }
 
-    public function getSearchQuery(string $query, int $size = 10): ElasticQuery
+    public function getSearchQuery(string $query, int $size = 10, int $from = 0): ElasticQuery
     {
         $template = $this->getSearchTemplate('booksQuery');
         $template = str_replace("{{query}}", $query, $template);
         $template = str_replace("{{size}}", $size, $template);
+        $template = str_replace("{{from}}", $from, $template);
 
         return new ElasticQuery(
             $this->alias,

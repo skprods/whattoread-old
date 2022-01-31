@@ -5,31 +5,34 @@ namespace App\Telegram\Commands;
 use App\Models\Book;
 use App\Models\BookAssociation;
 use App\Models\Genre;
+use App\Telegram\TelegramCommand;
+use App\Traits\HasDeclination;
 use Illuminate\Support\Facades\DB;
 
 class AboutCommand extends TelegramCommand
 {
-    protected $name = 'about';
+    use HasDeclination;
 
-    protected $description = 'Подробная информация о боте';
+    public string $name = 'about';
+    public string $description = 'Подробная информация о боте';
 
-    public function handleCommand()
+    public function handle()
     {
         $booksCount = Book::query()->where('status', Book::ACTIVE_STATUS)->count();
-        $booksMessage = $this->getBooksMessage($booksCount);
+        $booksMessage = $this->getBooksDeclination($booksCount);
 
         $authorsCount = DB::table('books')
             ->selectRaw("count(distinct author) as authorsCount")
             ->where('status', Book::ACTIVE_STATUS)
             ->first()
             ->authorsCount;
-        $authorsMessage = $this->getAuthorMessage($authorsCount);
+        $authorsMessage = $this->getAuthorDeclination($authorsCount);
 
         $genresCount = Genre::query()->where('status', Genre::ACTIVE_STATUS)->count();
-        $genresMessage = $this->getGenresMessage($genresCount);
+        $genresMessage = $this->getGenresDeclination($genresCount);
 
         $associationsCount = BookAssociation::query()->count();
-        $associationsMessage = $this->getAssociationsMessage($associationsCount);
+        $associationsMessage = $this->getAssociationsDeclination($associationsCount);
 
         $text = "WhatToRead - бот, который подбирает книги на основе ваших предпочтений.\n\n";
 
@@ -65,89 +68,5 @@ class AboutCommand extends TelegramCommand
             'text' => $text,
             'parse_mode' => 'markdown',
         ]);
-    }
-
-    private static function getBooksMessage(int $count): string
-    {
-        switch ($count % 10) {
-            case 1:
-                return "$count книга";
-            case 2:
-            case 3:
-            case 4:
-                return "$count книги";
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 0:
-                return "$count книг";
-            default:
-                return "";
-        }
-    }
-
-    private function getAuthorMessage(int $count): string
-    {
-        switch ($count % 10) {
-            case 1:
-                return "$count автор";
-            case 2:
-            case 3:
-            case 4:
-                return "$count автора";
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 0:
-                return "$count авторов";
-            default:
-                return "";
-        }
-    }
-
-    private function getGenresMessage(int $count): string
-    {
-        switch ($count % 10) {
-            case 1:
-                return "$count жанр";
-            case 2:
-            case 3:
-            case 4:
-                return "$count жанра";
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 0:
-                return "$count жанров";
-            default:
-                return "";
-        }
-    }
-
-    private function getAssociationsMessage(int $count): string
-    {
-        switch ($count % 10) {
-            case 1:
-                return "$count книжная ассоциация";
-            case 2:
-            case 3:
-            case 4:
-                return "$count книжные ассоциации";
-            case 5:
-            case 6:
-            case 7:
-            case 8:
-            case 9:
-            case 0:
-                return "$count книжных ассоциаций";
-            default:
-                return "";
-        }
     }
 }

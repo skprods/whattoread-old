@@ -4,18 +4,21 @@ namespace App\Telegram\Commands;
 
 use App\Models\Book;
 use App\Models\Genre;
+use App\Telegram\TelegramCommand;
+use Illuminate\Support\Facades\Log;
 
 class BookCommand extends TelegramCommand
 {
-    public bool $hasParam = true;
+    public bool $show = false;
 
-    protected $name = 'book{id}';
+    public string $name = 'book';
+    public string $pattern = 'book{id}';
+    public string $description = 'Подробная информация о книге';
 
-    protected $description = 'Подробная информация о книге';
-
-    public function handleCommand()
+    public function handle()
     {
         $bookId = $this->arguments['id'];
+        Log::info($bookId);
         /** @var Book $book */
         $book = Book::find($bookId);
 
