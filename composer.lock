@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b0da78057ee538e8431e2ea159046b83",
+    "content-hash": "3e150d731bd6f8a1b15a55e54b454230",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3810,16 +3810,16 @@
         },
         {
             "name": "skprods/laravel-telegram-sdk",
-            "version": "1.x-dev",
+            "version": "1.0.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skprods/laravel-telegram-sdk.git",
-                "reference": "a61a6a63a50e3282e0b174087d65d3fa6eaddf8a"
+                "reference": "339ebd48299ff301914d72777a19ec991c683ea3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skprods/laravel-telegram-sdk/zipball/a61a6a63a50e3282e0b174087d65d3fa6eaddf8a",
-                "reference": "a61a6a63a50e3282e0b174087d65d3fa6eaddf8a",
+                "url": "https://api.github.com/repos/skprods/laravel-telegram-sdk/zipball/339ebd48299ff301914d72777a19ec991c683ea3",
+                "reference": "339ebd48299ff301914d72777a19ec991c683ea3",
                 "shasum": ""
             },
             "require": {
@@ -3832,7 +3832,6 @@
                 "laravel/framework": "^8",
                 "squizlabs/php_codesniffer": "^3.5"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -3861,9 +3860,9 @@
             ],
             "support": {
                 "issues": "https://github.com/skprods/laravel-telegram-sdk/issues",
-                "source": "https://github.com/skprods/laravel-telegram-sdk/tree/1.x"
+                "source": "https://github.com/skprods/laravel-telegram-sdk/tree/1.0.11"
             },
-            "time": "2022-01-31T15:14:50+00:00"
+            "time": "2022-01-31T20:56:23+00:00"
         },
         {
             "name": "spatie/laravel-permission",
@@ -9489,9 +9488,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "skprods/laravel-telegram-sdk": 20
-    },
+    "stability-flags": [],
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -9499,5 +9496,5 @@
         "ext-redis": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.1.0"
 }
