@@ -8,7 +8,6 @@ use App\Models\TelegramUserBook;
 use App\Telegram\TelegramCommand;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Log;
 
 class RecsCommand extends TelegramCommand
 {
@@ -19,6 +18,7 @@ class RecsCommand extends TelegramCommand
     public string $description = 'Рекомендации для книги';
 
     private int $perPage = 5;
+    private int $totalScore = 140;
 
     protected function handle()
     {
@@ -151,7 +151,7 @@ class RecsCommand extends TelegramCommand
                 $book = $bookMatching->comparingBook;
             }
 
-            $score = round($bookMatching->total_score / 200 * 100, 2);
+            $score = round($bookMatching->total_score / $this->totalScore * 100, 2);
             $description = mb_strlen($book->description) > 300
                 ? mb_substr($book->description, 0, 300) . "..."
                 : $book->description;

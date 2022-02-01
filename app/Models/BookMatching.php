@@ -53,7 +53,7 @@ class BookMatching extends Model
 
     public function getAuthorScoreAttribute($value): int
     {
-        return $value * 100;
+        return $value * 40;
     }
 
     public function setAuthorScoreAttribute($value)
