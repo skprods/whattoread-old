@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\BookDeleted;
 use App\Events\BookDescriptionUpdated;
+use App\Events\BookGenresUpdated;
 use App\Events\BookUpdated;
 use App\Events\NewFrequencies;
 use App\Listeners\CreateNewFrequencies;
@@ -29,6 +30,10 @@ class EventServiceProvider extends ServiceProvider
 
         BookDescriptionUpdated::class => [
             UpdateBookDescriptionFrequency::class,
+            UpdateBookMatches::class,
+        ],
+
+        BookGenresUpdated::class => [
             UpdateBookMatches::class,
         ],
 

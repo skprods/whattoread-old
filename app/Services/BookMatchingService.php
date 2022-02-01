@@ -6,6 +6,7 @@ use App\Managers\BookMatchingManager;
 use App\Models\Book;
 use App\Models\BookDescriptionFrequency;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SKprods\LaravelHelpers\Console;
 
@@ -102,6 +103,8 @@ class BookMatchingService
         array $comparingWordFrequencies,
         array $comparingWordIds
     ) {
+        /** Жанры для книг */
+        $bookGenres = [];
         /** Сумма всех частот сравниваемой книги */
         $wordTotalFrequency = $this->getExactTotalFrequency($comparingWordFrequencies);
         /** Процент описания */
@@ -141,10 +144,17 @@ class BookMatchingService
             } else {
                 $bookScores[$bookId]['author_score'] = (int) $this->getScore(0);
             }
+
+            /** Вычисление веса за совпадения по жанрам */
+            $comparingGenres = $this->getBookGenres($book->id, $bookGenres);
+            $matchingGenres = $this->getBookGenres($bookId, $bookGenres);
+            $genresCount = $this->getMatchingGenresCount($comparingGenres, $matchingGenres);
+            $bookScores[$bookId]['genres_score'] = $genresCount;
         }
 
         $this->log($book, "Данные по совпадениям с книгами дополнены: {$bookFrequencies->count()} книг");
 
+        /** Для каждой книги прописываем сравниваемую (текущую) и совпадающую */
         foreach ($bookScores as $matchingBookId => $params) {
             $bookScores[$matchingBookId] = array_merge($params, [
                 'comparing_book_id' => $book->id,
@@ -164,6 +174,38 @@ class BookMatchingService
     private function getScore(float $frequenciesSum): float
     {
         return round($frequenciesSum * 100, 2);
+    }
+
+    private function getBookGenres(int $bookId, array &$bookGenres): array
+    {
+        if (!isset($bookGenres[$bookId])) {
+            $genres = DB::table('book_genre')
+                ->where('book_id', $bookId)
+                ->orderBy('book_id')
+                ->select('genre_id')
+                ->get()
+                ->pluck('genre_id');
+            $bookGenres[$bookId] = $genres->all();
+        }
+
+        return $bookGenres[$bookId];
+    }
+
+    private function getMatchingGenresCount(array $comparingGenres, array $matchingGenres): int
+    {
+        $count = 0;
+
+        if (!empty($comparingGenres) && !empty($matchingGenres)) {
+            foreach ($comparingGenres as $comparingGenre) {
+                $count += in_array($comparingGenre, $matchingGenres) ? 1 : 0;
+            }
+
+            if ($count > 4) {
+                $count = 4;
+            }
+        }
+
+        return $count;
     }
 
     public function log(Book $book, string $message)

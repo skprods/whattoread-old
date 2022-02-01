@@ -12,7 +12,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $id
  * @property-read Book $comparingBook
  * @property-read Book $matchingBook
- * @property double $author_score
+ * @property int $author_score
+ * @property int $genres_score
  * @property double $description_score
  * @property double $total_score
  * @property Carbon $created_at
@@ -26,6 +27,7 @@ class BookMatching extends Model
 
     protected $fillable = [
         'author_score',
+        'genres_score',
         'description_score',
     ];
 
@@ -35,9 +37,10 @@ class BookMatching extends Model
 
         static::saving(function (BookMatching $model) {
             $author = $model->author_score ?? 0;
+            $genres = $model->genres_score ?? 0;
             $description = $model->description_score ?? 0;
 
-            $model->total_score = $author + $description;
+            $model->total_score = $author + $genres + $description;
         });
     }
 
@@ -56,6 +59,11 @@ class BookMatching extends Model
         return $value * 40;
     }
 
+    public function getGenresScoreAttribute($value): int
+    {
+        return $value * 10;
+    }
+
     public function setAuthorScoreAttribute($value)
     {
         if ($value > 1) {
@@ -67,6 +75,19 @@ class BookMatching extends Model
         }
 
         $this->attributes['author_score'] = $score;
+    }
+
+    public function setGenresScoreAttribute($value)
+    {
+        if ($value > 4) {
+            $score = 4;
+        } elseif ($value < 0) {
+            $score = 0;
+        } else {
+            $score = $value;
+        }
+
+        $this->attributes['genres_score'] = $score;
     }
 
     public static function firstByBookIds(int $firstBookId, int $secondBookId): ?BookMatching

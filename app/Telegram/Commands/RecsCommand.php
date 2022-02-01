@@ -18,7 +18,7 @@ class RecsCommand extends TelegramCommand
     public string $description = 'Рекомендации для книги';
 
     private int $perPage = 5;
-    private int $totalScore = 140;
+    private int $totalScore = 180;
 
     protected function handle()
     {

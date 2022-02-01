@@ -4,8 +4,10 @@ namespace App\Managers;
 
 use App\Events\BookDeleted;
 use App\Events\BookDescriptionUpdated;
+use App\Events\BookGenresUpdated;
 use App\Events\BookUpdated;
 use App\Models\Book;
+use App\Models\Genre;
 use App\Models\Stat;
 use Exception;
 use Illuminate\Support\Facades\DB;
@@ -75,14 +77,22 @@ class BookManager
         $this->book->fill($params);
         $this->book->save();
 
+        $hasNewGenres = false;
         if (isset($params['genres'])) {
+            $hasNewGenres = $this->checkNewGenres($this->book, $params['genres']);
             $this->book->genres()->sync($params['genres']);
         }
 
         BookUpdated::dispatch($this->book);
 
-        if ($oldDescription !== $this->book->description) {
+        $descriptionUpdated = $oldDescription !== $this->book->description;
+        if ($descriptionUpdated) {
             BookDescriptionUpdated::dispatch($this->book);
+        }
+
+        /** Если не обновилось описание, но появились новые жанры, нужно обновить book_matches */
+        if (!$descriptionUpdated && $hasNewGenres) {
+            BookGenresUpdated::dispatch($this->book);
         }
 
         return $this->book;
@@ -116,5 +126,20 @@ class BookManager
     {
         $genres = $this->book->genres()->pluck('id')->toArray();
         $this->book->genres()->sync(array_merge($genres, $genreIds));
+    }
+
+    private function checkNewGenres(Book $book, array $newGenres): bool
+    {
+        $genres = [];
+        foreach ($newGenres as $genreId) {
+            $genres[$genreId] = $genreId;
+        }
+
+        $currentGenres = [];
+        $book->genres->each(function (Genre $genre) use (&$newGenres) {
+            $newGenres[$genre->id] = $genre->id;
+        });
+
+        return $genres != $currentGenres;
     }
 }
