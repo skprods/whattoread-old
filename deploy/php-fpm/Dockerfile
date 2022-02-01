@@ -7,9 +7,7 @@ RUN apt-get update && apt-get install -y git \
     supervisor \
     && docker-php-ext-install pdo_mysql pcntl zip \
     && pecl install redis \
-    && pecl install xdebug \
-    && docker-php-ext-enable redis\
-    && docker-php-ext-enable xdebug
+    && docker-php-ext-enable redis
 
 ENV PATH="$PATH:/var/www/vendor/bin"
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
