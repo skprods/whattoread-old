@@ -25,11 +25,18 @@ class RecsCommand extends TelegramCommand
         $bookId = $this->arguments['id'];
         $book = Book::findOrFail($bookId);
 
+        $this->replyWithMessage([
+            'text' => "Готовим рекомендации...",
+        ]);
+        $this->replyWithChatAction([
+            'action' => 'typing',
+        ]);
+
         $builder = $this->getBuilder($bookId);
 
         $count = $builder->count();
         if (!$count) {
-            $text = "У нас нет рекомендаций к книге {$book->author} - {$book->title}, ";
+            $text = "К сожалению, пока что у нас нет рекомендаций к книге {$book->author} - {$book->title}, ";
             $text .= "но скоро они появятся. Попробуйте позже.";
             $this->replyWithMessage(['text' => $text]);
 
