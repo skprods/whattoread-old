@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Events\BookDeleted;
 use App\Events\BookDescriptionUpdated;
+use App\Events\BookFrequencyCreated;
 use App\Events\BookGenresUpdated;
 use App\Events\BookUpdated;
 use App\Events\NewFrequencies;
@@ -28,11 +29,17 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
         ],
 
+        /** Изменилось описание книги */
         BookDescriptionUpdated::class => [
             UpdateBookDescriptionFrequency::class,
+        ],
+
+        /** Составлен частотный словник книги */
+        BookFrequencyCreated::class => [
             UpdateBookMatches::class,
         ],
 
+        /** Обновлены жанры книги */
         BookGenresUpdated::class => [
             UpdateBookMatches::class,
         ],

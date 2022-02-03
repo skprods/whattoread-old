@@ -3,6 +3,7 @@
 namespace App\Listeners;
 
 use App\Events\BookDescriptionUpdated;
+use App\Events\BookFrequencyCreated;
 use App\Managers\Dictionaries\FrequencyManager;
 
 class UpdateBookDescriptionFrequency extends Listener
@@ -17,5 +18,7 @@ class UpdateBookDescriptionFrequency extends Listener
     public function handle(BookDescriptionUpdated $event)
     {
         $this->frequencyManager->createDescriptionFrequency($event->book);
+
+        BookFrequencyCreated::dispatch($event->book);
     }
 }
