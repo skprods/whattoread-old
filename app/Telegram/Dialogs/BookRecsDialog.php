@@ -6,6 +6,8 @@ use App\Managers\KeyboardParamManager;
 use App\Models\KeyboardParam;
 use App\Services\BooksService;
 use App\Telegram\TelegramDialog;
+use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Facades\Log;
 
 class BookRecsDialog extends TelegramDialog
 {
@@ -89,25 +91,29 @@ class BookRecsDialog extends TelegramDialog
         $text = $this->getText($books, $page);
         $keyboard = $this->getKeyboard($updateId, $count, $this->perPage, $page);
 
-        if (count($keyboard) < 2) {
-            $this->editMessageText([
-                'chat_id' => $this->getChat()->id,
-                'message_id' => $this->update->callbackQuery->message->messageId,
-                'text' => $text,
-                'parse_mode' => 'markdown',
-            ]);
-        } else {
-            $this->editMessageText([
-                'chat_id' => $this->getChat()->id,
-                'message_id' => $this->update->callbackQuery->message->messageId,
-                'text' => $text,
-                'parse_mode' => 'markdown',
-                'reply_markup' => json_encode([
-                    'inline_keyboard' => [
-                        $keyboard,
-                    ]
-                ])
-            ]);
+        try {
+            if (count($keyboard) < 2) {
+                $this->editMessageText([
+                    'chat_id' => $this->getChat()->id,
+                    'message_id' => $this->update->callbackQuery->message->messageId,
+                    'text' => $text,
+                    'parse_mode' => 'markdown',
+                ]);
+            } else {
+                $this->editMessageText([
+                    'chat_id' => $this->getChat()->id,
+                    'message_id' => $this->update->callbackQuery->message->messageId,
+                    'text' => $text,
+                    'parse_mode' => 'markdown',
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' => [
+                            $keyboard,
+                        ]
+                    ])
+                ]);
+            }
+        } catch (ClientException $exception) {
+            Log::error($exception->getMessage());
         }
     }
 

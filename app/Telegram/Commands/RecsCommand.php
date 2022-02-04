@@ -8,8 +8,10 @@ use App\Models\BookMatching;
 use App\Models\KeyboardParam;
 use App\Models\TelegramUserBook;
 use App\Telegram\TelegramCommand;
+use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Log;
 
 class RecsCommand extends TelegramCommand
 {
@@ -97,6 +99,10 @@ class RecsCommand extends TelegramCommand
         }
         $bookId = (int) $keyboardParam->param;
 
+        $this->replyWithChatAction([
+            'action' => 'typing',
+        ]);
+
         /** @var Book $book */
         $book = Book::findOrFail($bookId);
 
@@ -115,25 +121,29 @@ class RecsCommand extends TelegramCommand
 
         $keyboard = $this->getKeyboard($updateId, $count, $this->perPage, $pageNumber);
 
-        if (count($keyboard) < 2) {
-            $this->editMessageText([
-                'chat_id' => $this->chatInfo->id,
-                'message_id' => $this->update->callbackQuery->message->messageId,
-                'text' => $text,
-                'parse_mode' => 'markdown',
-            ]);
-        } else {
-            $this->editMessageText([
-                'chat_id' => $this->chatInfo->id,
-                'message_id' => $this->update->callbackQuery->message->messageId,
-                'text' => $text,
-                'parse_mode' => 'markdown',
-                'reply_markup' => json_encode([
-                    'inline_keyboard' => [
-                        $keyboard,
-                    ]
-                ])
-            ]);
+        try {
+            if (count($keyboard) < 2) {
+                $this->editMessageText([
+                    'chat_id' => $this->chatInfo->id,
+                    'message_id' => $this->update->callbackQuery->message->messageId,
+                    'text' => $text,
+                    'parse_mode' => 'markdown',
+                ]);
+            } else {
+                $this->editMessageText([
+                    'chat_id' => $this->chatInfo->id,
+                    'message_id' => $this->update->callbackQuery->message->messageId,
+                    'text' => $text,
+                    'parse_mode' => 'markdown',
+                    'reply_markup' => json_encode([
+                        'inline_keyboard' => [
+                            $keyboard,
+                        ]
+                    ])
+                ]);
+            }
+        } catch (ClientException $exception) {
+            Log::error($exception->getMessage());
         }
     }
 
