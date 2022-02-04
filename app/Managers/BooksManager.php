@@ -65,7 +65,7 @@ class BooksManager
             throw $exception;
         }
 
-        if ($book->description) {
+        if ($book->description && $book->status === Book::ACTIVE_STATUS) {
             BookDescriptionUpdated::dispatch($book);
         }
 
