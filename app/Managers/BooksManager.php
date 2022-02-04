@@ -3,6 +3,7 @@
 namespace App\Managers;
 
 use App\Entities\SamolitBook;
+use App\Events\BookDescriptionUpdated;
 use App\Models\Book;
 use App\Models\TelegramUser;
 use App\Parsers\SamolitParser;
@@ -62,6 +63,10 @@ class BooksManager
         } catch (\Exception $exception) {
             DB::rollBack();
             throw $exception;
+        }
+
+        if ($book->description) {
+            BookDescriptionUpdated::dispatch($book);
         }
 
         return $book;
