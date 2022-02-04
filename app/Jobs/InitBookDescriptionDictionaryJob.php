@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Managers\Dictionaries\FrequencyManager;
+use App\Services\FrequencyService;
 use App\Models\Book;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -11,13 +11,13 @@ class InitBookDescriptionDictionaryJob extends Job
     private ?int $start;
     private ?int $end;
 
-    private FrequencyManager $manager;
+    private FrequencyService $manager;
 
     public function __construct(?int $start, ?int $end, bool $debug)
     {
         $this->start = $start;
         $this->end = $end;
-        $this->manager = app(FrequencyManager::class, ['debug' => $debug]);
+        $this->manager = app(FrequencyService::class, ['debug' => $debug]);
 
         parent::__construct($debug);
     }

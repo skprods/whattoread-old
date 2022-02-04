@@ -3,17 +3,17 @@
 namespace App\Listeners;
 
 use App\Events\NewFrequencies;
-use App\Managers\Dictionaries\FrequencyManager;
+use App\Services\FrequencyService;
 
 class CreateNewFrequencies extends Listener
 {
-    private FrequencyManager $manager;
+    private FrequencyService $manager;
 
     public $timeout = 7200;
 
     public function __construct()
     {
-        $this->manager = app(FrequencyManager::class);
+        $this->manager = app(FrequencyService::class);
     }
 
     public function handle(NewFrequencies $event)

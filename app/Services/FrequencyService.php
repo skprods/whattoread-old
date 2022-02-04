@@ -1,33 +1,32 @@
 <?php
 
-namespace App\Managers\Dictionaries;
+namespace App\Services;
 
-use App\Clients\RusTxtClient;
 use App\Facades\Dictionary;
 use App\Managers\BookDictionaryManager;
 use App\Managers\BookFrequenciesManager;
 use App\Managers\BookManager;
+use App\Managers\Dictionaries\DictionaryManager;
 use App\Models\Book;
 use App\Models\Word;
-use GuzzleHttp\Exception\RequestException;
+use cijic\phpMorphy\Morphy;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use SKprods\LaravelHelpers\Console;
 
-class FrequencyManager
+class FrequencyService
 {
     private bool $debug;
     private Book $book;
 
-    /** Клиент для проверки морфологии */
-    private RusTxtClient $client;
+    private Morphy $morphy;
 
     private BookFrequenciesManager $bookFrequenciesManager;
 
     public function __construct(bool $debug = false)
     {
         $this->debug = $debug;
-        $this->setClient();
+        $this->morphy = new Morphy();
         $this->bookFrequenciesManager = app(BookFrequenciesManager::class);
     }
 
@@ -183,13 +182,7 @@ class FrequencyManager
 
     private function createWord(string $wordKey): ?Word
     {
-        try {
-            $type = $this->getType($wordKey);
-        } catch (RequestException $exception) {
-            Log::error($exception->getMessage());
-            $this->setClient();
-            $type = $this->getType($wordKey);
-        }
+        $type = $this->getType($wordKey);
 
         if ($type) {
             /** @var Word $word */
@@ -206,53 +199,37 @@ class FrequencyManager
 
     private function getType(string $word): ?string
     {
-        $content = $this->client->getMorphologyForWord($word);
+        $partOfSpeech = $this->morphy->getPartOfSpeech(mb_strtoupper($word));
 
-        preg_match('<meta name="description" content="(.*?)часть речи:(.*?),(.*?)">', $content, $matches);
-        if (isset($matches[2])) {
-            $partOfSpeech = trim($matches[2]);
-
+        if ($partOfSpeech) {
             $types = [
-                'местоимение-существительное' => 'мест',
-                'местоименное прилагательное' => 'прл',
-                'частица' => 'част',
-                'междометие' => 'межд',
-                'прилагательное' => 'прл',
-                'причастие' => 'прч',
-                'существительное' => 'сущ',
-                'наречие' => 'нар',
-                'глагол в личной форме' => 'гл',
-                'инфинитив' => 'гл',
-                'деепричастие' => 'дееп',
-                'союз' => 'союз',
-                'предлог' => 'предл',
-                'фразеологизм' => 'фраз',
-                'предикатив' => 'предик',
-                'местоимение-предикатив' => 'предик',
-                'вводное слово' => 'ввод',
+                'С' => 'сущ',
+                'П' => 'прл',
+                'КР_ПРИЛ' => 'прл',
+                'ИНФИНИТИВ' => 'гл',
+                'Г' => 'гл',
+                'ДЕЕПРИЧАСТИЕ' => 'дееп',
+                'ПРИЧАСТИЕ' => 'прч',
+                'КР_ПРИЧАСТИЕ' => 'прч',
+                'ЧИСЛ' => 'числ',
+                'ЧИСЛ-П' => 'числ',
+                'МС' => 'мест',
+                'МС-ПРЕДК' => 'предик',
+                'МС-П' => 'прл',
+                'Н' => 'нар',
+                'ПРЕДК' => 'предик',
+                'ПРЕДЛ' => 'предл',
+                'СОЮЗ' => 'союз',
+                'МЕЖД' => 'межд',
+                'ЧАСТ' => 'част',
+                'ВВОДН' => 'ввод',
+                'ФРАЗ' => 'фраз',
             ];
 
-            if (str_contains($partOfSpeech, 'прилагательное')) {
-                return 'прл';
-            }
-
-            if (str_contains($partOfSpeech, 'числительное')) {
-                return 'числ';
-            }
-
-            if (str_contains($partOfSpeech, 'причастие')) {
-                return 'прч';
-            }
-
-            return $types[$partOfSpeech] ?? null;
+            return $types[$partOfSpeech[0]] ?? null;
         }
 
         return null;
-    }
-
-    private function setClient()
-    {
-        $this->client = new RusTxtClient();
     }
 
     public function log(string $message)

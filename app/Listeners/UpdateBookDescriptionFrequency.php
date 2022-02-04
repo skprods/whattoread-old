@@ -4,15 +4,15 @@ namespace App\Listeners;
 
 use App\Events\BookDescriptionUpdated;
 use App\Events\BookFrequencyCreated;
-use App\Managers\Dictionaries\FrequencyManager;
+use App\Services\FrequencyService;
 
 class UpdateBookDescriptionFrequency extends Listener
 {
-    private FrequencyManager $frequencyManager;
+    private FrequencyService $frequencyManager;
 
     public function __construct()
     {
-        $this->frequencyManager = app(FrequencyManager::class);
+        $this->frequencyManager = app(FrequencyService::class);
     }
 
     public function handle(BookDescriptionUpdated $event)
