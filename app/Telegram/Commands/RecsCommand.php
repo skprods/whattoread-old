@@ -2,8 +2,10 @@
 
 namespace App\Telegram\Commands;
 
+use App\Managers\KeyboardParamManager;
 use App\Models\Book;
 use App\Models\BookMatching;
+use App\Models\KeyboardParam;
 use App\Models\TelegramUserBook;
 use App\Telegram\TelegramCommand;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +21,15 @@ class RecsCommand extends TelegramCommand
 
     private int $perPage = 5;
     private int $totalScore = 180;
+
+    private KeyboardParamManager $keyboardParamManager;
+
+    public function __construct()
+    {
+        $this->keyboardParamManager = app(KeyboardParamManager::class);
+
+        parent::__construct();
+    }
 
     protected function handle()
     {
@@ -67,12 +78,24 @@ class RecsCommand extends TelegramCommand
                 ])
             ]);
         }
+
+        $this->keyboardParamManager->create([
+            'update_id' => $this->update->updateId,
+            'param' => $bookId,
+        ]);
     }
 
     protected function handleCallback()
     {
-        $pageNumber = (int) $this->chatInfo->currentCommand->callbackData;
-        $bookId = $this->chatInfo->previousCommand->arguments['id'];
+        $callbackData = $this->getCallbackData($this->update->callbackQuery->data);
+        $pageNumber = (int) $callbackData['data'];
+        $updateId = $callbackData['update_id'];
+
+        $keyboardParam = KeyboardParam::findByUpdateId($updateId);
+        if (!$keyboardParam) {
+            return;
+        }
+        $bookId = (int) $keyboardParam->param;
 
         /** @var Book $book */
         $book = Book::findOrFail($bookId);
@@ -90,7 +113,7 @@ class RecsCommand extends TelegramCommand
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
         $text = $this->getMessage($text, $bookMatches, $bookId);
 
-        $keyboard = $this->getKeyboard($this->update->updateId, $count, $this->perPage, $pageNumber);
+        $keyboard = $this->getKeyboard($updateId, $count, $this->perPage, $pageNumber);
 
         if (count($keyboard) < 2) {
             $this->editMessageText([
