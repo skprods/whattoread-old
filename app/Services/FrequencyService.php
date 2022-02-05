@@ -6,7 +6,6 @@ use App\Facades\Dictionary;
 use App\Managers\BookDictionaryManager;
 use App\Managers\BookFrequenciesManager;
 use App\Managers\BookManager;
-use App\Managers\Dictionaries\DictionaryManager;
 use App\Models\Book;
 use App\Models\Word;
 use cijic\phpMorphy\Morphy;
@@ -37,7 +36,7 @@ class FrequencyService
         $bookName = "{$this->book->author} - {$this->book->title}";
         $this->log("Начинается составление частотного словника по содержанию книги #{$this->book->id}: $bookName");
 
-        $dictionary = Dictionary::createFromFile($filePath, DictionaryManager::FB2_EXTENSION);
+        $dictionary = Dictionary::createFromFile($filePath, DictionaryService::FB2_EXTENSION);
         $this->log("Словарь подготовлен");
 
         $wordsCount = $dictionary->count();

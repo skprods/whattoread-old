@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Managers\Dictionaries;
+namespace App\Services;
 
 use App\Drivers\DictionaryDriver;
+use App\Drivers\WordExtractionManager;
 use App\Entities\Dictionary;
 use App\Exceptions\FileTypeNotAllowedException;
 
-class DictionaryManager
+class DictionaryService
 {
 //    private const TXT_EXTENSION = 'txt';
     public const FB2_EXTENSION = 'fb2';

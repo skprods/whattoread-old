@@ -2,8 +2,6 @@
 
 namespace App\Drivers;
 
-use Illuminate\Support\Collection;
-
 abstract class DictionaryDriver
 {
     private array $ruAlphabet = [

@@ -4,7 +4,7 @@ namespace App\Telegram\Dialogs;
 
 use App\Managers\KeyboardParamManager;
 use App\Models\KeyboardParam;
-use App\Services\BooksService;
+use App\Services\SearchService;
 use App\Telegram\TelegramDialog;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Log;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Log;
 class BookRecsDialog extends TelegramDialog
 {
     private KeyboardParamManager $keyboardParamManager;
-    private BooksService $booksService;
+    private SearchService $searchService;
 
     public string $name = 'bookrecs';
     public string $description = 'Получить рекомендации на книгу';
@@ -25,7 +25,7 @@ class BookRecsDialog extends TelegramDialog
     public function __construct()
     {
         $this->keyboardParamManager = app(KeyboardParamManager::class);
-        $this->booksService = app(BooksService::class);
+        $this->searchService = app(SearchService::class);
 
         parent::__construct();
     }
@@ -40,7 +40,7 @@ class BookRecsDialog extends TelegramDialog
         $this->stepCompleted = false;
 
         $message = $this->update->message->text;
-        $search = $this->booksService->findBookInElastic($message, $this->perPage);
+        $search = $this->searchService->findBookInElastic($message, $this->perPage);
         $books = $search['items'];
         $count = $search['total'];
 
@@ -83,7 +83,7 @@ class BookRecsDialog extends TelegramDialog
             return;
         }
 
-        $search = $this->booksService
+        $search = $this->searchService
             ->findBookInElastic($keyboardParam->param, $this->perPage, $this->perPage * ($page - 1));
         $books = $search['items'];
         $count = $search['total'];

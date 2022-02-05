@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Managers\Dictionaries;
+namespace App\Drivers;
 
-use App\Drivers\Fb2Driver;
-use App\Drivers\TextDriver;
 use Illuminate\Support\Manager;
 use Illuminate\Contracts\Container\Container;
 

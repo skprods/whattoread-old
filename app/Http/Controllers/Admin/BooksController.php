@@ -11,9 +11,9 @@ use App\Http\Requests\Admin\BookUpdateRequest;
 use App\Http\Resources\Admin\BookResource;
 use App\Http\Resources\SingleResource;
 use App\Managers\BookManager;
-use App\Managers\BooksManager;
-use App\Managers\FileManager;
 use App\Models\Book;
+use App\Services\BooksService;
+use App\Services\FileService;
 use App\Traits\HasDataTableFilters;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -64,7 +64,7 @@ class BooksController extends Controller
 
     public function create(BookCreateRequest $request): BookResource
     {
-        $book = app(BooksManager::class)->create($request->validated());
+        $book = app(BooksService::class)->create($request->validated());
 
         return new BookResource($book->load('genres'));
     }
@@ -89,7 +89,7 @@ class BooksController extends Controller
             'file' => ['required', 'file', 'mimetypes:text/xml'],
         ]);
 
-        $filepath = app(FileManager::class)->saveBookFile($request->file('file'));
+        $filepath = app(FileService::class)->saveBookFile($request->file('file'));
         NewFrequencies::dispatch($filepath, $book->id);
 
         return new SingleResource([

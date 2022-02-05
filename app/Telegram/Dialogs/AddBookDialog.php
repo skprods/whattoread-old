@@ -2,7 +2,7 @@
 
 namespace App\Telegram\Dialogs;
 
-use App\Managers\BooksManager;
+use App\Services\BooksService;
 use App\Models\Elasticsearch\ElasticBooks;
 use App\Services\ElasticsearchService;
 use App\Telegram\TelegramDialog;
@@ -114,9 +114,12 @@ class AddBookDialog extends TelegramDialog
         $this->stepCompleted = false;
         $message = $this->update->message->text;
 
+        /** @var BooksService $booksService */
+        $booksService = app(BooksService::class);
+
         if (mb_strtolower($message) === "конец" || mb_strtolower($message) === "пропустить") {
             $this->replyWithMessage(['text' => 'Добавляем книгу...']);
-            app(BooksManager::class)->addFromTelegram($this->chatInfo->dialog->data, $this->chatInfo->id);
+            $booksService->createFromTelegram($this->chatInfo->dialog->data, $this->chatInfo->id);
 
             $this->replyWithMessage([
                 'text' => 'Книга добавлена. Теперь мы сделаем рекомендации ещё более точными!'

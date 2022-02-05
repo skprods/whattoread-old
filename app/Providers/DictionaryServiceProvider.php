@@ -2,7 +2,7 @@
 
 namespace App\Providers;
 
-use App\Managers\Dictionaries\DictionaryManager;
+use App\Services\DictionaryService;
 use Illuminate\Support\ServiceProvider;
 
 class DictionaryServiceProvider extends ServiceProvider
@@ -10,7 +10,7 @@ class DictionaryServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton('dictionary', function () {
-            return new DictionaryManager();
+            return new DictionaryService();
         });
     }
 }
