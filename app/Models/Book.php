@@ -45,6 +45,7 @@ class Book extends Model
         'title',
         'description',
         'author',
+        'isbn',
         'status',
         'words_count',
         'therms_count',
