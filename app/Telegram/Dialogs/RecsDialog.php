@@ -115,8 +115,6 @@ class RecsDialog extends TelegramDialog
             'update_id' => $this->update->updateId,
             'param' => "{$bookId}_" . (int) $withAuthor,
         ]);
-
-        $this->stepCompleted = false;
     }
 
     protected function withAuthorCallback()
