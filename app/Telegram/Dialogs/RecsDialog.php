@@ -1,25 +1,28 @@
 <?php
 
-namespace App\Telegram\Commands;
+namespace App\Telegram\Dialogs;
 
 use App\Managers\KeyboardParamManager;
 use App\Models\Book;
 use App\Models\BookMatching;
 use App\Models\KeyboardParam;
 use App\Models\TelegramUserBook;
-use App\Telegram\TelegramCommand;
+use App\Telegram\TelegramDialog;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Log;
 
-class RecsCommand extends TelegramCommand
+class RecsDialog extends TelegramDialog
 {
     public bool $show = false;
 
     public string $name = 'recs';
     public string $pattern = "recs{id}";
     public string $description = 'Рекомендации для книги';
+    protected array $steps = [
+        'withAuthor',
+    ];
 
     private int $perPage = 5;
     private int $totalScore = 180;
@@ -33,9 +36,36 @@ class RecsCommand extends TelegramCommand
         parent::__construct();
     }
 
-    protected function handle()
+    protected function getCurrentStep()
     {
-        $bookId = $this->arguments['id'];
+        $currentStep = parent::getCurrentStep();
+
+        if (!$currentStep && $this->update->callbackQuery) {
+            return 'withAuthor';
+        }
+
+        return $currentStep;
+    }
+
+    public function handle()
+    {
+        $this->chatInfo->dialog->data['bookId'] = $this->arguments['id'];
+
+        $this->replyWithMessage([
+            'text' => "Хотите ли вы видеть в подборке книги этого же автора?",
+            'reply_markup' => json_encode([
+                'keyboard' => [["Да", "Нет"]],
+                'resize_keyboard' => true,
+                'one_time_keyboard' => true,
+            ]),
+        ]);
+    }
+
+    protected function withAuthorStep()
+    {
+        $withAuthor = $this->update->message->text === "Да";
+        Log::info((int) $withAuthor);
+        $bookId = $this->chatInfo->dialog->data['bookId'];
         $book = Book::findOrFail($bookId);
 
         $this->replyWithMessage([
@@ -45,7 +75,7 @@ class RecsCommand extends TelegramCommand
             'action' => 'typing',
         ]);
 
-        $builder = $this->getBuilder($bookId);
+        $builder = $this->getBuilder($bookId, $withAuthor);
 
         $count = $builder->count();
         if (!$count) {
@@ -83,11 +113,13 @@ class RecsCommand extends TelegramCommand
 
         $this->keyboardParamManager->create([
             'update_id' => $this->update->updateId,
-            'param' => $bookId,
+            'param' => "{$bookId}_" . (int) $withAuthor,
         ]);
+
+        $this->stepCompleted = false;
     }
 
-    protected function handleCallback()
+    protected function withAuthorCallback()
     {
         $callbackData = $this->getCallbackData($this->update->callbackQuery->data);
         $pageNumber = (int) $callbackData['data'];
@@ -97,7 +129,7 @@ class RecsCommand extends TelegramCommand
         if (!$keyboardParam) {
             return;
         }
-        $bookId = (int) $keyboardParam->param;
+        [$bookId, $withAuthor] = explode('_', $keyboardParam->param);
 
         $this->replyWithChatAction([
             'action' => 'typing',
@@ -110,7 +142,7 @@ class RecsCommand extends TelegramCommand
             return;
         }
 
-        $builder = $this->getBuilder($bookId);
+        $builder = $this->getBuilder($bookId, (bool) $withAuthor);
 
         $count = $builder->count();
         $bookMatches = $builder->limit($this->perPage)->offset($this->perPage * ($pageNumber - 1))->get();
@@ -147,18 +179,25 @@ class RecsCommand extends TelegramCommand
         }
     }
 
-    private function getBuilder(int $bookId): Builder
+    private function getBuilder(int $bookId, bool $withAuthor): Builder
     {
         /** Исключаем книги, которые уже прочитал (добавил) пользователь, за исключением $bookId, по которой ищут */
         $excludedBookIds = TelegramUserBook::getUserBookIds($this->telegramUser->id);
         unset($excludedBookIds[$bookId]);
 
-        return BookMatching::query()
-            ->where('comparing_book_id', $bookId)
+        $builder = BookMatching::query()
+            ->orWhere('comparing_book_id', $bookId)
             ->orWhere('matching_book_id', $bookId)
             ->whereNotIn('comparing_book_id', $excludedBookIds)
             ->whereNotIn('comparing_book_id', $excludedBookIds)
             ->orderByDesc('total_score');
+
+        if ($withAuthor === false) {
+            $builder = BookMatching::query()->from($builder);
+            $builder->where('author_score', '=', 0);
+        }
+
+        return $builder;
     }
 
     private static function getBooksMessage(int $count): string

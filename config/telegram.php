@@ -12,11 +12,11 @@ return [
                 \App\Telegram\Commands\AboutCommand::class,
                 \App\Telegram\Commands\MyBooksCommand::class,
                 \App\Telegram\Commands\BookCommand::class,
-                \App\Telegram\Commands\RecsCommand::class,
             ],
             'dialogs'       => [
                 \App\Telegram\Dialogs\AddBookDialog::class,
                 \App\Telegram\Dialogs\BookRecsDialog::class,
+                \App\Telegram\Dialogs\RecsDialog::class,
             ],
             'allowed_chats' => [
                 env('ERROR_CHAT_ID'),

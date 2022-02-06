@@ -4,6 +4,7 @@ namespace App\Telegram\Commands;
 
 use App\Models\Book;
 use App\Models\Genre;
+use App\Telegram\Dialogs\RecsDialog;
 use App\Telegram\TelegramCommand;
 use Illuminate\Support\Facades\Log;
 
@@ -43,7 +44,7 @@ class BookCommand extends TelegramCommand
             $text .= implode(' ', $genres) . "\n";
         }
 
-        $text .= "Рекомендации: /" . RecsCommand::getCommandNameForBook($bookId);
+        $text .= "Рекомендации: /" . RecsDialog::getCommandNameForBook($bookId);
         $text .= "\n\n";
 
         $text .= $book->description !== '' ? "*Описание*: \n" . $book->description : "Описания пока нет";
