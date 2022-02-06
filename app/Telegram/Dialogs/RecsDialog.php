@@ -3,6 +3,7 @@
 namespace App\Telegram\Dialogs;
 
 use App\Managers\KeyboardParamManager;
+use App\Managers\RecommendationListManager;
 use App\Models\Book;
 use App\Models\BookRecommendation;
 use App\Models\KeyboardParam;
@@ -28,10 +29,12 @@ class RecsDialog extends TelegramDialog
     private int $totalScore = 180;
 
     private KeyboardParamManager $keyboardParamManager;
+    private RecommendationListManager $recommendationListManager;
 
     public function __construct()
     {
         $this->keyboardParamManager = app(KeyboardParamManager::class);
+        $this->recommendationListManager = app(RecommendationListManager::class);
 
         parent::__construct();
     }
@@ -64,7 +67,6 @@ class RecsDialog extends TelegramDialog
     protected function withAuthorStep()
     {
         $withAuthor = $this->update->message->text === "Да";
-        Log::info((int) $withAuthor);
         $bookId = $this->chatInfo->dialog->data['bookId'];
         $book = Book::findOrFail($bookId);
 
@@ -118,6 +120,22 @@ class RecsDialog extends TelegramDialog
             'update_id' => $this->update->updateId,
             'param' => "{$bookId}_" . (int) $withAuthor,
         ]);
+
+        try {
+            $this->recommendationListManager
+                ->saveRecommendations($bookMatches, $bookId, $this->update->updateId, $this->chatInfo->id, true);
+
+            $this->replyWithMessage([
+                'text' => "Пожалуйста, оцените эту подборку",
+                'reply_markup' => json_encode([
+                    'inline_keyboard' => [
+                        $this->getRatingKeyboard($this->update->updateId),
+                    ]
+                ])
+            ]);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+        }
     }
 
     protected function withAuthorCallback()
@@ -177,6 +195,14 @@ class RecsDialog extends TelegramDialog
             }
         } catch (ClientException $exception) {
             Log::error($exception->getMessage());
+        }
+
+        /** Дополняем просмотренные рекомендации в recommendation_lists */
+        try {
+            $this->recommendationListManager
+                ->saveRecommendations($bookMatches, $bookId, $updateId, $this->chatInfo->id, false);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
         }
     }
 
@@ -238,6 +264,17 @@ class RecsDialog extends TelegramDialog
         });
 
         return $text;
+    }
+
+    private function getRatingKeyboard(int $updateId): array
+    {
+        return [
+            ['text' => 1, 'callback_data' => "recsRating_rating-1_{$updateId}"],
+            ['text' => 2, 'callback_data' => "recsRating_rating-2_{$updateId}"],
+            ['text' => 3, 'callback_data' => "recsRating_rating-3_{$updateId}"],
+            ['text' => 4, 'callback_data' => "recsRating_rating-4_{$updateId}"],
+            ['text' => 5, 'callback_data' => "recsRating_rating-5_{$updateId}"],
+        ];
     }
 
     public static function getCommandNameForBook(int $bookId): string

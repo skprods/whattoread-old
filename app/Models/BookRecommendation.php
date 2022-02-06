@@ -10,7 +10,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
+ * @property int $comparing_book_id
  * @property-read Book $comparingBook
+ * @property int $matching_book_id
  * @property-read Book $matchingBook
  * @property int $author_score
  * @property int $genres_score

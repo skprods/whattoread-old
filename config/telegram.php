@@ -12,6 +12,8 @@ return [
                 \App\Telegram\Commands\AboutCommand::class,
                 \App\Telegram\Commands\MyBooksCommand::class,
                 \App\Telegram\Commands\BookCommand::class,
+
+                \App\Telegram\Commands\RecsRatingCommand::class,
             ],
             'dialogs'       => [
                 \App\Telegram\Dialogs\AddBookDialog::class,
