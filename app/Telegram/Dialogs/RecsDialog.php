@@ -125,6 +125,8 @@ class RecsDialog extends TelegramDialog
             $this->recommendationListManager
                 ->saveRecommendations($bookMatches, $bookId, $this->update->updateId, $this->chatInfo->id, true);
 
+            /** Ждём две секунды, чтобы просьба об оценке не слилась со списком и пришла отдельно, а не одновременно */
+            sleep(2);
             $this->replyWithMessage([
                 'text' => "Пожалуйста, оцените эту подборку",
                 'reply_markup' => json_encode([
