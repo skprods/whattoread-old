@@ -3,13 +3,13 @@
 namespace App\Jobs;
 
 use App\Models\Book;
-use App\Services\BookMatchingService;
+use App\Services\BookRecommendationsService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
-class InitBookMatchesJob extends Job
+class InitBookRecommendationsJob extends Job
 {
-    private BookMatchingService $bookMatchingService;
+    private BookRecommendationsService $bookRecommendationsService;
 
     private ?int $start;
     private ?int $end;
@@ -26,7 +26,7 @@ class InitBookMatchesJob extends Job
     {
         $this->log('Начинается наполнение рекомендательной базы книг');
 
-        $this->bookMatchingService = app(BookMatchingService::class, ['debug' => $this->debugMode]);
+        $this->bookRecommendationsService = app(BookRecommendationsService::class, ['debug' => $this->debugMode]);
 
         $builder = DB::table('books')->orderBy('id')->where('status', Book::ACTIVE_STATUS);
 
@@ -40,7 +40,7 @@ class InitBookMatchesJob extends Job
 
         $builder->chunk(1000, function (Collection $data) {
             $bookIds = $data->pluck('id')->toArray();
-            $this->bookMatchingService->createForBooks($bookIds);
+            $this->bookRecommendationsService->createForBooks($bookIds);
         });
 
         $this->log('Наполнение рекомендательной базы книг завершено');

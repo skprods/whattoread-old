@@ -90,7 +90,7 @@ class BookManager
             BookDescriptionUpdated::dispatch($this->book);
         }
 
-        /** Если не обновилось описание, но появились новые жанры, нужно обновить book_matches */
+        /** Если не обновилось описание, но появились новые жанры, нужно обновить book_recommendations */
         if (!$descriptionUpdated && $hasNewGenres) {
             BookGenresUpdated::dispatch($this->book);
         }

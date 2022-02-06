@@ -4,15 +4,15 @@ namespace App\Listeners;
 
 use App\Events\BookFrequencyCreated;
 use App\Events\BookGenresUpdated;
-use App\Services\BookMatchingService;
+use App\Services\BookRecommendationsService;
 
-class UpdateBookMatches extends Listener
+class UpdateBookRecommendations extends Listener
 {
-    private BookMatchingService $service;
+    private BookRecommendationsService $service;
 
     public function __construct()
     {
-        $this->service = app(BookMatchingService::class);
+        $this->service = app(BookRecommendationsService::class);
     }
 
     public function handle(BookFrequencyCreated|BookGenresUpdated $event)

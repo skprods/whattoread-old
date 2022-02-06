@@ -19,11 +19,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class BookMatching extends Model
+class BookRecommendation extends Model
 {
     use HasDatabaseCounter;
-
-    protected $table = 'book_matches';
 
     protected $fillable = [
         'author_score',
@@ -35,7 +33,7 @@ class BookMatching extends Model
     {
         parent::boot();
 
-        static::saving(function (BookMatching $model) {
+        static::saving(function (BookRecommendation $model) {
             $author = $model->author_score ?? 0;
             $genres = $model->genres_score ?? 0;
             $description = $model->description_score ?? 0;
@@ -90,7 +88,7 @@ class BookMatching extends Model
         $this->attributes['genres_score'] = $score;
     }
 
-    public static function firstByBookIds(int $firstBookId, int $secondBookId): ?BookMatching
+    public static function firstByBookIds(int $firstBookId, int $secondBookId): ?BookRecommendation
     {
         return self::query()
             ->where(function (Builder $query) use ($firstBookId, $secondBookId) {

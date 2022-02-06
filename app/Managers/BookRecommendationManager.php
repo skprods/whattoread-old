@@ -2,14 +2,14 @@
 
 namespace App\Managers;
 
-use App\Models\BookMatching;
+use App\Models\BookRecommendation;
 use Illuminate\Support\Facades\DB;
 
-class BookMatchingManager
+class BookRecommendationManager
 {
-    private ?BookMatching $bookMatching;
+    private ?BookRecommendation $bookMatching;
 
-    public function __construct(BookMatching $bookMatching)
+    public function __construct(BookRecommendation $bookMatching)
     {
         $this->bookMatching = $bookMatching;
     }
@@ -29,7 +29,7 @@ class BookMatchingManager
             }
 
             if (count($allowed) === 1000) {
-                DB::table('book_matches')->upsert(
+                DB::table('book_recommendations')->upsert(
                     $allowed,
                     ['comparing_book_id', 'matching_book_id'],
                     ['author_score', 'description_score', 'total_score']
@@ -39,7 +39,7 @@ class BookMatchingManager
         }
 
         if (count($allowed)) {
-            DB::table('book_matches')->upsert(
+            DB::table('book_recommendations')->upsert(
                 $allowed,
                 ['comparing_book_id', 'matching_book_id'],
                 ['author_score', 'description_score', 'total_score']
@@ -75,7 +75,7 @@ class BookMatchingManager
             throw new \Exception('Не переданы параметры comparing_book_id и/или matching_book_id');
         }
 
-        $this->bookMatching = BookMatching::firstByBookIds($params['comparing_book_id'], $params['matching_book_id']);
+        $this->bookMatching = BookRecommendation::firstByBookIds($params['comparing_book_id'], $params['matching_book_id']);
 
         if ($this->bookMatching) {
             return $this->update($params);
@@ -84,19 +84,20 @@ class BookMatchingManager
         }
     }
 
-    public function createIfAllowed(array $params): ?BookMatching
+    public function createIfAllowed(array $params): ?BookRecommendation
     {
         // TODO: if total_score === 0
-        if (!$params['description_score'] && !$params['author_score']) {
+        // TODO: сделать статичную функцию у модели calcTotalScore($params): int
+        if (!$params['description_score'] && !$params['author_score'] && !$params['genres_score']) {
             return null;
         }
 
         return $this->create($params);
     }
 
-    public function create(array $params): BookMatching
+    public function create(array $params): BookRecommendation
     {
-        $this->bookMatching = app(BookMatching::class);
+        $this->bookMatching = app(BookRecommendation::class);
         $this->bookMatching->fill($params);
         $this->bookMatching->comparingBook()->associate($params['comparing_book_id']);
         $this->bookMatching->matchingBook()->associate($params['matching_book_id']);
@@ -105,7 +106,7 @@ class BookMatchingManager
         return $this->bookMatching;
     }
 
-    public function update(array $params): BookMatching
+    public function update(array $params): BookRecommendation
     {
         $this->bookMatching->fill($params);
         $this->bookMatching->save();
@@ -115,6 +116,6 @@ class BookMatchingManager
 
     public function deleteForBook(int $bookId)
     {
-        BookMatching::deleteByBookId($bookId);
+        BookRecommendation::deleteByBookId($bookId);
     }
 }

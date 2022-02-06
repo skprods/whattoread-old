@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Managers\BookMatchingManager;
+use App\Managers\BookRecommendationManager;
 use App\Models\Book;
 use App\Models\BookDescriptionFrequency;
 use Illuminate\Support\Collection;
@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SKprods\LaravelHelpers\Console;
 
-class BookMatchingService
+class BookRecommendationsService
 {
     private const EXACT_MULTIPLIER = 5;
 
     private bool $debug;
-    private BookMatchingManager $bookMatchingManager;
+    private BookRecommendationManager $bookRecommendationManager;
 
     public function __construct(bool $debug = false)
     {
         $this->debug = $debug;
-        $this->bookMatchingManager = app(BookMatchingManager::class);
+        $this->bookRecommendationManager = app(BookRecommendationManager::class);
     }
 
     public function createForBooks(array $bookIds)
@@ -65,7 +65,7 @@ class BookMatchingService
 
         if ($bookIds->count()) {
             $this->log($book, "Найдено {$bookIds->count()} книг");
-            $this->bookMatchingManager->deleteForBook($book->id);
+            $this->bookRecommendationManager->deleteForBook($book->id);
             $this->log($book, "Данные по совпадениям для книги очищены");
         } else {
             $this->error($book, "[отменено] Похожие книги не найдены");
@@ -83,7 +83,7 @@ class BookMatchingService
                 $bookFrequencies = BookDescriptionFrequency::getBookFrequenciesByBookIds($matchingBookIds->toArray());
                 $this->log($book, "Частотные словники похожих книг получены (для {$matchingBookIds->count()} книг)");
 
-                $this->createMatchesFromBookFrequencies(
+                $this->createRecommendationsFromBookFrequencies(
                     $bookFrequencies,
                     $book,
                     $comparingWordFrequencies,
@@ -97,7 +97,7 @@ class BookMatchingService
         $this->log($book, "Совпадения подобраны и сохранены: $count книг");
     }
 
-    private function createMatchesFromBookFrequencies(
+    private function createRecommendationsFromBookFrequencies(
         Collection $bookFrequencies,
         Book $book,
         array $comparingWordFrequencies,
@@ -162,7 +162,7 @@ class BookMatchingService
             ]);
         }
 
-        $this->bookMatchingManager->bulkCreate($bookScores);
+        $this->bookRecommendationManager->bulkCreate($bookScores);
         $this->log($book, "Сохранены совпадения: {$bookFrequencies->count()} книг");
     }
 
@@ -211,18 +211,18 @@ class BookMatchingService
     public function log(Book $book, string $message)
     {
         if ($this->debug) {
-            Console::info("[bookMatching #{$book->id}] $message");
+            Console::info("[bookRecommendations #{$book->id}] $message");
         }
 
-        Log::info("[bookMatching #{$book->id}] $message");
+        Log::info("[bookRecommendations #{$book->id}] $message");
     }
 
     public function error(Book $book, string $message)
     {
         if ($this->debug) {
-            Console::error("[bookMatching #{$book->id}] $message");
+            Console::error("[bookRecommendations #{$book->id}] $message");
         }
 
-        Log::error("[bookMatching #{$book->id}] $message");
+        Log::error("[bookRecommendations #{$book->id}] $message");
     }
 }

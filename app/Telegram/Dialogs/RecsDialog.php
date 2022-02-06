@@ -4,7 +4,7 @@ namespace App\Telegram\Dialogs;
 
 use App\Managers\KeyboardParamManager;
 use App\Models\Book;
-use App\Models\BookMatching;
+use App\Models\BookRecommendation;
 use App\Models\KeyboardParam;
 use App\Models\TelegramUserBook;
 use App\Telegram\TelegramDialog;
@@ -186,7 +186,7 @@ class RecsDialog extends TelegramDialog
         $excludedBookIds = TelegramUserBook::getUserBookIds($this->telegramUser->id);
         unset($excludedBookIds[$bookId]);
 
-        $builder = BookMatching::query()
+        $builder = BookRecommendation::query()
             ->orWhere('comparing_book_id', $bookId)
             ->orWhere('matching_book_id', $bookId)
             ->whereNotIn('comparing_book_id', $excludedBookIds)
@@ -194,7 +194,7 @@ class RecsDialog extends TelegramDialog
             ->orderByDesc('total_score');
 
         if ($withAuthor === false) {
-            $builder = BookMatching::query()->from($builder);
+            $builder = BookRecommendation::query()->from($builder);
             $builder->where('author_score', '=', 0);
         }
 
@@ -217,7 +217,7 @@ class RecsDialog extends TelegramDialog
 
     private function getMessage(string $text, Collection $bookMatches, int $searchBookId): string
     {
-        $bookMatches->each(function (BookMatching $bookMatching) use (&$text, $searchBookId) {
+        $bookMatches->each(function (BookRecommendation $bookMatching) use (&$text, $searchBookId) {
             if ($bookMatching->comparing_book_id === $searchBookId) {
                 $book = $bookMatching->matchingBook;
             } else {
