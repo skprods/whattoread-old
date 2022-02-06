@@ -70,6 +70,9 @@ class RecsDialog extends TelegramDialog
 
         $this->replyWithMessage([
             'text' => "Готовим рекомендации...",
+            'reply_markup' => json_encode([
+                'remove_keyboard' => true,
+            ]),
         ]);
         $this->replyWithChatAction([
             'action' => 'typing',
