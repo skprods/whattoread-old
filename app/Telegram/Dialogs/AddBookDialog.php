@@ -40,7 +40,6 @@ class AddBookDialog extends TelegramDialog
     public function authorStep()
     {
         $author = $this->update->message->text;
-        Log::info(json_encode($author, JSON_UNESCAPED_UNICODE));
         $this->chatInfo->dialog->data['author'] = $author;
 
         /** Название книги мы получили на предыдущем шаге */
@@ -84,7 +83,12 @@ class AddBookDialog extends TelegramDialog
         }
 
         $this->replyWithMessage([
-            'text' => 'Хорошо. Оцените эту книгу по шкале от 1 (не понравилась) до 5 (понравилась)'
+            'text' => 'Хорошо. Оцените эту книгу по шкале от 1 (не понравилась) до 5 (понравилась)',
+            'reply_markup' => json_encode([
+                'keyboard' => [['1', '2', '3', '4', '5']],
+                'resize_keyboard' => true,
+                'one_time_keyboard' => true,
+            ]),
         ]);
     }
 
@@ -106,7 +110,12 @@ class AddBookDialog extends TelegramDialog
         $text .= "Напишите одну или несколько ассоциаций (по одной в сообщении или через запятую). ";
         $text .= "Можно использовать словосочетания или обычные слова. Когда закончите, в отдельном сообщении напишите Конец.\n\n";
         $text .= "Если вы не хотите отвечать, напишите Пропустить";
-        $this->replyWithMessage(['text' => $text]);
+        $this->replyWithMessage([
+            'text' => $text,
+            'reply_markup' => json_encode([
+                'remove_keyboard' => true,
+            ]),
+        ]);
     }
 
     public function associationsStep()
