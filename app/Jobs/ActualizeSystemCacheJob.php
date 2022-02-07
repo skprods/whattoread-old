@@ -5,7 +5,7 @@ namespace App\Jobs;
 use App\Models\Book;
 use App\Models\BookContentFrequency;
 use App\Models\BookDescriptionFrequency;
-use App\Models\BookRecommendation;
+use App\Models\BookRecs;
 use App\Models\Exception;
 use App\Models\Genre;
 use App\Models\TelegramMessage;
@@ -42,8 +42,8 @@ class ActualizeSystemCacheJob extends QueueJob
                 'diff' => Word::getDiffCount(),
             ],
             'book_matches' => [
-                'total' => BookRecommendation::query()->count(),
-                'diff' => BookRecommendation::getDiffCount(),
+                'total' => BookRecs::query()->count(),
+                'diff' => BookRecs::getDiffCount(),
             ],
             'content_frequency' => [
                 'total' => BookContentFrequency::query()->count(),

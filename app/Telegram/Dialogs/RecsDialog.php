@@ -5,13 +5,14 @@ namespace App\Telegram\Dialogs;
 use App\Managers\KeyboardParamManager;
 use App\Managers\RecommendationListManager;
 use App\Models\Book;
-use App\Models\BookRecommendation;
+use App\Models\BookRecs;
+use App\Models\BookRecsShort;
 use App\Models\KeyboardParam;
 use App\Models\TelegramUserBook;
 use App\Telegram\TelegramDialog;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
 class RecsDialog extends TelegramDialog
@@ -76,14 +77,12 @@ class RecsDialog extends TelegramDialog
                 'remove_keyboard' => true,
             ]),
         ]);
-        $this->replyWithChatAction([
-            'action' => 'typing',
-        ]);
 
-        $builder = $this->getBuilder($bookId, $withAuthor);
+        $shortRecs = BookRecsShort::find($bookId);
+        $recs = $this->getRecs($shortRecs, $withAuthor);
 
-        $count = $builder->count();
-        if (!$count) {
+        $count = $recs->count();
+        if ($count === 0) {
             $text = "К сожалению, пока что у нас нет рекомендаций к книге {$book->author} - {$book->title}, ";
             $text .= "но скоро они появятся. Попробуйте позже.";
             $this->replyWithMessage(['text' => $text]);
@@ -91,11 +90,11 @@ class RecsDialog extends TelegramDialog
             return;
         }
 
-        $bookMatches = $builder->limit($this->perPage)->get();
-
         $booksMessage = self::getBooksMessage($count);
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
-        $text = $this->getMessage($text, $bookMatches, $bookId);
+
+        $recs = $recs->chunk($this->perPage);
+        $text = $this->getMessage($text, $recs->get(0));
 
         $keyboard = $this->getKeyboard($this->update->updateId, $count, $this->perPage);
 
@@ -122,8 +121,9 @@ class RecsDialog extends TelegramDialog
         ]);
 
         try {
+            $recs = $this->getRecs($shortRecs, $withAuthor);
             $this->recommendationListManager
-                ->saveRecommendations($bookMatches, $bookId, $this->update->updateId, $this->chatInfo->id, true);
+                ->saveRecommendations($recs, $bookId, $this->update->updateId, $this->chatInfo->id, true);
 
             /** Ждём две секунды, чтобы просьба об оценке не слилась со списком и пришла отдельно, а не одновременно */
             sleep(2);
@@ -150,11 +150,9 @@ class RecsDialog extends TelegramDialog
         if (!$keyboardParam) {
             return;
         }
-        [$bookId, $withAuthor] = explode('_', $keyboardParam->param);
 
-        $this->replyWithChatAction([
-            'action' => 'typing',
-        ]);
+        [$bookId, $withAuthor] = explode('_', $keyboardParam->param);
+        $withAuthor = $withAuthor === '1';
 
         /** @var Book $book */
         $book = Book::findOrFail($bookId);
@@ -163,14 +161,29 @@ class RecsDialog extends TelegramDialog
             return;
         }
 
-        $builder = $this->getBuilder($bookId, (bool) $withAuthor);
+        $shortRecs = BookRecsShort::find($bookId);
+        $recs = $this->getRecs($shortRecs, $withAuthor);
 
-        $count = $builder->count();
-        $bookMatches = $builder->limit($this->perPage)->offset($this->perPage * ($pageNumber - 1))->get();
-
+        $count = $recs->count();
         $booksMessage = self::getBooksMessage($count);
         $text = "С книгой {$book->author} - {$book->title} мы рекомендуем {$booksMessage}: \n\n";
-        $text = $this->getMessage($text, $bookMatches, $bookId);
+
+        $recs = $recs->chunk($this->perPage);
+        $rec = $this->getRec($recs, $pageNumber - 1);
+        if (!$rec) {
+            $text = "К сожалению, пока что у нас нет рекомендаций к книге {$book->author} - {$book->title}, ";
+            $text .= "но скоро они появятся. Попробуйте позже.";
+            $this->editMessageText([
+                'chat_id' => $this->chatInfo->id,
+                'message_id' => $this->update->callbackQuery->message->messageId,
+                'text' => $text,
+                'parse_mode' => 'markdown',
+            ]);
+
+            return;
+        }
+
+        $text = $this->getMessage($text, $rec);
 
         $keyboard = $this->getKeyboard($updateId, $count, $this->perPage, $pageNumber);
 
@@ -201,11 +214,32 @@ class RecsDialog extends TelegramDialog
 
         /** Дополняем просмотренные рекомендации в recommendation_lists */
         try {
+            $recs = $this->getRecs($shortRecs, $withAuthor);
             $this->recommendationListManager
-                ->saveRecommendations($bookMatches, $bookId, $updateId, $this->chatInfo->id, false);
+                ->saveRecommendations($recs, $bookId, $updateId, $this->chatInfo->id, false);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
         }
+    }
+
+    private function getRecs(BookRecsShort $shortRecs, bool $withAuthor): Collection
+    {
+        $excludedBookIds = TelegramUserBook::getUserBookIds($this->telegramUser->id);
+        unset($excludedBookIds[$shortRecs->book_id]);
+
+        $recs = collect($shortRecs->data);
+        if ($withAuthor === false) {
+            $recs = $recs->filter(function ($rec) {
+                return $rec['author_score'] === 0;
+            });
+        }
+
+        /** Исклчаем уже добавленные пользователем книги */
+        $recs = $recs->filter(function ($rec) use ($excludedBookIds) {
+            return !isset($excludedBookIds[$rec['book_id']]);
+        });
+
+        return $recs->sortByDesc('total_score');
     }
 
     private function getBuilder(int $bookId, bool $withAuthor): Builder
@@ -214,7 +248,7 @@ class RecsDialog extends TelegramDialog
         $excludedBookIds = TelegramUserBook::getUserBookIds($this->telegramUser->id);
         unset($excludedBookIds[$bookId]);
 
-        $builder = BookRecommendation::query()
+        $builder = BookRecs::query()
             ->orWhere('comparing_book_id', $bookId)
             ->orWhere('matching_book_id', $bookId)
             ->whereNotIn('comparing_book_id', $excludedBookIds)
@@ -222,7 +256,7 @@ class RecsDialog extends TelegramDialog
             ->orderByDesc('total_score');
 
         if ($withAuthor === false) {
-            $builder = BookRecommendation::query()->from($builder);
+            $builder = BookRecs::query()->from($builder);
             $builder->where('author_score', '=', 0);
         }
 
@@ -243,16 +277,19 @@ class RecsDialog extends TelegramDialog
         };
     }
 
-    private function getMessage(string $text, Collection $bookMatches, int $searchBookId): string
+    private function getMessage(string $text, Collection $recs): string
     {
-        $bookMatches->each(function (BookRecommendation $bookMatching) use (&$text, $searchBookId) {
-            if ($bookMatching->comparing_book_id === $searchBookId) {
-                $book = $bookMatching->matchingBook;
-            } else {
-                $book = $bookMatching->comparingBook;
-            }
+        $bookIds = $recs->keys()->toArray();
+        $books = Book::whereIdIn($bookIds)
+            ->mapWithKeys(function (Book $book) {
+                return [$book->id => $book];
+            });
 
-            $score = round($bookMatching->total_score / $this->totalScore * 100, 2);
+        $recs->each(function ($rec) use (&$text, $books) {
+            /** @var Book $book */
+            $book = $books->get($rec['book_id']);
+
+            $score = round($rec['total_score'] / $this->totalScore * 100, 2);
             $description = mb_strlen($book->description) > 300
                 ? mb_substr($book->description, 0, 300) . "..."
                 : $book->description;
@@ -266,6 +303,21 @@ class RecsDialog extends TelegramDialog
         });
 
         return $text;
+    }
+
+    private function getRec(Collection $recs, int $page)
+    {
+        if (!$recs->has($page)) {
+            do {
+                $page -= 1;
+
+                if ($recs->has($page)) {
+                    return $recs->get($page);
+                }
+            } while ($page >= 0);
+        }
+
+        return null;
     }
 
     private function getRatingKeyboard(int $updateId): array

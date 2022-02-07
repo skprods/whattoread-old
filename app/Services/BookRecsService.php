@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Managers\BookRecommendationManager;
+use App\Managers\BookRecsManager;
 use App\Models\Book;
 use App\Models\BookDescriptionFrequency;
 use Illuminate\Support\Collection;
@@ -10,17 +10,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use SKprods\LaravelHelpers\Console;
 
-class BookRecommendationsService
+class BookRecsService
 {
     private const EXACT_MULTIPLIER = 5;
 
     private bool $debug;
-    private BookRecommendationManager $bookRecommendationManager;
+    private BookRecsManager $bookRecommendationManager;
 
     public function __construct(bool $debug = false)
     {
         $this->debug = $debug;
-        $this->bookRecommendationManager = app(BookRecommendationManager::class);
+        $this->bookRecommendationManager = app(BookRecsManager::class);
     }
 
     public function createForBooks(array $bookIds)

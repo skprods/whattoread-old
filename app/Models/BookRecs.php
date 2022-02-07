@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -21,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
-class BookRecommendation extends Model
+class BookRecs extends Model
 {
     use HasDatabaseCounter;
 
@@ -35,7 +36,7 @@ class BookRecommendation extends Model
     {
         parent::boot();
 
-        static::saving(function (BookRecommendation $model) {
+        static::saving(function (BookRecs $model) {
             $author = $model->author_score ?? 0;
             $genres = $model->genres_score ?? 0;
             $description = $model->description_score ?? 0;
@@ -90,7 +91,7 @@ class BookRecommendation extends Model
         $this->attributes['genres_score'] = $score;
     }
 
-    public static function firstByBookIds(int $firstBookId, int $secondBookId): ?BookRecommendation
+    public static function firstByBookIds(int $firstBookId, int $secondBookId): ?BookRecs
     {
         return self::query()
             ->where(function (Builder $query) use ($firstBookId, $secondBookId) {
@@ -102,6 +103,14 @@ class BookRecommendation extends Model
                     ->where('matching_book_id', $firstBookId);
             })
             ->first();
+    }
+
+    public static function getByBookId(int $bookId): Collection
+    {
+        return self::query()
+            ->where('comparing_book_id', $bookId)
+            ->orWhere('matching_book_id', $bookId)
+            ->get();
     }
 
     public static function deleteByBookId(int $bookId)

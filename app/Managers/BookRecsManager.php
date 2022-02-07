@@ -2,14 +2,14 @@
 
 namespace App\Managers;
 
-use App\Models\BookRecommendation;
+use App\Models\BookRecs;
 use Illuminate\Support\Facades\DB;
 
-class BookRecommendationManager
+class BookRecsManager
 {
-    private ?BookRecommendation $bookMatching;
+    private ?BookRecs $bookMatching;
 
-    public function __construct(BookRecommendation $bookMatching)
+    public function __construct(BookRecs $bookMatching)
     {
         $this->bookMatching = $bookMatching;
     }
@@ -75,7 +75,7 @@ class BookRecommendationManager
             throw new \Exception('Не переданы параметры comparing_book_id и/или matching_book_id');
         }
 
-        $this->bookMatching = BookRecommendation::firstByBookIds($params['comparing_book_id'], $params['matching_book_id']);
+        $this->bookMatching = BookRecs::firstByBookIds($params['comparing_book_id'], $params['matching_book_id']);
 
         if ($this->bookMatching) {
             return $this->update($params);
@@ -84,7 +84,7 @@ class BookRecommendationManager
         }
     }
 
-    public function createIfAllowed(array $params): ?BookRecommendation
+    public function createIfAllowed(array $params): ?BookRecs
     {
         // TODO: if total_score === 0
         // TODO: сделать статичную функцию у модели calcTotalScore($params): int
@@ -95,9 +95,9 @@ class BookRecommendationManager
         return $this->create($params);
     }
 
-    public function create(array $params): BookRecommendation
+    public function create(array $params): BookRecs
     {
-        $this->bookMatching = app(BookRecommendation::class);
+        $this->bookMatching = app(BookRecs::class);
         $this->bookMatching->fill($params);
         $this->bookMatching->comparingBook()->associate($params['comparing_book_id']);
         $this->bookMatching->matchingBook()->associate($params['matching_book_id']);
@@ -106,7 +106,7 @@ class BookRecommendationManager
         return $this->bookMatching;
     }
 
-    public function update(array $params): BookRecommendation
+    public function update(array $params): BookRecs
     {
         $this->bookMatching->fill($params);
         $this->bookMatching->save();
@@ -116,6 +116,6 @@ class BookRecommendationManager
 
     public function deleteForBook(int $bookId)
     {
-        BookRecommendation::deleteByBookId($bookId);
+        BookRecs::deleteByBookId($bookId);
     }
 }

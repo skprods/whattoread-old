@@ -6,12 +6,14 @@ use App\Events\BookDeleted;
 use App\Events\BookDescriptionUpdated;
 use App\Events\BookFrequencyCreated;
 use App\Events\BookGenresUpdated;
+use App\Events\BookRecsUpdated;
 use App\Events\BookUpdated;
 use App\Events\NewFrequencies;
 use App\Listeners\CreateNewFrequencies;
 use App\Listeners\DeleteElasticBook;
 use App\Listeners\UpdateBookDescriptionFrequency;
-use App\Listeners\UpdateBookRecommendations;
+use App\Listeners\UpdateBookRecs;
+use App\Listeners\UpdateBookRecsShort;
 use App\Listeners\UpdateElasticBook;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -36,12 +38,17 @@ class EventServiceProvider extends ServiceProvider
 
         /** Составлен частотный словник книги */
         BookFrequencyCreated::class => [
-            UpdateBookRecommendations::class,
+            UpdateBookRecs::class,
         ],
 
         /** Обновлены жанры книги */
         BookGenresUpdated::class => [
-            UpdateBookRecommendations::class,
+            UpdateBookRecs::class,
+        ],
+
+        /** Обновлены рекомендации для книги */
+        BookRecsUpdated::class => [
+            UpdateBookRecsShort::class,
         ],
 
         BookUpdated::class => [

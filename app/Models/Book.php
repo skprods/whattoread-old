@@ -130,4 +130,9 @@ class Book extends Model
 
         return $builder->get();
     }
+
+    public static function whereIdIn(array $bookIds): Collection
+    {
+        return self::query()->whereIn('id', $bookIds)->get();
+    }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\InitBookRecommendationsJob;
+use App\Jobs\InitBookRecsJob;
 use Illuminate\Console\Command;
 
 class InitBookRecsCommand extends Command
@@ -13,7 +13,7 @@ class InitBookRecsCommand extends Command
 
     public function handle()
     {
-        dispatch(new InitBookRecommendationsJob(
+        dispatch(new InitBookRecsJob(
             $this->option('start'),
             $this->option('end'),
             $this->option('debug') ?? false

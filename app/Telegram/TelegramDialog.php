@@ -154,4 +154,17 @@ abstract class TelegramDialog extends Dialog
             throw $exception;
         }
     }
+
+    private function logError(array $params, \Exception $exception)
+    {
+        Log::info(json_encode([
+            'request' => $params,
+            'answer' => [
+                'code' => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file' => $exception->getFile(),
+                'line' => $exception->getLine(),
+            ],
+        ], JSON_UNESCAPED_UNICODE));
+    }
 }

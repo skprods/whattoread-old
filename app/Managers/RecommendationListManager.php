@@ -2,25 +2,22 @@
 
 namespace App\Managers;
 
-use App\Models\BookRecommendation;
 use App\Models\RecommendationList;
 use App\Models\TelegramUser;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 
 class RecommendationListManager
 {
     /** Сохранить/дополнить рекомендации */
     public function saveRecommendations(
-        Collection $bookMatches,
+        Collection $recs,
         int $bookId,
         int $updateId,
         int $telegramId,
         bool $create = true
     ): ?RecommendationList {
-        $bookIds = $bookMatches->mapWithKeys(function (BookRecommendation $rec) use ($bookId) {
-            return $rec->comparing_book_id === $bookId
-                ? [$rec->matching_book_id => $rec->total_score]
-                : [$rec->comparing_book_id => $rec->total_score];
+        $bookIds = $recs->mapWithKeys(function ($rec) use ($bookId) {
+            return [$rec['book_id'] => $rec['total_score']];
         })->toArray();
 
         $telegramUser = TelegramUser::findByTelegramIdOrFail($telegramId);
