@@ -315,6 +315,8 @@ class RecsDialog extends TelegramDialog
                     return $recs->get($page);
                 }
             } while ($page >= 0);
+        } else {
+            return $recs->get($page);
         }
 
         return null;
