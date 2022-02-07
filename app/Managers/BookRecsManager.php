@@ -7,11 +7,11 @@ use Illuminate\Support\Facades\DB;
 
 class BookRecsManager
 {
-    private ?BookRecs $bookMatching;
+    private ?BookRecs $bookRecs;
 
-    public function __construct(BookRecs $bookMatching)
+    public function __construct(BookRecs $bookRecs)
     {
-        $this->bookMatching = $bookMatching;
+        $this->bookRecs = $bookRecs;
     }
 
     /**
@@ -20,6 +20,7 @@ class BookRecsManager
     public function bulkCreate(array $matching)
     {
         $allowed = [];
+        $table = $this->bookRecs->getTable();
 
         foreach ($matching as $params) {
             $item = $this->prepareParams($params);
@@ -29,7 +30,7 @@ class BookRecsManager
             }
 
             if (count($allowed) === 1000) {
-                DB::table('book_recommendations')->upsert(
+                DB::table($table)->upsert(
                     $allowed,
                     ['comparing_book_id', 'matching_book_id'],
                     ['author_score', 'description_score', 'total_score']
@@ -39,7 +40,7 @@ class BookRecsManager
         }
 
         if (count($allowed)) {
-            DB::table('book_recommendations')->upsert(
+            DB::table($table)->upsert(
                 $allowed,
                 ['comparing_book_id', 'matching_book_id'],
                 ['author_score', 'description_score', 'total_score']
@@ -75,9 +76,9 @@ class BookRecsManager
             throw new \Exception('Не переданы параметры comparing_book_id и/или matching_book_id');
         }
 
-        $this->bookMatching = BookRecs::firstByBookIds($params['comparing_book_id'], $params['matching_book_id']);
+        $this->bookRecs = BookRecs::firstByBookIds($params['comparing_book_id'], $params['matching_book_id']);
 
-        if ($this->bookMatching) {
+        if ($this->bookRecs) {
             return $this->update($params);
         } else {
             return $this->createIfAllowed($params);
@@ -97,21 +98,21 @@ class BookRecsManager
 
     public function create(array $params): BookRecs
     {
-        $this->bookMatching = app(BookRecs::class);
-        $this->bookMatching->fill($params);
-        $this->bookMatching->comparingBook()->associate($params['comparing_book_id']);
-        $this->bookMatching->matchingBook()->associate($params['matching_book_id']);
-        $this->bookMatching->save();
+        $this->bookRecs = app(BookRecs::class);
+        $this->bookRecs->fill($params);
+        $this->bookRecs->comparingBook()->associate($params['comparing_book_id']);
+        $this->bookRecs->matchingBook()->associate($params['matching_book_id']);
+        $this->bookRecs->save();
 
-        return $this->bookMatching;
+        return $this->bookRecs;
     }
 
     public function update(array $params): BookRecs
     {
-        $this->bookMatching->fill($params);
-        $this->bookMatching->save();
+        $this->bookRecs->fill($params);
+        $this->bookRecs->save();
 
-        return $this->bookMatching;
+        return $this->bookRecs;
     }
 
     public function deleteForBook(int $bookId)

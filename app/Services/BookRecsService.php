@@ -211,18 +211,18 @@ class BookRecsService
     public function log(Book $book, string $message)
     {
         if ($this->debug) {
-            Console::info("[bookRecommendations #{$book->id}] $message");
+            Console::info("[bookRecs #{$book->id}] $message");
         }
 
-        Log::info("[bookRecommendations #{$book->id}] $message");
+        Log::info("[bookRecs #{$book->id}] $message");
     }
 
     public function error(Book $book, string $message)
     {
         if ($this->debug) {
-            Console::error("[bookRecommendations #{$book->id}] $message");
+            Console::error("[bookRecs #{$book->id}] $message");
         }
 
-        Log::error("[bookRecommendations #{$book->id}] $message");
+        Log::error("[bookRecs #{$book->id}] $message");
     }
 }
