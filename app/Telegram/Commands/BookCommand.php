@@ -19,7 +19,6 @@ class BookCommand extends TelegramCommand
     public function handle()
     {
         $bookId = $this->arguments['id'];
-        Log::info($bookId);
         /** @var Book $book */
         $book = Book::find($bookId);
 
