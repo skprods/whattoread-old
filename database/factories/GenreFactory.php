@@ -22,7 +22,8 @@ class GenreFactory extends Factory
     public function definition()
     {
         return [
-            //
+            'name' => $this->faker->name,
+            'status' => Genre::MODERATION_STATUS,
         ];
     }
 }
