@@ -11,7 +11,7 @@ use App\Models\Word;
 use cijic\phpMorphy\Morphy;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use SKprods\LaravelHelpers\Console;
+use SKprods\LaravelHelpers\Facades\Console;
 
 class FrequencyService
 {
