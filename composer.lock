@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1134c0d09d6c710f5f5b519508e92bfc",
+    "content-hash": "bc3c4104386a9d4aaf79635ff1258093",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -3807,24 +3807,24 @@
         },
         {
             "name": "skprods/laravel-helpers",
-            "version": "1.0.4",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skprods/laravel-helpers.git",
-                "reference": "07de2e03931b726ee185f707b5d98ef95616e219"
+                "reference": "995233f57c63fc321ea22737b043fc7fe7713ca8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skprods/laravel-helpers/zipball/07de2e03931b726ee185f707b5d98ef95616e219",
-                "reference": "07de2e03931b726ee185f707b5d98ef95616e219",
+                "url": "https://api.github.com/repos/skprods/laravel-helpers/zipball/995233f57c63fc321ea22737b043fc7fe7713ca8",
+                "reference": "995233f57c63fc321ea22737b043fc7fe7713ca8",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "^7|^8",
+                "illuminate/support": "^7|^8|^9",
                 "php": "^7.4|^8.0"
             },
             "require-dev": {
-                "laravel/framework": "^7|^8",
+                "laravel/framework": "^7|^8|^9",
                 "squizlabs/php_codesniffer": "^3.5"
             },
             "type": "library",
@@ -3840,8 +3840,7 @@
             "authors": [
                 {
                     "name": "Pavel Sklyar",
-                    "email": "ozpavel@yandex.ru",
-                    "role": "Maintainer"
+                    "email": "ozpavel@yandex.ru"
                 }
             ],
             "description": "Helpers for Laravel framework",
@@ -3853,9 +3852,9 @@
             ],
             "support": {
                 "issues": "https://github.com/skprods/laravel-helpers/issues",
-                "source": "https://github.com/skprods/laravel-helpers/tree/1.0.4"
+                "source": "https://github.com/skprods/laravel-helpers/tree/2.0.0"
             },
-            "time": "2021-11-01T07:06:08+00:00"
+            "time": "2022-02-15T19:17:33+00:00"
         },
         {
             "name": "skprods/laravel-telegram-sdk",

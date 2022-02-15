@@ -8,7 +8,7 @@ use App\Models\BookDescriptionFrequency;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use SKprods\LaravelHelpers\Console;
+use SKprods\LaravelHelpers\Facades\Console;
 
 class BookRecsService
 {
