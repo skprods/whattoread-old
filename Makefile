@@ -1,5 +1,5 @@
 # Запуск приложения для разработки
-app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev redis-config
+app-start-dev: rm-vendor app-build-dev app-up-dev load-vendor-dev app-supervisor-start redis-config
 app-start-prod: app-build-prod app-up-prod app-supervisor-start redis-config
 
 app-build-dev: # сборка проекта с указанием имени пользователя

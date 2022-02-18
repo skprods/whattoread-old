@@ -9,7 +9,7 @@ class ActualizeSystemCacheCommand extends Command
 {
     protected $signature = 'actualize:systemCache {--debug}';
 
-    protected $description = 'Обновляет кэш с информацией о системе';
+    protected $description = 'Актуализация кэша с информацией о системе';
 
     public function handle()
     {
