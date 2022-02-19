@@ -17,6 +17,8 @@ services:
             dockerfile: ./deploy/php-fpm/Dockerfile
         volumes:
             - ./deploy/php-fpm/php.ini:/usr/local/etc/php/php.ini
+            - ./deploy/php-fpm/php.ini:/usr/local/etc/php/php.ini-development
+            - ./deploy/php-fpm/php.ini:/usr/local/etc/php/php.ini-production
             - ./deploy/php-fpm/supervisord.conf:/etc/supervisor/conf.d/supervisord.conf
             - ./app:/var/www/app
             - ./bootstrap:/var/www/bootstrap
@@ -55,7 +57,7 @@ services:
             - ./backups:/home
 
     whattoread-elasticsearch:
-        image: docker.elastic.co/elasticsearch/elasticsearch:7.9.1
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1
         restart: unless-stopped
         environment:
             - "discovery.type=single-node"
