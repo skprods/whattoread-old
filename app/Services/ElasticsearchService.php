@@ -3,10 +3,10 @@
 namespace App\Services;
 
 use App\Support\ElasticQuery;
+use App\Support\ElasticSearchDocument;
 use App\Support\ElasticSearchResult;
 use Elasticsearch\Client;
 use Elasticsearch\Common\Exceptions\Missing404Exception;
-use Illuminate\Support\Facades\Log;
 
 class ElasticsearchService
 {
@@ -95,12 +95,18 @@ class ElasticsearchService
         }
     }
 
-    public function delete(string $index, string $id)
+    public function delete(string $index, string $id): bool
     {
-        $this->client->delete([
-            'index' => $index,
-            'id' => $id
-        ]);
+        try {
+            $result = $this->client->delete([
+                'index' => $index,
+                'id' => $id
+            ]);
+
+            return isset($result['result']) && $result['result'] === "deleted";
+        } catch (Missing404Exception $exception) {
+            return false;
+        }
     }
 
     public function search(ElasticQuery $query): ?ElasticSearchResult
@@ -117,15 +123,15 @@ class ElasticsearchService
         }
     }
 
-    public function getById(ElasticQuery $query): ?ElasticSearchResult
+    public function getById(string $key, int $id): ?ElasticSearchDocument
     {
         try {
-            $result = $this->client->search([
-                'index' => $query->key,
-                'body' => $query->body,
+            $result = $this->client->get([
+                'index' => $key,
+                'id' => $id,
             ]);
 
-            return new ElasticSearchResult($result);
+            return new ElasticSearchDocument($result);
         } catch (Missing404Exception $exception) {
             return null;
         }
