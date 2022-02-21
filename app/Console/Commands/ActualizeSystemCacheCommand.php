@@ -13,6 +13,10 @@ class ActualizeSystemCacheCommand extends Command
 
     public function handle()
     {
+
+
+
+        echo "test";
         dispatch(new ActualizeSystemCacheJob($this->option('debug')));
     }
 }
