@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Events\NewFrequencies;
-use App\Http\Controllers\Controller;
 use App\Http\Collections\Admin\BooksCollection;
 use App\Http\Collections\CollectionResource;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\BookCreateRequest;
 use App\Http\Requests\Admin\BookUpdateRequest;
 use App\Http\Resources\Admin\BookResource;
@@ -24,6 +24,41 @@ class BooksController extends Controller
 {
     use HasDataTableFilters;
 
+    /**
+     * @OA\Get(
+     *     path="api/v1/admin/books",
+     *     summary="Получение книг",
+     *     description="Получение информации о всех книгах с пагинацией",
+     *     operationId="admin.books",
+     *     tags={"Админ-панель | Книги"},
+     *     security={ {"bearer":{}} },
+     *     @OA\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         required=true,
+     *         description="Bearer {token}",
+     *         @OA\Schema(
+     *             type="bearerAuth"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="pagination",
+     *         in="query",
+     *         example="30",
+     *         description="Число записей на страницу"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Успешная выборка",
+     *         @OA\JsonContent(ref="#/components/schemas/BooksCollection")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Пользователь не авторизован",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedException")
+     *     ),
+     * )
+     */
     public function index(): CollectionResource
     {
         $builder = Book::query()->with(['genres']);
@@ -57,11 +92,76 @@ class BooksController extends Controller
         return BooksCollection::fromDataTable($dataTable, 30);
     }
 
+    /**
+     * @OA\Get(
+     *     path="api/v1/admin/books/{id}",
+     *     summary="Получение книги",
+     *     description="Получение информации о конкретной книги по ID",
+     *     operationId="admin.books.show",
+     *     tags={"Админ-панель | Книги"},
+     *     security={ {"bearer":{}} },
+     *     @OA\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         required=true,
+     *         description="Bearer {token}",
+     *         @OA\Schema(
+     *             type="bearerAuth"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         example="1",
+     *         description="ID нужной книги"
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Успешная выборка",
+     *         @OA\JsonContent(ref="#/components/schemas/BookResource")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Пользователь не авторизован",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedException")
+     *     ),
+     * )
+     */
     public function show(Book $book): BookResource
     {
         return new BookResource($book->load(['genres']));
     }
 
+    /**
+     * @OA\Post(
+     *     path="api/v1/admin/books",
+     *     summary="Создание книги",
+     *     description="Создание книги",
+     *     operationId="admin.books.create",
+     *     tags={"Админ-панель | Книги"},
+     *     @OA\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         required=true,
+     *         description="Bearer {token}",
+     *         @OA\Schema(
+     *             type="bearerAuth"
+     *         )
+     *     ),
+     *     @OA\RequestBody(ref="#/components/requestBodies/BookCreateRequest"),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Книга создана",
+     *         @OA\JsonContent(ref="#/components/schemas/BookResource")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Пользователь не авторизован",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedException")
+     *     ),
+     * )
+     */
     public function create(BookCreateRequest $request): BookResource
     {
         $book = app(BooksService::class)->create($request->validated());
@@ -69,6 +169,42 @@ class BooksController extends Controller
         return new BookResource($book->load('genres'));
     }
 
+    /**
+     * @OA\Put(
+     *     path="api/v1/admin/books/{id}",
+     *     summary="Обновление книги",
+     *     description="Обновление книги",
+     *     operationId="admin.books.update",
+     *     tags={"Админ-панель | Книги"},
+     *     @OA\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         required=true,
+     *         description="Bearer {token}",
+     *         @OA\Schema(
+     *             type="bearerAuth"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         example="1",
+     *         description="ID нужной книги"
+     *     ),
+     *     @OA\RequestBody(ref="#/components/requestBodies/BookUpdateRequest"),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Книга обновлена",
+     *         @OA\JsonContent(ref="#/components/schemas/BookResource")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Пользователь не авторизован",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedException")
+     *     ),
+     * )
+     */
     public function update(BookUpdateRequest $request, Book $book): BookResource
     {
         $book = app(BookManager::class, ['book' => $book])->update($request->validated());
@@ -76,6 +212,40 @@ class BooksController extends Controller
         return new BookResource($book->load('genres'));
     }
 
+    /**
+     * @OA\Delete(
+     *     path="api/v1/admin/books/{id}",
+     *     summary="Удаление книги",
+     *     description="Удаление книги",
+     *     operationId="admin.books.delete",
+     *     tags={"Админ-панель | Книги"},
+     *     @OA\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         required=true,
+     *         description="Bearer {token}",
+     *         @OA\Schema(
+     *             type="bearerAuth"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         example="1",
+     *         description="ID нужной книги"
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Книга удалена",
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Пользователь не авторизован",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedException")
+     *     ),
+     * )
+     */
     public function delete(Book $book): Response
     {
         app(BookManager::class, ['book' => $book])->delete();
@@ -83,6 +253,52 @@ class BooksController extends Controller
         return response()->noContent();
     }
 
+    /**
+     * @OA\Post(
+     *     path="api/v1/admin/books/{id}/frequency",
+     *     summary="Создание книги",
+     *     description="Создание книги",
+     *     operationId="admin.books.createFrequency",
+     *     tags={"Админ-панель | Книги"},
+     *     @OA\Parameter(
+     *         name="Authorization",
+     *         in="header",
+     *         required=true,
+     *         description="Bearer {token}",
+     *         @OA\Schema(
+     *             type="bearerAuth"
+     *         )
+     *     ),
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         example="1",
+     *         description="ID нужной книги"
+     *     ),
+     *     @OA\RequestBody(
+     *         request="CreateFrequency",
+     *         required=true,
+     *         description="Запрос на создание книги",
+     *         @OA\JsonContent(
+     *             required={"file"},
+     *             @OA\Property( property="string", type="string", format="binary", example="book.fb2",
+     *                 description="Файл книги в формате fb2"
+     *             ),
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Книга создана",
+     *         @OA\JsonContent(ref="#/components/schemas/BookResource")
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Пользователь не авторизован",
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedException")
+     *     ),
+     * )
+     */
     public function createFrequency(Request $request, Book $book): SingleResource
     {
         $request->validate([
