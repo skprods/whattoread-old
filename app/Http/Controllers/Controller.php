@@ -8,10 +8,7 @@ use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Routing\Controller as BaseController;
 
 /**
- * @OA\Info(
- *    title="WhatToRead API",
- *    version="1.0.0",
- * )
+ * @OA\Info( title="WhatToRead API", version="1.0.0" )
  */
 class Controller extends BaseController
 {

@@ -6,6 +6,26 @@ use App\Traits\CanPrepareData;
 use Illuminate\Http\Resources\Json\ResourceCollection;
 use Yajra\DataTables\EloquentDataTable;
 
+/**
+ * @OA\Schema(
+ *     description="Коллекция записей",
+ *     @OA\Property( property="success", type="boolean", example="true", description="Успешный ли ответ" ),
+ *     @OA\Property(
+ *         property="pagination",
+ *         type="object",
+ *         description="Пагинация",
+ *         @OA\Property( property="per_page", type="integer", example="30",
+ *             description="Количество записей на страницу"
+ *         ),
+ *         @OA\Property( property="total", type="integer", example="120", description="Всего записей" ),
+ *         @OA\Property( property="current_page", type="integer", example="3", description="Текущая страница" ),
+ *         @OA\Property( property="first_page", type="integer", example="1", description="Первая страница" ),
+ *         @OA\Property( property="last_page", type="integer", example="4", description="Последняя страница" ),
+ *         @OA\Property( property="prev_page", type="integer", example="2", description="Предыдущая страница" ),
+ *         @OA\Property( property="next_page", type="integer", example="4", description="Следующая страница" ),
+ *     ),
+ * )
+ */
 class CollectionResource extends ResourceCollection
 {
     use CanPrepareData;
