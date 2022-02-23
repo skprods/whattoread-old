@@ -55,7 +55,6 @@ namespace App\Http\Resources;
  *     ),
  * )
  */
-
 class UserResource extends SingleResource
 {
     public function toArray($request): array

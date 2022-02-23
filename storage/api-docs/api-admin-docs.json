@@ -1,14 +1,14 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "WhatToRead API",
+        "title": "WhatToRead Admin API",
         "version": "1.0.0"
     },
     "paths": {
         "api/v1/admin/books": {
             "get": {
                 "tags": [
-                    "Админ-панель | Книги"
+                    "Книги"
                 ],
                 "summary": "Получение книг",
                 "description": "Получение информации о всех книгах с пагинацией",
@@ -57,56 +57,12 @@
                         "bearer": []
                     }
                 ]
-            },
-            "post": {
-                "tags": [
-                    "Админ-панель | Книги"
-                ],
-                "summary": "Создание книги",
-                "description": "Создание книги",
-                "operationId": "admin.books.create",
-                "parameters": [
-                    {
-                        "name": "Authorization",
-                        "in": "header",
-                        "description": "Bearer {token}",
-                        "required": true,
-                        "schema": {
-                            "type": "bearerAuth"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "$ref": "#/components/requestBodies/BookCreateRequest"
-                },
-                "responses": {
-                    "201": {
-                        "description": "Книга создана",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/BookResource"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Пользователь не авторизован",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UnauthorizedException"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
         "api/v1/admin/books/{id}": {
             "get": {
                 "tags": [
-                    "Админ-панель | Книги"
+                    "Книги"
                 ],
                 "summary": "Получение книги",
                 "description": "Получение информации о конкретной книги по ID",
@@ -156,108 +112,16 @@
                         "bearer": []
                     }
                 ]
-            },
-            "put": {
-                "tags": [
-                    "Админ-панель | Книги"
-                ],
-                "summary": "Обновление книги",
-                "description": "Обновление книги",
-                "operationId": "admin.books.update",
-                "parameters": [
-                    {
-                        "name": "Authorization",
-                        "in": "header",
-                        "description": "Bearer {token}",
-                        "required": true,
-                        "schema": {
-                            "type": "bearerAuth"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID нужной книги",
-                        "required": true,
-                        "example": "1"
-                    }
-                ],
-                "requestBody": {
-                    "$ref": "#/components/requestBodies/BookUpdateRequest"
-                },
-                "responses": {
-                    "200": {
-                        "description": "Книга обновлена",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/BookResource"
-                                }
-                            }
-                        }
-                    },
-                    "401": {
-                        "description": "Пользователь не авторизован",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UnauthorizedException"
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Админ-панель | Книги"
-                ],
-                "summary": "Удаление книги",
-                "description": "Удаление книги",
-                "operationId": "admin.books.delete",
-                "parameters": [
-                    {
-                        "name": "Authorization",
-                        "in": "header",
-                        "description": "Bearer {token}",
-                        "required": true,
-                        "schema": {
-                            "type": "bearerAuth"
-                        }
-                    },
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "ID нужной книги",
-                        "required": true,
-                        "example": "1"
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "Книга удалена"
-                    },
-                    "401": {
-                        "description": "Пользователь не авторизован",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UnauthorizedException"
-                                }
-                            }
-                        }
-                    }
-                }
             }
         },
-        "api/v1/admin/books/{id}/frequency": {
-            "post": {
+        "api/v1/admin/books/adsfgsa/{id}": {
+            "get": {
                 "tags": [
-                    "Админ-панель | Книги"
+                    "Книги"
                 ],
-                "summary": "Создание книги",
-                "description": "Создание книги",
-                "operationId": "admin.books.createFrequency",
+                "summary": "Получение книги",
+                "description": "Получение информации о конкретной книги по ID",
+                "operationId": "admin.books.s",
                 "parameters": [
                     {
                         "name": "Authorization",
@@ -276,32 +140,9 @@
                         "example": "1"
                     }
                 ],
-                "requestBody": {
-                    "request": "CreateFrequency",
-                    "description": "Запрос на создание книги",
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "file"
-                                ],
-                                "properties": {
-                                    "string": {
-                                        "description": "Файл книги в формате fb2",
-                                        "type": "string",
-                                        "format": "binary",
-                                        "example": "book.fb2"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
                 "responses": {
-                    "201": {
-                        "description": "Книга создана",
+                    "200": {
+                        "description": "Успешная выборка",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -320,13 +161,18 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer": []
+                    }
+                ]
             }
         },
         "api/v1/admin/genres": {
             "get": {
                 "tags": [
-                    "Админ-панель | Жанры"
+                    "Жанры"
                 ],
                 "summary": "Получение жанров",
                 "description": "Получение информации о всех жанрах",
@@ -364,226 +210,6 @@
                         }
                     }
                 }
-            }
-        },
-        "api/v1/login": {
-            "post": {
-                "tags": [
-                    "Аутентификация"
-                ],
-                "summary": "Авторизация",
-                "description": "Авторизация по почте и паролю",
-                "operationId": "authLogin",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "email",
-                                    "password"
-                                ],
-                                "properties": {
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@email.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret"
-                                    },
-                                    "remember": {
-                                        "description": "Нужно ли запоминать пользователя (влияет на время жизни токена)",
-                                        "type": "boolean",
-                                        "example": "true"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Успешная авторизация",
-                        "headers": {
-                            "Authorization": {
-                                "description": "Bearer-токен для доступа к приложению",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Переданные данные невалидны",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": "false"
-                                        },
-                                        "error": {
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "example": "Переданные данные невалидны"
-                                                },
-                                                "validator": {
-                                                    "properties": {
-                                                        "email": {
-                                                            "type": "string",
-                                                            "example": "Неверный email и/или пароль"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "api/v1/register": {
-            "post": {
-                "tags": [
-                    "Аутентификация"
-                ],
-                "summary": "Регистрация",
-                "description": "Регистрация в системе",
-                "operationId": "authRegister",
-                "requestBody": {
-                    "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "required": [
-                                    "first_name",
-                                    "email",
-                                    "password",
-                                    "password_confirmation"
-                                ],
-                                "properties": {
-                                    "first_name": {
-                                        "type": "string",
-                                        "example": "Олег"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email",
-                                        "example": "user@email.com"
-                                    },
-                                    "password": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string",
-                                        "format": "password",
-                                        "example": "secret"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Успешная регистрация и авторизация",
-                        "headers": {
-                            "Authorization": {
-                                "description": "Bearer-токен для доступа к приложению",
-                                "schema": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Переданные данные невалидны",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "success": {
-                                            "type": "boolean",
-                                            "example": "false"
-                                        },
-                                        "error": {
-                                            "properties": {
-                                                "message": {
-                                                    "type": "string",
-                                                    "example": "Переданные данные невалидны"
-                                                },
-                                                "validator": {
-                                                    "properties": {
-                                                        "email": {
-                                                            "type": "string",
-                                                            "example": "Такой email уже существует"
-                                                        }
-                                                    },
-                                                    "type": "object"
-                                                }
-                                            },
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "api/v1/users": {
-            "get": {
-                "tags": [
-                    "Пользователи"
-                ],
-                "summary": "Информация о пользователе",
-                "description": "Получение информации об авторизованном пользователе",
-                "operationId": "users.users",
-                "parameters": [
-                    {
-                        "name": "Authorization",
-                        "in": "header",
-                        "description": "Bearer {token}",
-                        "required": true,
-                        "schema": {
-                            "type": "bearerAuth"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Успешная выборка",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/UserResource"
-                                }
-                            }
-                        }
-                    }
-                },
-                "security": [
-                    {
-                        "bearer": []
-                    }
-                ]
             }
         }
     },
@@ -737,12 +363,6 @@
                                             "approved"
                                         ],
                                         "example": "moderation"
-                                    },
-                                    "genres": {
-                                        "type": "array",
-                                        "items": {
-                                            "$ref": "#/components/schemas/GenreResource/allOf/0/properties/data"
-                                        }
                                     },
                                     "created_at": {
                                         "description": "Дата создания",
@@ -946,97 +566,8 @@
         },
         "requestBodies": {
             "BookCreateRequest": {
-                "description": "Запрос на создание книги",
-                "required": true,
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "required": [
-                                "title",
-                                "description",
-                                "author",
-                                "status"
-                            ],
-                            "properties": {
-                                "title": {
-                                    "type": "string",
-                                    "example": "Заголовок книги"
-                                },
-                                "description": {
-                                    "type": "string",
-                                    "example": "Описание книги"
-                                },
-                                "author": {
-                                    "type": "string",
-                                    "example": "Автор книги"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "example": "Статус книги"
-                                },
-                                "genres": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "integer"
-                                    },
-                                    "example": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
-            },
-            "BookUpdateRequest": {
-                "description": "Запрос на обновление книги",
-                "required": true,
-                "content": {
-                    "application/json": {
-                        "schema": {
-                            "required": [
-                                "title",
-                                "author",
-                                "status"
-                            ],
-                            "properties": {
-                                "title": {
-                                    "type": "string",
-                                    "example": "Заголовок книги"
-                                },
-                                "description": {
-                                    "type": "string",
-                                    "example": "Описание книги"
-                                },
-                                "author": {
-                                    "type": "string",
-                                    "example": "Автор книги"
-                                },
-                                "status": {
-                                    "type": "string",
-                                    "example": "Статус книги"
-                                },
-                                "genres": {
-                                    "type": "array",
-                                    "items": {
-                                        "type": "integer"
-                                    },
-                                    "example": [
-                                        1,
-                                        2,
-                                        3,
-                                        4
-                                    ]
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                }
+                "description": "product_request",
+                "required": true
             }
         }
     },
