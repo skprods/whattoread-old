@@ -35,4 +35,10 @@ class BookRecsShort extends Model
     {
         return self::query()->where('book_id', $bookId)->first();
     }
+
+    public function getMatchingBooks(): \Illuminate\Database\Eloquent\Collection
+    {
+        $bookIds = array_keys($this->data);
+        return Book::whereIdIn($bookIds);
+    }
 }
