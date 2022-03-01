@@ -41,6 +41,8 @@ class BookRecsShortService
             $data[$recsBookId] = [
                 'book_id' => $recsBookId,
                 'author_score' => $rec->author_score,
+                'genres_score' => $rec->genres_score,
+                'description_score' => $rec->description_score,
                 'total_score' => $rec->total_score,
             ];
         });

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\BookRecsShort;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Http\Request;
@@ -19,7 +20,12 @@ class RouteServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->configureRateLimiting();
+        $this->defineRoutes();
+        $this->setBindings();
+    }
 
+    private function defineRoutes()
+    {
         Route::prefix('api/v1')
             ->middleware(['api'])
             ->namespace($this->namespace)
@@ -38,6 +44,13 @@ class RouteServiceProvider extends ServiceProvider
         Route::prefix('bot')
             ->middleware(['api'])
             ->group(base_path('routes/bot.php'));
+    }
+
+    private function setBindings()
+    {
+        Route::bind('bookRecsShort', function ($bookId) {
+            return BookRecsShort::where('book_id', $bookId)->firstOrFail();
+        });
     }
 
     protected function configureRateLimiting()
