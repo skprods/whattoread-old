@@ -54,7 +54,6 @@ services:
             - ./deploy/percona/init-testing-db.sql:/docker-entrypoint-initdb.d/init-testing-db.sql
             - ./deploy/percona/dump.sh:/dump.sh
             - ./deploy/percona/restore.sh:/restore.sh
-            - ./backups:/home
 
     whattoread-elasticsearch:
         image: docker.elastic.co/elasticsearch/elasticsearch:7.14.1

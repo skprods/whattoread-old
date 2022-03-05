@@ -17,6 +17,7 @@ services:
       - "3306:3306"
     volumes:
       - whattoread-database-data:/var/lib/mysql
+      - ${DB_BACKUPS_PATH}:/home
 
   whattoread-elasticsearch:
     container_name: whattoread-elasticsearch
