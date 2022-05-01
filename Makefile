@@ -29,22 +29,22 @@ php-reindex-books:
 
 ### Команды для работы с контейнерами приложения
 exec-php-fpm: # заходим в контейнер с php
-	docker-compose exec whattoread-php-fpm bash
+	docker compose exec whattoread-php-fpm bash
 exec-nginx: # заходим в контейнер с nginx
-	docker-compose exec whattoread-nginx bash
+	docker compose exec whattoread-nginx bash
 exec-redis: # заходим в контейнер с redis
-	docker-compose exec whattoread-redis bash
+	docker compose exec whattoread-redis bash
 exec-percona: # заходим в контейнер с redis
-	docker-compose exec whattoread-percona bash
+	docker compose exec whattoread-percona bash
 
 app-supervisor-start: # запуск supervisor для очередей
-	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor start
+	docker compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor start
 app-supervisor-stop: # остановка supervisor
-	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor stop
+	docker compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor stop
 app-supervisor-restart: # рестарт supervisor
-	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor restart
+	docker compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor restart
 app-supervisor-status: # статус supervisor
-	docker-compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor status
+	docker compose exec -u root whattoread-php-fpm /usr/sbin/service supervisor status
 
 ### Копирование зависимостей локально из контейнера
 rm-vendor:
@@ -57,5 +57,5 @@ load-vendor-dev:
 	docker cp whattoread-php-fpm-dev:/var/www/vendor/. ./vendor
 
 redis-config:
-	docker-compose exec whattoread-redis redis-cli config set stop-writes-on-bgsave-error no
-	docker-compose exec whattoread-redis redis-cli config get stop-writes-on-bgsave-error
+	docker compose exec whattoread-redis redis-cli config set stop-writes-on-bgsave-error no
+	docker compose exec whattoread-redis redis-cli config get stop-writes-on-bgsave-error
