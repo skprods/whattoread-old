@@ -22,6 +22,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * @property Carbon $created_at
  * @property Carbon $updated_at
  * @property-read Collection|Genre[] $genres
+ * @property-read Collection|Isbn[] $isbns
  * @property-read Collection|Category[] $categories
  * @property-read Collection|TelegramUser[] $telegramUsers
  * @property-read Collection|BookAssociation[] $associations
@@ -45,7 +46,6 @@ class Book extends Model
         'title',
         'description',
         'author',
-        'isbn',
         'status',
         'words_count',
         'therms_count',
@@ -54,6 +54,11 @@ class Book extends Model
     public function genres(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class);
+    }
+
+    public function isbns(): HasMany
+    {
+        return $this->hasMany(Isbn::class);
     }
 
     public function categories(): BelongsToMany
