@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -13,9 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property string $name
  * @property string $status
  * @property-read Book[] $books
- * @property int|null $parent_id
- * @property-read Genre|null $parent
- * @property-read Genre|null $child
+ * @property-read Collection|Genre[] $parents
+ * @property-read Collection|Genre[] $childs
  * @property Carbon $created_at
  * @property Carbon $updated_at
  */
@@ -37,12 +37,12 @@ class Genre extends Model
         return $this->belongsToMany(Book::class);
     }
 
-    public function parent(): BelongsToMany
+    public function parents(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class, 'subgenres', 'child_id', 'parent_id');
     }
 
-    public function child(): BelongsToMany
+    public function childs(): BelongsToMany
     {
         return $this->belongsToMany(Genre::class, 'subgenres', 'parent_id', 'child_id');
     }

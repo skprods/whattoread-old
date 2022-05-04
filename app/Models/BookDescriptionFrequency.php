@@ -39,12 +39,21 @@ class BookDescriptionFrequency extends Model
         return $this->belongsTo(Word::class);
     }
 
-    public static function getBookIdsByWordIds(array $wordIds): \Illuminate\Support\Collection
+    /**
+     * @param array $wordIds        - ID слов, по которым ищутся книги
+     * @param array $onlyBookIds    - ID книг, из которых должна состоять выборка (для ограничений по жанру)
+     * @return \Illuminate\Support\Collection
+     */
+    public static function getBookIdsForRecs(array $wordIds, array $onlyBookIds = []): \Illuminate\Support\Collection
     {
         $builder = self::query()->select('book_id')->groupBy('book_id');
 
         foreach ($wordIds as $wordId) {
             $builder->orWhere('word_id', $wordId);
+        }
+
+        if (!empty($onlyBookIds)) {
+            $builder->whereIn('book_id', $onlyBookIds);
         }
 
         return $builder->get()->pluck('book_id')->mapWithKeys(function ($bookId) {

@@ -140,4 +140,18 @@ class Book extends Model
     {
         return self::query()->whereIn('id', $bookIds)->get();
     }
+
+    /**
+     * Поиск книг, которые входят в определённые жанры
+     */
+    public static function getBookIdsByGenreIds(array $genreIds): array
+    {
+        return self::query()
+            ->leftJoin('book_genre as bg', 'bg.book_id', '=', 'id')
+            ->whereIn('bg.genre_id', $genreIds)
+            ->select('id')
+            ->get()
+            ->pluck('id', 'id')
+            ->toArray();
+    }
 }
