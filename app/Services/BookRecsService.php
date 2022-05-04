@@ -62,7 +62,12 @@ class BookRecsService
         $this->log($book, "Частотный словник книги по описанию получен");
 
         $bookIdsForBookGenres = $this->getBookIdsByBookGenre($book);
-        $bookIds = BookDescriptionFrequency::getBookIdsForRecs($comparingWordIds, $bookIdsForBookGenres);
+        $bookIdsForBookGenres = array_chunk($bookIdsForBookGenres, 10000);
+        $bookIds = [];
+        foreach ($bookIdsForBookGenres as $bookIdsForBookGenre) {
+            $bookIds = BookDescriptionFrequency::getBookIdsForRecs($comparingWordIds, $bookIdsForBookGenre)
+                ->merge($bookIds);
+        }
         $bookIds->forget($book->id);
 
         if ($bookIds->count()) {
