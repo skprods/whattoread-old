@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         /** Актуализация кэша с информацией о системе */
-        $schedule->command(ActualizeSystemCacheCommand::class)->everyMinute();
+        $schedule->command(ActualizeSystemCacheCommand::class)->everyFiveMinutes();
         /** Проверка работоспособности всех частей приложения */
         $schedule->command(HealthCheckCommand::class)->everyFiveMinutes();
         /** Полная переиндексация книг */
