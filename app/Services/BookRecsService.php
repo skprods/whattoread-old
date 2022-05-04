@@ -66,8 +66,9 @@ class BookRecsService
         $bookIds = [];
         foreach ($bookIdsForBookGenres as $bookIdsForBookGenre) {
             $bookIds = BookDescriptionFrequency::getBookIdsForRecs($comparingWordIds, $bookIdsForBookGenre)
-                ->merge($bookIds);
+                ->toArray() + $bookIds;
         }
+        $bookIds = collect($bookIds);
         $bookIds->forget($book->id);
 
         if ($bookIds->count()) {
