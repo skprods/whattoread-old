@@ -48,10 +48,11 @@ class InitBookRecsJob extends Job
 
         $this->log('Инициализация наполнения book_recs_short');
         dispatch(new InitBookRecsShortJob($this->start, $this->end, $this->debugMode));
+        $this->log('InitBookRecsShortJob отправлена в очередь');
 
         $message = "Наполнение рекомендательной базы книг завершено. \n";
-        $message .= "Старт: " . $this->start ?? "Не указан" . ";\n";
-        $message .= "Конец: " . $this->end ?? "Не указан" . ";\n";
+        $message .= "Старт: " . $this->start ?? "Не указан" . "\n";
+        $message .= "Конец: " . $this->end ?? "Не указан" . "\n";
         app(NotificationService::class)->notify($message);
     }
 }
