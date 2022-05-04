@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Managers\BookRecsManager;
 use App\Models\Book;
 use App\Models\BookDescriptionFrequency;
+use App\Models\Genre;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -60,7 +61,8 @@ class BookRecsService
 
         $this->log($book, "Частотный словник книги по описанию получен");
 
-        $bookIds = BookDescriptionFrequency::getBookIdsByWordIds($comparingWordIds);
+        $bookIdsForBookGenres = $this->getBookIdsByBookGenre($book);
+        $bookIds = BookDescriptionFrequency::getBookIdsForRecs($comparingWordIds, $bookIdsForBookGenres);
         $bookIds->forget($book->id);
 
         if ($bookIds->count()) {
@@ -95,6 +97,42 @@ class BookRecsService
         );
 
         $this->log($book, "Совпадения подобраны и сохранены: $count книг");
+    }
+
+    /** Получение ID книг, относящихся к жанрам переданной книги */
+    private function getBookIdsByBookGenre(Book $book): array
+    {
+        $genres = $book->genres;
+
+        $genreIds = [];
+        $genres->each(function (Genre $genre) use (&$genreIds) {
+            $newGenres = $this->getGenreIdsByGenre($genre);
+            $genreIds = $genreIds + $newGenres;
+        });
+
+        return Book::getBookIdsByGenreIds($genreIds);
+    }
+
+    /** Получение ID родительских и дочерних жанров по переданному */
+    private function getGenreIdsByGenre(Genre $genre): array
+    {
+        $genreIds = [];
+
+        $genre->parents->each(function (Genre $genre) use (&$genreIds) {
+            $childs = $genre->childs->pluck('id', 'id')->toArray();
+            $genreIds = $genreIds + $childs;
+        });
+
+        $genre->childs->each(function (Genre $genre) use (&$genreIds) {
+            $genre->parents->each(function (Genre $genre) use (&$genreIds) {
+                $childs = $genre->childs->pluck('id', 'id')->toArray();
+                $genreIds = $genreIds + $childs;
+            });
+        });
+
+        $genreIds[$genre->id] = $genre->id;
+
+        return $genreIds;
     }
 
     private function createRecommendationsFromBookFrequencies(

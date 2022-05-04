@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Book;
 use App\Services\BookRecsService;
+use App\Services\NotificationService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -44,5 +45,13 @@ class InitBookRecsJob extends Job
         });
 
         $this->log('Наполнение рекомендательной базы книг завершено');
+
+        $this->log('Инициализация наполнения book_recs_short');
+        dispatch(new InitBookRecsShortJob($this->start, $this->end, $this->debugMode));
+
+        $message = "Наполнение рекомендательной базы книг завершено. \n";
+        $message .= "Старт: " . $this->start ?? "Не указан" . ";\n";
+        $message .= "Конец: " . $this->end ?? "Не указан" . ";\n";
+        app(NotificationService::class)->notify($message);
     }
 }
