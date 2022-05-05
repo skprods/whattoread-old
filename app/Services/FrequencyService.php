@@ -21,12 +21,14 @@ class FrequencyService
     private Morphy $morphy;
 
     private BookFrequenciesManager $bookFrequenciesManager;
+    private VectorService $vectorService;
 
     public function __construct(bool $debug = false)
     {
         $this->debug = $debug;
         $this->morphy = new Morphy();
         $this->bookFrequenciesManager = app(BookFrequenciesManager::class);
+        $this->vectorService = app(VectorService::class);
     }
 
     /** Формирование словника из файла */
@@ -61,7 +63,7 @@ class FrequencyService
         $this->log("Файл успешно удалён");
     }
 
-    public function createDescriptionFrequency(Book $book)
+    public function createDescriptionFrequency(Book $book): void
     {
         $this->book = $book;
         $bookName = "{$this->book->author} - {$this->book->title}";
@@ -188,6 +190,7 @@ class FrequencyService
             $word = app(Word::class);
             $word->word = $wordKey;
             $word->type = $type;
+            $word->vector = $this->vectorService->createForWord($word);
             $word->save();
 
             return $word;
