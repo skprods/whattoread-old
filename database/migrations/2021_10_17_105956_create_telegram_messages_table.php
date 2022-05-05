@@ -15,7 +15,7 @@ class CreateTelegramMessagesTable extends Migration
     {
         Schema::create('telegram_messages', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('telegram_user_id')->constrained();
+            $table->foreignId('telegram_user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('command', 45);
             $table->json('responses');
             $table->timestamp('created_at')->useCurrent();

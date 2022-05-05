@@ -21,7 +21,8 @@ class CreateBooksTable extends Migration
             $table->string('publisher_name')->nullable();
             $table->string('publisher_year')->nullable();
             $table->string('author');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
 
             $table->index('title');
             $table->index('publisher_name');

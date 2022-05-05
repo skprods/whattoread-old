@@ -16,12 +16,13 @@ class CreateGenresTable extends Migration
         Schema::create('genres', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
 
         Schema::create('book_genre', function (Blueprint $table) {
-            $table->foreignId('book_id')->constrained()->onDelete('CASCADE');
-            $table->foreignId('genre_id')->constrained()->onDelete('CASCADE');
+            $table->foreignId('book_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('genre_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
         });
     }
 

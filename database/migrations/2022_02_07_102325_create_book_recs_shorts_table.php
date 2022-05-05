@@ -14,7 +14,7 @@ class CreateBookRecsShortsTable extends Migration
     public function up()
     {
         Schema::create('book_recs_shorts', function (Blueprint $table) {
-            $table->foreignId('book_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('book_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->json('data');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
