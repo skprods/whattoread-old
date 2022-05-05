@@ -11,8 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property int $id
  * @property string $word
- * @property-read  Word|null $parentWord
+ * @property int $parent_id
+ * @property-read  Word|null $parent
  * @property string $type
+ * @property array $vector
  * @property Carbon $created_at
  */
 class Word extends Model
@@ -20,41 +22,57 @@ class Word extends Model
     use HasFactory;
     use HasDatabaseCounter;
 
+    public const PARTICLE_TYPE = 'част';
+    public const INTERJECTION_TYPE = 'межд';
+    public const ADJECTIVE_TYPE = 'прл';
+    public const PARTICIPLE_TYPE = 'прч';
+    public const NOUN_TYPE = 'сущ';
+    public const ADVERB_TYPE = 'нар';
+    public const VERB_TYPE = 'гл';
+    public const ADVERB_PARTICIPLE_TYPE = 'дееп';
+    public const UNION_TYPE = 'союз';
+    public const PREDICATE_TYPE = 'предик';
+    public const PREPOSITION_TYPE = 'предл';
+    public const INTRODUCTORY_TYPE = 'ввод';
+    public const PRONOUN_TYPE = 'мест';
+    public const NUMERAL_TYPE = 'числ';
+    public const PHRASEOLOGY_TYPE = 'фраз';
+    public const PROPER_NOUN_TYPE = 'собс'; // имя собственное/нарицательное
+
+    public const TYPES = [
+        self::PARTICLE_TYPE,
+        self::INTERJECTION_TYPE,
+        self::ADJECTIVE_TYPE,
+        self::PARTICIPLE_TYPE,
+        self::NOUN_TYPE,
+        self::ADVERB_TYPE,
+        self::VERB_TYPE,
+        self::ADVERB_PARTICIPLE_TYPE,
+        self::UNION_TYPE,
+        self::PREDICATE_TYPE,
+        self::PREPOSITION_TYPE,
+        self::INTRODUCTORY_TYPE,
+        self::PRONOUN_TYPE,
+        self::NUMERAL_TYPE,
+        self::PHRASEOLOGY_TYPE,
+    ];
+
     public $timestamps = false;
 
     protected $fillable = [
         'word',
+        'parent_id',
         'type',
-        'type_sub',
-        'type_ssub',
-        'plural',
-        'gender',
-        'wcase',
-        'comp',
-        'soul',
-        'transit',
-        'perfect',
-        'face',
-        'kind',
-        'time',
-        'inf',
-        'vozv',
-        'nakl',
-        'short',
+        'vector',
         'created_at',
     ];
 
     protected $casts = [
-        'plural' => 'boolean',
-        'soul' => 'boolean',
-        'prefect' => 'boolean',
-        'inf' => 'boolean',
-        'vozv' => 'boolean',
-        'short' => 'boolean',
+        'vector' => 'array',
         'created_at' => 'datetime',
     ];
 
-    public function parentWord(): BelongsTo
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(Word::class, 'parent_id');
     }
