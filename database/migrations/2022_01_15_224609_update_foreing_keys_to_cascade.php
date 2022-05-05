@@ -21,24 +21,12 @@ class UpdateForeingKeysToCascade extends Migration
             $table->foreign('telegram_user_id')
                 ->references('id')
                 ->on('telegram_users')
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('telegram_chat_id')
                 ->references('id')
                 ->on('telegram_chats')
-                ->cascadeOnDelete();
-        });
-
-        Schema::table('book_category', function (Blueprint $table) {
-            $table->dropForeign(['book_id']);
-            $table->dropForeign(['category_id']);
-
-            $table->foreign('book_id')
-                ->references('id')
-                ->on('books')
-                ->cascadeOnDelete();
-            $table->foreign('category_id')
-                ->references('id')
-                ->on('categories')
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
         });
 
@@ -50,14 +38,17 @@ class UpdateForeingKeysToCascade extends Migration
             $table->foreign('book_id')
                 ->references('id')
                 ->on('books')
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('user_id')
                 ->references('id')
                 ->on('users')
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
             $table->foreign('telegram_user_id')
                 ->references('id')
                 ->on('telegram_users')
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
         });
 
@@ -76,6 +67,7 @@ class UpdateForeingKeysToCascade extends Migration
             $table->foreign('book_id')
                 ->references('id')
                 ->on('books')
+                ->cascadeOnUpdate()
                 ->cascadeOnDelete();
         });
     }

@@ -15,8 +15,8 @@ class CreateBookMatchesTable extends Migration
     {
         Schema::create('book_matches', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('comparing_book_id')->constrained('books')->cascadeOnDelete();
-            $table->foreignId('matching_book_id')->constrained('books')->cascadeOnDelete();
+            $table->foreignId('comparing_book_id')->constrained('books')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('matching_book_id')->constrained('books')->cascadeOnUpdate()->cascadeOnDelete();
             $table->tinyInteger('author_score')->default(0);
             $table->float('description_score')->unsigned()->default(0);
             $table->float('total_score')->unsigned()->default(0);

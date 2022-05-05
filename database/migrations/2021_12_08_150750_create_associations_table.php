@@ -15,8 +15,8 @@ class CreateAssociationsTable extends Migration
     {
         Schema::create('associations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('word_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('association_word_id')->constrained('words')->cascadeOnDelete();
+            $table->foreignId('word_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('association_word_id')->constrained('words')->cascadeOnUpdate()->cascadeOnDelete();
             $table->integer('total');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();

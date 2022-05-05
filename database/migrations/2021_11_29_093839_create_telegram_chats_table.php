@@ -17,11 +17,17 @@ class CreateTelegramChatsTable extends Migration
             $table->id();
             $table->string('chat_id')->unique();
             $table->string('title');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
 
         Schema::table('telegram_messages', function (Blueprint $table) {
-            $table->foreignId('telegram_chat_id')->nullable()->after('id')->constrained();
+            $table->foreignId('telegram_chat_id')
+                ->nullable()
+                ->after('id')
+                ->constrained()
+                ->cascadeOnUpdate()
+                ->cascadeOnDelete();
         });
     }
 

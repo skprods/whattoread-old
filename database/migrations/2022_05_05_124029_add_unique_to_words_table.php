@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateBookDictionariesTable extends Migration
+class AddUniqueToWordsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,8 @@ class CreateBookDictionariesTable extends Migration
      */
     public function up()
     {
-        Schema::create('book_dictionaries', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('book_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
-            $table->json('words');
-            $table->timestamps();
+        Schema::table('words', function (Blueprint $table) {
+            $table->unique(['word', 'type']);
         });
     }
 
@@ -28,6 +25,8 @@ class CreateBookDictionariesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('book_dictionaries');
+        Schema::table('words', function (Blueprint $table) {
+            $table->dropUnique(['word', 'type']);
+        });
     }
 }

@@ -16,8 +16,8 @@ class CreateRecommendationListsTable extends Migration
         Schema::create('recommendation_lists', function (Blueprint $table) {
             $table->id();
             $table->integer('update_id')->unique();
-            $table->foreignId('telegram_user_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('book_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('telegram_user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('book_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->json('recommendations');
             $table->smallInteger('rating')->unsigned()->nullable();
             $table->timestamp('created_at')->useCurrent();

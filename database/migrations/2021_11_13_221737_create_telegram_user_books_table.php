@@ -15,10 +15,11 @@ class CreateTelegramUserBooksTable extends Migration
     {
         Schema::create('telegram_user_books', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('telegram_user_id')->constrained()->onDelete('CASCADE');
-            $table->foreignId('book_id')->constrained()->onDelete('CASCADE');
+            $table->foreignId('telegram_user_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('book_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->tinyInteger('rating');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
         });
     }
 

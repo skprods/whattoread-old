@@ -15,8 +15,8 @@ class CreateSubgenresTable extends Migration
     public function up()
     {
         Schema::create('subgenres', function (Blueprint $table) {
-            $table->foreignId('parent_id')->constrained('genres')->cascadeOnDelete();
-            $table->foreignId('child_id')->constrained('genres')->cascadeOnDelete();
+            $table->foreignId('parent_id')->constrained('genres')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('child_id')->constrained('genres')->cascadeOnUpdate()->cascadeOnDelete();
 
             $table->unique(['parent_id', 'child_id']);
         });

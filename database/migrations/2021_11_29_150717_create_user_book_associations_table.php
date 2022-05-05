@@ -15,9 +15,9 @@ class CreateUserBookAssociationsTable extends Migration
     {
         Schema::create('user_book_associations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('book_id')->constrained();
-            $table->foreignId('user_id')->nullable()->constrained();
-            $table->foreignId('telegram_user_id')->nullable()->constrained();
+            $table->foreignId('book_id')->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('telegram_user_id')->nullable()->constrained()->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('association');
             $table->timestamp('created_at')->useCurrent();
             $table->timestamp('updated_at')->useCurrent()->useCurrentOnUpdate();
