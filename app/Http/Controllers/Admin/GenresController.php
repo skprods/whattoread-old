@@ -41,7 +41,7 @@ class GenresController extends Controller
      */
     public function index(Request $request): CollectionResource
     {
-        $builder = Genre::query()->with(['parent', 'child']);
+        $builder = Genre::query()->with(['parents', 'childs']);
 
         $dataTable = DataTables::eloquent($builder);
 
