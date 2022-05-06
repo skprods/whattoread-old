@@ -56,8 +56,9 @@ abstract class DictionaryDriver
             return $row;
         }
 
-        /** убираем теги */
+        /** убираем теги и переводим в нижний регистр */
         $row = strip_tags($row);
+        $row = mb_strtolower($row);
 
         /** удаляем запрещённые символы */
         $row = $this->deleteForbiddenSymbols($row);
@@ -65,7 +66,7 @@ abstract class DictionaryDriver
         /** Убираем букву ё */
         $row = str_replace('ё', 'е', $row);
 
-        return mb_strtolower(trim($row));
+        return trim($row);
     }
 
     private function deleteForbiddenSymbols(string $row): string
