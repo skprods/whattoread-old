@@ -62,6 +62,9 @@ abstract class DictionaryDriver
         /** удаляем запрещённые символы */
         $row = $this->deleteForbiddenSymbols($row);
 
+        /** Убираем букву ё */
+        $row = str_replace('ё', 'е', $row);
+
         return mb_strtolower(trim($row));
     }
 
@@ -87,10 +90,6 @@ abstract class DictionaryDriver
 
             if (in_array($symbol, $this->replacingSymbols)) {
                 $needDelete = true;
-            }
-
-            if ($symbol === "ё") {
-                $rowSymbols[$key] = "е";
             }
 
             if ($needDelete) {
