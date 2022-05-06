@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\BookFrequencyCreated;
+use App\Events\BookDescriptionFrequencyCreated;
 use App\Events\BookGenresUpdated;
 use App\Events\BookRecsUpdated;
 use App\Services\BookRecsService;
@@ -16,7 +16,7 @@ class UpdateBookRecs extends Listener
         $this->service = app(BookRecsService::class);
     }
 
-    public function handle(BookFrequencyCreated|BookGenresUpdated $event)
+    public function handle(BookDescriptionFrequencyCreated|BookGenresUpdated $event)
     {
         $this->service->createForBook($event->book);
 

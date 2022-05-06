@@ -3,8 +3,11 @@
 namespace App\Services;
 
 use App\Clients\RusVectoresClient;
+use App\Models\Book;
+use App\Models\BookDescriptionFrequency;
 use App\Models\Word;
 use cijic\phpMorphy\Morphy;
+use Illuminate\Support\Collection;
 
 /**
  * Сервис для работы с векторами
@@ -39,6 +42,66 @@ class VectorService
         $this->vectorLength = config('variables.vectors.length');
         $this->vectorMin = config('variables.vectors.min');
         $this->vectorMax = config('variables.vectors.max');
+    }
+
+    public function createForBookByDescription(Book $book): ?array
+    {
+        $this->vector = [];
+        $frequencies = BookDescriptionFrequency::getBookFrequenciesByBookIds([$book->id]);
+
+        if ($frequencies->count() === 0) {
+            return null;
+        }
+
+        /**
+         * В вектор книги войдут только первые 40 слов из
+         * частотного словника, поэтому нужно обрезать
+         * коллекцию до 40
+         *
+         * @var Collection $frequencies
+         */
+        $frequencies = $frequencies->first()->chunk(40)->first();
+
+        /** Получаем слова с их векторами в формате wordId => vector */
+        $vectors = Word::getByIds($frequencies->keys()->toArray())->pluck('vector', 'id');
+
+        /**
+         * Проходим по каждому слову из словника и формируем
+         * его новый вектор, умноженный на частоту слова.
+         * Для этого нужно каждую вершину умножить на частоту
+         * слова в словнике этой книги.
+         *
+         * На выходе $this->vector будет состоять из 40 векторов
+         * слов, умноженных на соответствующие частоты.
+         */
+        $frequencies->each(function ($frequency, $wordId) use ($vectors) {
+            /** Берём вектор слова */
+            $vector = $vectors->get($wordId);
+
+            /** Получаем вектор слова с множителем */
+            $wordVector = [];
+            foreach ($vector as $value) {
+                $multValue = $frequency * $value;
+                $wordVector[] = round($multValue, self::$precision);
+            }
+
+            $this->vector[] = $wordVector;
+        });
+
+        /** Формируем однослойный вектор книги путём сложения всех векторов */
+        $bookVector = [];
+        foreach ($this->vector[0] as $key => $value) {
+            $bookValue = 0;
+            foreach ($this->vector as $wordVector) {
+                $bookValue += $wordVector[$key];
+            }
+
+            $bookVector[$key] = round($bookValue, self::$precision);
+        }
+
+        $this->vector = $bookVector;
+
+        return $this->vector;
     }
 
     /** Создание вектора для слова из БД */

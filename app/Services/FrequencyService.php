@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\BookDescriptionFrequencyCreated;
 use App\Facades\Dictionary;
 use App\Managers\BookDictionaryManager;
 use App\Managers\BookFrequenciesManager;
@@ -61,6 +62,8 @@ class FrequencyService
 
         unlink($filePath);
         $this->log("Файл успешно удалён");
+
+        // TODO: Событие, что создан словник по содержанию, нужно сформировать его вектор
     }
 
     public function createDescriptionFrequency(Book $book): void
@@ -92,6 +95,8 @@ class FrequencyService
 
         $this->saveDictionary($dictionary, $wordsCount, 'description');
         $this->log("Словарь терминов по описанию успешно наполнен");
+
+        BookDescriptionFrequencyCreated::dispatch($book);
     }
 
     /** Сохранение частотного словника  */

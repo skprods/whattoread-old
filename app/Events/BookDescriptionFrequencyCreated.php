@@ -4,7 +4,7 @@ namespace App\Events;
 
 use App\Models\Book;
 
-class BookUpdated extends Event
+class BookDescriptionFrequencyCreated extends Event
 {
     public Book $book;
 

@@ -3,14 +3,9 @@
 namespace App\Events;
 
 use App\Models\Book;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
 
-class BookDescriptionUpdated
+class BookDescriptionUpdated extends Event
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
     public Book $book;
 
     public function __construct(Book $book)

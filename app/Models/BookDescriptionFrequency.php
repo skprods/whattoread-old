@@ -66,6 +66,7 @@ class BookDescriptionFrequency extends Model
         return self::query()
             ->select()
             ->whereIn('book_id', $bookIds)
+            ->orderByDesc('frequency')
             ->get()
             ->mapToGroups(function (BookDescriptionFrequency $frequency) {
                 return [
