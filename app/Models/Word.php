@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -75,5 +76,10 @@ class Word extends Model
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Word::class, 'parent_id');
+    }
+
+    public static function getByIds(array $ids): Collection
+    {
+        return self::query()->whereIn('id', $ids)->get();
     }
 }

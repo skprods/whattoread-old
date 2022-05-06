@@ -3,14 +3,15 @@
 namespace App\Providers;
 
 use App\Events\BookDeleted;
+use App\Events\BookDescriptionFrequencyCreated;
 use App\Events\BookDescriptionUpdated;
-use App\Events\BookFrequencyCreated;
 use App\Events\BookGenresUpdated;
 use App\Events\BookRecsUpdated;
 use App\Events\BookUpdated;
 use App\Events\NewFrequencies;
 use App\Listeners\CreateNewFrequencies;
 use App\Listeners\DeleteElasticBook;
+use App\Listeners\GenerateBookDescriptionVector;
 use App\Listeners\UpdateBookDescriptionFrequency;
 use App\Listeners\UpdateBookRecs;
 use App\Listeners\UpdateBookRecsShort;
@@ -37,8 +38,9 @@ class EventServiceProvider extends ServiceProvider
         ],
 
         /** Составлен частотный словник книги */
-        BookFrequencyCreated::class => [
+        BookDescriptionFrequencyCreated::class => [
             UpdateBookRecs::class,
+            GenerateBookDescriptionVector::class,
         ],
 
         /** Обновлены жанры книги */
