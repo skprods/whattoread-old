@@ -18,6 +18,8 @@ abstract class DictionaryDriver
         "\x18", "\x19", "\x1a", "\x1b", "\x1c", "\x1d", "\x1e", "\x1f",
     ];
 
+    private array $accentSymbols = [];
+
     /** Симолы, которые необходимо заменить на пустую строку */
     private array $replacingSymbols;
 
@@ -29,6 +31,9 @@ abstract class DictionaryDriver
         $replacingSymbolsFile = file_get_contents(resource_path("dictionary/replacingSymbols.json"));
         $this->replacingSymbols = json_decode($replacingSymbolsFile, true);
         $this->replacingSymbols = array_merge($this->replacingSymbols, $this->utf8replace);
+
+        $accentSymbolsFile = file_get_contents(resource_path("dictionary/accentSymbols.json"));
+        $this->accentSymbols = json_decode($accentSymbolsFile, true);
 
         $this->nbsp = html_entity_decode("&nbsp;");
     }
@@ -71,6 +76,9 @@ abstract class DictionaryDriver
         /** удаляем запрещённые символы */
         $row = $this->deleteForbiddenSymbols($row);
 
+        /** заменяем символы с ударениями */
+        $row = $this->replaceAccentSymbols($row);
+
         /** Убираем букву ё */
         $row = str_replace('ё', 'е', $row);
 
@@ -107,5 +115,20 @@ abstract class DictionaryDriver
         }
 
         return implode('', $rowSymbols);
+    }
+
+    private function replaceAccentSymbols(string $row): string
+    {
+        if (preg_match("/[А-Яа-я|ё|Ё]/", $row)) {
+            $lang = "ru";
+        } else {
+            $lang = "en";
+        }
+
+        foreach ($this->accentSymbols[$lang] as $accentSymbol => $normalSymbol) {
+            $row = str_replace($accentSymbol, $normalSymbol, $row);
+        }
+
+        return $row;
     }
 }
