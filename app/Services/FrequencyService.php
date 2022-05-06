@@ -107,6 +107,12 @@ class FrequencyService
          * термины и вставляем их в БД
          */
         $chunkedDictionary->each(function (Collection $bookWordsFrequency) use (&$thermsCount, $wordsCount, $type) {
+            $bookWordsFrequency->mapWithKeys(function ($frequency, $word) {
+                $word = str_replace('ё', 'е', $word);
+
+                return [$word => $frequency];
+            });
+
             /** Коллекция отобранных терминов, наполняется по принципу word => frequency */
             $thermDictionary = collect();
             /** Вспомогательный массив для фиксации, какие слова нужно добавить в БД (если таких ещё нет) */
