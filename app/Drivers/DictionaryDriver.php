@@ -89,6 +89,10 @@ abstract class DictionaryDriver
                 $needDelete = true;
             }
 
+            if ($symbol === "ё") {
+                $rowSymbols[$key] = "е";
+            }
+
             if ($needDelete) {
                 unset($rowSymbols[$key]);
             }
