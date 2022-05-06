@@ -73,6 +73,15 @@ abstract class DictionaryDriver
         $row = strip_tags($row);
         $row = mb_strtolower($row);
 
+        /**
+         * Замена именно на пробелы, чтобы не было странных слов,
+         * состоящих из двух. Например, когда "прыгнет.Начало",
+         * раньше получалось "прыгнетначало".
+         */
+        $row = str_replace(".", ' ', $row);
+        $row = str_replace(",", ' ', $row);
+        $row = str_replace("…", ' ', $row);
+
         /** удаляем запрещённые символы */
         $row = $this->deleteForbiddenSymbols($row);
 
