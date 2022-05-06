@@ -68,7 +68,7 @@ class NotificationService
     {
         $this->telegram->sendMessage([
             'chat_id' => env('ERROR_CHAT_ID'),
-            'text' => $text,
+            'text' => mb_substr($text, 0, 2000),
             'parse_mode' => 'markdown',
         ]);
     }
