@@ -5,28 +5,29 @@ namespace App\Console\Commands;
 use App\Entities\Subgenres;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Neuronets\GenresClassifier;
+use App\Neuronets\GenresNeuronet;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use SKprods\LaravelHelpers\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class NeuronetTrain extends Command
+class GenresNeuronetTrain extends Command
 {
-    protected $signature = 'neuronet:trainGenres {--epoch=10} {--chunk=50000}';
+    protected $signature = 'neuronet:trainGenres {--epoch=10} {--learning=0.0001} {--chunk=50000}';
     protected $description = 'Тренировка классификатора жанров';
 
-    private GenresClassifier $genresClassifier;
+    private GenresNeuronet $genresNeuronet;
     private Subgenres $subgenres;
     private ProgressBar $bar;
 
+    private float $learningCoefficient;
     private int $chunk;
 
-    public function __construct(GenresClassifier $genresClassifier, Subgenres $subgenres)
+    public function __construct(GenresNeuronet $genresClassifier, Subgenres $subgenres)
     {
         parent::__construct();
 
-        $this->genresClassifier = $genresClassifier;
+        $this->genresNeuronet = $genresClassifier;
         $this->bar = Console::bar();
         $this->subgenres = $subgenres;
     }
@@ -36,6 +37,8 @@ class NeuronetTrain extends Command
         Console::info("Запускаем тренировку классификатора жанров.");
 
         $epochCount = (int) $this->option('epoch');
+
+        $this->learningCoefficient = $this->option('learning');
         $this->chunk = (int) $this->option('chunk');
 
         for ($epoch = 1; $epoch <= $epochCount; $epoch++) {
@@ -58,7 +61,7 @@ class NeuronetTrain extends Command
                 $data = $this->mapData($data);
 
                 Console::info("Данные подготовлены. Начало обучения.");
-                $this->genresClassifier->train($data, 0.00001);
+                $this->genresNeuronet->train($data, $this->learningCoefficient);
 
                 $chunkNumber++;
                 $totalBooks += $data->count();
