@@ -46,4 +46,21 @@ class Genre extends Model
     {
         return $this->belongsToMany(Genre::class, 'subgenres', 'parent_id', 'child_id');
     }
+
+    public function getParentGenres(Genre $genre = null): Collection
+    {
+        $genres = new Collection();
+        $genre = $genre ?? $this;
+
+        if ($genre->parents->isNotEmpty()) {
+            $genre->parents->each(function (Genre $parentGenre) use ($genres) {
+                $genres->put($parentGenre->id, $parentGenre);
+                $genres->union($this->getParentGenres($parentGenre));
+            });
+        }
+
+        $genres->put($genre->id, $genre);
+
+        return $genres;
+    }
 }

@@ -30,9 +30,9 @@ class VectorService
     private array $vector;
 
     /** Множитель (для генерации значений) */
-    private static int $accuracy = 1000000000;
+    public static int $accuracy = 1000000000;
     /** Точность (для значений вершин вектора */
-    private static int $precision = 8;
+    public static int $precision = 8;
 
     public function __construct(Morphy $morphy, RusVectoresClient $client)
     {
