@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 /**
@@ -21,9 +22,9 @@ use Illuminate\Pagination\LengthAwarePaginator;
  * @property int $therms_count
  * @property Carbon $created_at
  * @property Carbon $updated_at
+ * @property-read BookVector $vector
  * @property-read Collection|Genre[] $genres
  * @property-read Collection|Isbn[] $isbns
- * @property-read Collection|Category[] $categories
  * @property-read Collection|TelegramUser[] $telegramUsers
  * @property-read Collection|BookAssociation[] $associations
  * @property-read Collection|BookContentFrequency[] $contentFrequencies
@@ -50,6 +51,11 @@ class Book extends Model
         'words_count',
         'therms_count',
     ];
+
+    public function vector(): HasOne
+    {
+        return $this->hasOne(BookVector::class);
+    }
 
     public function genres(): BelongsToMany
     {

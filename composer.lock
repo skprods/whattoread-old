@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bc3c4104386a9d4aaf79635ff1258093",
+    "content-hash": "d27bf76b13b30d73f744726d54b3a2cf",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -2506,6 +2506,62 @@
             "time": "2021-11-21T11:48:40+00:00"
         },
         {
+            "name": "markbaker/matrix",
+            "version": "3.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MarkBaker/PHPMatrix.git",
+                "reference": "c66aefcafb4f6c269510e9ac46b82619a904c576"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MarkBaker/PHPMatrix/zipball/c66aefcafb4f6c269510e9ac46b82619a904c576",
+                "reference": "c66aefcafb4f6c269510e9ac46b82619a904c576",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+                "phpcompatibility/php-compatibility": "^9.0",
+                "phpdocumentor/phpdocumentor": "2.*",
+                "phploc/phploc": "^4.0",
+                "phpmd/phpmd": "2.*",
+                "phpunit/phpunit": "^7.0 || ^8.0 || ^9.3",
+                "sebastian/phpcpd": "^4.0",
+                "squizlabs/php_codesniffer": "^3.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Matrix\\": "classes/src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mark Baker",
+                    "email": "mark@demon-angel.eu"
+                }
+            ],
+            "description": "PHP Class for working with matrices",
+            "homepage": "https://github.com/MarkBaker/PHPMatrix",
+            "keywords": [
+                "mathematics",
+                "matrix",
+                "vector"
+            ],
+            "support": {
+                "issues": "https://github.com/MarkBaker/PHPMatrix/issues",
+                "source": "https://github.com/MarkBaker/PHPMatrix/tree/3.0.0"
+            },
+            "time": "2021-07-01T19:01:15+00:00"
+        },
+        {
             "name": "monolog/monolog",
             "version": "2.3.5",
             "source": {
@@ -3807,16 +3863,16 @@
         },
         {
             "name": "skprods/laravel-helpers",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/skprods/laravel-helpers.git",
-                "reference": "995233f57c63fc321ea22737b043fc7fe7713ca8"
+                "reference": "8930a59b9ecae0be941648c627cb61111a14397d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skprods/laravel-helpers/zipball/995233f57c63fc321ea22737b043fc7fe7713ca8",
-                "reference": "995233f57c63fc321ea22737b043fc7fe7713ca8",
+                "url": "https://api.github.com/repos/skprods/laravel-helpers/zipball/8930a59b9ecae0be941648c627cb61111a14397d",
+                "reference": "8930a59b9ecae0be941648c627cb61111a14397d",
                 "shasum": ""
             },
             "require": {
@@ -3852,9 +3908,9 @@
             ],
             "support": {
                 "issues": "https://github.com/skprods/laravel-helpers/issues",
-                "source": "https://github.com/skprods/laravel-helpers/tree/2.0.0"
+                "source": "https://github.com/skprods/laravel-helpers/tree/2.0.1"
             },
-            "time": "2022-02-15T19:17:33+00:00"
+            "time": "2022-05-21T12:58:19+00:00"
         },
         {
             "name": "skprods/laravel-telegram-sdk",
@@ -9544,5 +9600,5 @@
         "ext-redis": "*"
     },
     "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "plugin-api-version": "2.3.0"
 }
