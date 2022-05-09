@@ -5,24 +5,24 @@ namespace App\Console\Commands;
 use App\Entities\Subgenres;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Neuronets\GenresClassifier;
+use App\Neuronets\GenresSingleClassifier;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use SKprods\AdvancedLaravel\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class NeuronetTrain extends Command
+class GenresSingleClassifierTrain extends Command
 {
-    protected $signature = 'neuronet:trainGenres {--epoch=10} {--chunk=50000}';
+    protected $signature = 'neuronet:trainGenresSingleClassifier {--epoch=10} {--chunk=50000}';
     protected $description = 'Тренировка классификатора жанров';
 
-    private GenresClassifier $genresClassifier;
+    private GenresSingleClassifier $genresClassifier;
     private Subgenres $subgenres;
     private ProgressBar $bar;
 
     private int $chunk;
 
-    public function __construct(GenresClassifier $genresClassifier, Subgenres $subgenres)
+    public function __construct(GenresSingleClassifier $genresClassifier, Subgenres $subgenres)
     {
         parent::__construct();
 

@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Entities\Subgenres;
 use App\Models\Book;
 use App\Models\Genre;
-use App\Neuronets\GenresClassifier;
+use App\Neuronets\GenresSingleClassifier;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use SKprods\AdvancedLaravel\Facades\Console;
@@ -15,10 +15,10 @@ class NeuronetTest extends Command
     protected $signature = 'neuronet:test';
     protected $description = 'Проверка тестовых данных для нейросети';
 
-    private GenresClassifier $genresClassifier;
+    private GenresSingleClassifier $genresClassifier;
     private Subgenres $subgenres;
 
-    public function __construct(GenresClassifier $genresClassifier, Subgenres $subgenres)
+    public function __construct(GenresSingleClassifier $genresClassifier, Subgenres $subgenres)
     {
         parent::__construct();
 
@@ -28,7 +28,7 @@ class NeuronetTest extends Command
 
     public function handle()
     {
-        $this->genresClassifier = new GenresClassifier();
+        $this->genresClassifier = new GenresSingleClassifier();
         $this->subgenres = new Subgenres();
 
         $testData = Book::query()
