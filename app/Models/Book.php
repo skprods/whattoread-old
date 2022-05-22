@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Traits\HasDatabaseCounter;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -159,5 +160,12 @@ class Book extends Model
             ->get()
             ->pluck('id', 'id')
             ->toArray();
+    }
+
+    public static function builderWithStartEnd(int $startId = null, int $endId = null): Builder
+    {
+        $builder = self::query();
+        $builder = $startId ? $builder->where('id', '>=', $startId) : $builder;
+        return $endId ? $builder->where('id', '<=', $endId) : $builder;
     }
 }
