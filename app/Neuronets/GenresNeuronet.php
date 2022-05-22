@@ -69,6 +69,9 @@ class GenresNeuronet extends Neuronet
 
         Console::info("Обучающая выборка пройдена. Значение целевой функции: " . round($targetFunction, 5));
 
+        /** Сохранение весов и остальной информации в файл */
+        $this->save();
+
         return true;
     }
 
