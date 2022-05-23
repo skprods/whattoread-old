@@ -8,18 +8,10 @@ class Subgenres
 {
     private array $subgenres;
 
-    public function __construct()
-    {
-        $this->subgenres = DB::table('subgenres')
-            ->get()
-            ->mapToGroups(function ($subgenre) {
-                return [$subgenre->child_id => $subgenre->parent_id];
-            })
-            ->toArray();
-    }
-
     public function getGenres(int $genreId): array
     {
+        $this->setSubgenres();
+
         $genres = [];
         $this->getParentGenres($genreId, $genres);
 
@@ -28,6 +20,8 @@ class Subgenres
 
     public function getTopGenres(int $genreId): array
     {
+        $this->setSubgenres();
+
         $genres = [];
         $this->getParentGenres($genreId, $genres, false);
 
@@ -49,6 +43,18 @@ class Subgenres
             }
         } else {
             $genres[$genreId] = $genreId;
+        }
+    }
+
+    private function setSubgenres(): void
+    {
+        if (!isset($this->subgenres)) {
+            $this->subgenres = DB::table('subgenres')
+                ->get()
+                ->mapToGroups(function ($subgenre) {
+                    return [$subgenre->child_id => $subgenre->parent_id];
+                })
+                ->toArray();
         }
     }
 }

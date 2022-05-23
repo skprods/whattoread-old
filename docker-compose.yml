@@ -38,6 +38,8 @@ services:
         environment:
             PHP_INI_SCAN_DIR: "/var/www/deploy/php-fpm:/usr/local/etc/php/conf.d"
             TZ: "Europe/Moscow"
+        extra_hosts:
+            - "host.docker.internal:host-gateway"
 
     whattoread-percona:
         image: percona:8.0
