@@ -61,6 +61,10 @@ class BookRecsService extends Service
 
             $executionTime = time() - $time;
             $this->log("Наполнение рекомендаций для книги {$book->id} выполнено за {$executionTime}с");
+            $this->log("Использовано памяти: " . round(memory_get_usage() / 1024 / 1024, 2) . " MB");
+            $this->log(
+                "Пиковое использование: " . round(memory_get_peak_usage() / 1024 / 1024, 2) . " MB\n"
+            );
         }
     }
 
@@ -170,6 +174,11 @@ class BookRecsService extends Service
          */
         $savedCount = $this->saveRecsForBook($book);
         $this->log("Совпадения подобраны и сохранены: $savedCount книг", $book->id);
+
+        /** Освобождаем занятую совпадениями память */
+        unset($this->matchingDescriptionFrequencies);
+        unset($this->matchingBookGenres);
+        unset($this->matchingBookAuthors);
     }
 
     /**
