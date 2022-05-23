@@ -28,7 +28,7 @@ abstract class Service
     {
         $this->debug = $debug;
         $this->logChannel = $logChannel ?? config('logging.default');
-        $this->serviceName = static::class;
+        $this->serviceName = $this->serviceName ?? static::class;
 
         $this->bar = Console::bar();
     }
@@ -45,7 +45,7 @@ abstract class Service
         $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
         Log::channel($this->logChannel)->error($prefix . $message);
-        $this->console($message);
+        $this->console($message, $identifier);
     }
 
     /** Логирование предупреждения */
@@ -54,7 +54,7 @@ abstract class Service
         $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
         Log::channel($this->logChannel)->warning($prefix . $message);
-        $this->console($message);
+        $this->console($message, $identifier);
     }
 
     /** Логирование произвольного сообщения */
@@ -63,7 +63,7 @@ abstract class Service
         $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
         Log::channel($this->logChannel)->info($prefix . $message);
-        $this->console($message);
+        $this->console($message, $identifier);
     }
 
     /** Вывод информации в консоль */

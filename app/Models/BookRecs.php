@@ -57,15 +57,17 @@ class BookRecs extends Model
 
     public function getAuthorScoreAttribute($value): int
     {
+        return self::getAuthorScore($value);
+    }
+
+    /** Обычное значение очков автора */
+    public static function getAuthorScore($value): int
+    {
         return $value * 40;
     }
 
-    public function getGenresScoreAttribute($value): int
-    {
-        return $value * 10;
-    }
-
-    public function setAuthorScoreAttribute($value)
+    /** Значение очков автора для БД */
+    public static function getAuthorDbValue($value): int
     {
         if ($value > 1) {
             $score = 1;
@@ -75,10 +77,27 @@ class BookRecs extends Model
             $score = $value;
         }
 
-        $this->attributes['author_score'] = $score;
+        return $score;
     }
 
-    public function setGenresScoreAttribute($value)
+    public function setAuthorScoreAttribute($value)
+    {
+        $this->attributes['author_score'] = self::getAuthorDbValue($value);
+    }
+
+    public function getGenresScoreAttribute($value): int
+    {
+        return self::getGenresScore($value);
+    }
+
+    /** Обычное значение очков жанров */
+    public static function getGenresScore($value): int
+    {
+        return $value * 10;
+    }
+
+    /** Значение очков жанров для БД */
+    public static function getGenresDbValue($value): int
     {
         if ($value > 4) {
             $score = 4;
@@ -88,7 +107,12 @@ class BookRecs extends Model
             $score = $value;
         }
 
-        $this->attributes['genres_score'] = $score;
+        return $score;
+    }
+
+    public function setGenresScoreAttribute($value)
+    {
+        $this->attributes['genres_score'] = self::getGenresDbValue($value);
     }
 
     public static function firstByBookIds(int $firstBookId, int $secondBookId): ?BookRecs

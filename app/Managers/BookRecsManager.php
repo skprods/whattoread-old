@@ -4,6 +4,7 @@ namespace App\Managers;
 
 use App\Models\BookRecs;
 use Illuminate\Support\Facades\DB;
+use JetBrains\PhpStorm\ArrayShape;
 
 class BookRecsManager
 {
@@ -17,8 +18,9 @@ class BookRecsManager
     /**
      * @param array $matching - массив вида [0 => $params1, 1 => $params2]
      */
-    public function bulkCreate(array $matching)
+    public function bulkCreate(array $matching): int
     {
+        $allowedCount = 0;
         $allowed = [];
         $table = $this->bookRecs->getTable();
 
@@ -26,6 +28,7 @@ class BookRecsManager
             $item = $this->prepareParams($params);
 
             if ($item) {
+                $allowedCount++;
                 $allowed[] = $item;
             }
 
@@ -46,27 +49,64 @@ class BookRecsManager
                 ['author_score', 'description_score', 'total_score']
             );
         }
+
+        return $allowedCount;
     }
 
+    /** Подготовка параметров для вставки в БД */
     private function prepareParams(array $params): ?array
     {
         if (!isset($params['comparing_book_id']) || !isset($params['matching_book_id'])) {
             return null;
         }
 
-        /** total - сумма очков за автора и описание, максимум 200. для оптимизации отсекаем всё, что меньше $minTotal из 200 */
-        $total = $params['author_score'] + $params['description_score'];
-        $minTotal = config('variables.matches.minTotalScore');
-        if ($total < $minTotal) {
+        /**
+         * Для оптимизации занимаемого базой данных места в
+         * конфигурации проставлено минимальное суммарное значение
+         * совпадений. Если по $total не подходит, возвращаем null
+         */
+        $totalChecker = $this->checkTotalAllowed($params);
+        if ($totalChecker['allowed'] === false) {
             return null;
         }
 
         return [
             'comparing_book_id' => $params['comparing_book_id'],
             'matching_book_id' => $params['matching_book_id'],
-            'author_score' => $params['author_score'] > 0 ? 1 : 0,
+            'author_score' => BookRecs::getAuthorDbValue($params['author_score']),
+            'genres_score' => BookRecs::getGenresDbValue($params['genres_score']),
             'description_score' => $params['description_score'],
-            'total_score' => $total,
+            'total_score' => $totalChecker['total'],
+        ];
+    }
+
+    #[ArrayShape(['total' => "float", 'allowed' => "bool"])]
+    public function checkTotalAllowed(array $params): array
+    {
+        /**
+         * Считаем общую сумму значений
+         *
+         * Она вычитается как сумма очков за совпадение автора,
+         * жанров и словнику по описанию. Максимальное количество:
+         * - 40 за автора
+         * - 40 за жанры
+         * - 100 за словник
+         * Итого 180.
+         */
+        $authorScore = BookRecs::getAuthorScore($params['author_score']);
+        $genresScore = BookRecs::getGenresScore($params['genres_score']);
+        $total = $authorScore + $genresScore + $params['description_score'];
+
+        /**
+         * Для оптимизации занимаемого базой данных места в
+         * конфигурации проставлено минимальное суммарное значение
+         * совпадений. Если получившийся $total меньше, ставим
+         * ключ allowed = false
+         */
+        $minTotal = config('variables.matches.minTotalScore');
+        return [
+            'total' => $total,
+            'allowed' => $total >= $minTotal,
         ];
     }
 
