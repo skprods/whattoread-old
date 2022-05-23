@@ -31,10 +31,29 @@ class BookDescriptionFrequencyShort extends Model
         return $this->belongsTo(Book::class);
     }
 
-    /** Поиск словарей для книг */
+    /**
+     * Поиск словарей для книг
+     *
+     * Результатом функции будет коллекция в формате
+     * [ bookId => [word1 => frequency, word2 => frequency] ]
+     */
     public static function findByBookIds(array $bookIds): Collection
     {
-        return self::query()->whereIn('book_id', $bookIds)->get();
+        $chunked = array_chunk($bookIds, 10000);
+        $data = new Collection();
+
+        foreach ($chunked as $books) {
+            $frequencies = self::query()
+                ->whereIn('book_id', $books)
+                ->get()
+                ->mapWithKeys(function (self $frequencyShort) {
+                    return [$frequencyShort->book_id => $frequencyShort->data];
+                });
+
+            $data = $data->union($frequencies);
+        }
+
+        return $data;
     }
 
     /** Удаление словарей для книг */

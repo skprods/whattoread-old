@@ -18,7 +18,7 @@ class UpdateBookRecs extends Listener
 
     public function handle(BookDescriptionFrequencyCreated|BookGenresUpdated $event)
     {
-        $this->service->createForBook($event->book);
+        $this->service->createForBooks([$event->book->id]);
 
         BookRecsUpdated::dispatch($event->book);
     }

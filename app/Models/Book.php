@@ -143,6 +143,26 @@ class Book extends Model
         return $builder->get();
     }
 
+    public static function getBookAuthors(array $bookIds): Collection
+    {
+        $chunked = array_chunk($bookIds, 10000);
+        $data = new Collection();
+
+        foreach ($chunked as $books) {
+            $frequencies = self::query()
+                ->select(['id', 'author'])
+                ->whereIn('id', $books)
+                ->get()
+                ->mapWithKeys(function (self $book) {
+                    return [$book->id => $book->author];
+                });
+
+            $data = $data->union($frequencies);
+        }
+
+        return $data;
+    }
+
     public static function whereIdIn(array $bookIds): Collection
     {
         return self::query()->whereIn('id', $bookIds)->get();
