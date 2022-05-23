@@ -45,7 +45,7 @@ abstract class Service
         $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
         Log::channel($this->logChannel)->error($prefix . $message);
-        $this->console($message, $identifier);
+        $this->console($message, $identifier, 'error');
     }
 
     /** Логирование предупреждения */
@@ -54,7 +54,7 @@ abstract class Service
         $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
         Log::channel($this->logChannel)->warning($prefix . $message);
-        $this->console($message, $identifier);
+        $this->console($message, $identifier, 'comment');
     }
 
     /** Логирование произвольного сообщения */
@@ -63,16 +63,16 @@ abstract class Service
         $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
         Log::channel($this->logChannel)->info($prefix . $message);
-        $this->console($message, $identifier);
+        $this->console($message, $identifier, 'info');
     }
 
     /** Вывод информации в консоль */
-    protected function console(string $message, string $identifier = null): void
+    protected function console(string $message, string $identifier = null, string $type = 'info'): void
     {
         if ($this->debug) {
             $prefix = $identifier ? "[$this->serviceName #$identifier]: " : "[$this->serviceName]: ";
 
-            Console::info($prefix . $message);
+            Console::$type($prefix . $message);
         }
     }
 
