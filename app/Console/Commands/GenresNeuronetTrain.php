@@ -13,7 +13,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 class GenresNeuronetTrain extends Command
 {
-    protected $signature = 'neuronet:trainGenres {--epoch=10} {--learning=0.0001} {--chunk=50000}';
+    protected $signature = 'neuronet:trainGenres {--epoch=10} {--learning=0.0001} {--chunk=10000}';
     protected $description = 'Тренировка классификатора жанров';
 
     private GenresNeuronet $genresNeuronet;
