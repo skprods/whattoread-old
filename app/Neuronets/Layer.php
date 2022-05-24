@@ -15,6 +15,9 @@ class Layer implements Arrayable, Jsonable
     /** Коллекция нейронов, входящих в этот слой */
     public Collection $neurons;
 
+    /** Индикатор последнего слоя в нейросети */
+    public bool $isLast;
+
     /** Коэффициент скорости обучения */
     private float $learningCoefficient = 0.0001;
 
@@ -23,10 +26,11 @@ class Layer implements Arrayable, Jsonable
     /** Вектор из значений функций активации для каждого нейрона (в том же порядке, что и нейроны) */
     private array $activationVector;
 
-    public function __construct(int $position, array $neurons = null)
+    public function __construct(int $position, array $neurons = null, bool $isLast = false)
     {
         $this->position = $position;
         $this->neurons = $neurons ? Neuron::bulkCreate($neurons) : new Collection();
+        $this->isLast = $isLast;
     }
 
     public function getLearningCoefficient(): float
@@ -89,20 +93,32 @@ class Layer implements Arrayable, Jsonable
          * $multiply - единичная матрица, но нам нужен сам вектор,
          * поэтому извлекаем первый (и единственный) элемент
          */
-        $multiply = array_shift($multiply);
+        $multiplyVector = array_shift($multiply);
 
         /** Заполняем граничный вектор и вектор активаций */
         $targetVector = [];
-        $this->neurons->each(function (Neuron $neuron, int $key) use ($multiply, &$targetVector) {
-//            $targetValue = $multiply[$key] + $neuron->offset;
-//            $targetVector[$key] = $neuron->run($targetValue);
-            $targetVector[$key] = $multiply[$key] + $neuron->offset;
+        $this->neurons->each(function (Neuron $neuron, int $key) use ($multiplyVector, &$targetVector) {
+            $targetVector[$key] = $multiplyVector[$key] + $neuron->offset;
         });
 
-        $this->activationVector = $this->softmax($targetVector);
+        $this->activationVector = $this->calcActivationVector($targetVector);
 
         /** Возвращаем вектор активаций */
         return $this->activationVector;
+    }
+
+    protected function calcActivationVector(array $targetVector): array
+    {
+        return $this->isLast ? $this->softmax($targetVector) : $this->sigmoid($targetVector);
+    }
+
+    private function sigmoid(array $targetVector): array
+    {
+        foreach ($targetVector as $key => $targetValue) {
+            $targetVector[$key] = 1 / (1 + exp(-$targetValue));
+        }
+
+        return $targetVector;
     }
 
     private function softmax(array $vector): array
@@ -201,6 +217,7 @@ class Layer implements Arrayable, Jsonable
         return [
             'position' => $this->position,
             'neurons' => $neurons,
+            'isLast' => $this->isLast,
         ];
     }
 

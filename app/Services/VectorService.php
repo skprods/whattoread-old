@@ -232,7 +232,7 @@ class VectorService
         return $vector;
     }
 
-    public static function divide(array $first, array $second): array
+    public static function subtract(array $first, array $second): array
     {
         $result = [];
 

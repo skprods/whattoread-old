@@ -15,7 +15,7 @@ class GenresNeuronet extends Neuronet
     protected string $filename = 'genres.json';
     protected string $name = "Нейросеть для определения жанра по тексту";
 
-    protected int $hiddenLayersCount = 5;
+    protected int $hiddenLayersCount = 2;
 
     /** Вектор активации  */
     private array $activationVector;
@@ -34,8 +34,10 @@ class GenresNeuronet extends Neuronet
         $this->bar = Console::bar($trainData->count());
         $this->bar->start();
         $targetFunction = 0;
+        $diffToIdeal = 0;
+        $total = 0;
 
-        $trainData->each(function (array $text) use (&$targetFunction) {
+        $trainData->each(function (array $text) use (&$targetFunction, &$diffToIdeal, &$total) {
             $this->activationVector = $this->run($text['vector']);
 
             /** Формирование ожидаемого вектора и подсчёт целевой функции */
@@ -55,6 +57,26 @@ class GenresNeuronet extends Neuronet
                     $targetFunction += $desiredValue * log($this->activationVector[$key]);
                 });
 
+            $idealDiff = 0;
+            foreach ($this->activationVector as $key => $value) {
+                if ($this->expectedVector[$key] === 1) {
+                    /**
+                     * Если ожидаемое значение 1 - разница находится путём вычитания,
+                     * потому что $value стремится к этой 1.
+                     */
+                    $idealDiff += 1 - $value;
+                } else {
+                    /**
+                     * Если же ожидаемое значение 0, то разница - это значение $value,
+                     * потому что $value стремится к 0.
+                     */
+                    $idealDiff += $value;
+                }
+            }
+
+            $diffToIdeal += $idealDiff;
+            $total += count($this->expectedVector);
+
             /** Вычисление дельта-векторов и производных */
             $this->calcDeltas($text['vector']);
 
@@ -67,7 +89,10 @@ class GenresNeuronet extends Neuronet
         $this->bar->finish();
         Console::info(' Выполнено.');
 
-        Console::info("Обучающая выборка пройдена. Значение целевой функции: " . round(-$targetFunction, 5));
+        $targetFunction = round(-$targetFunction / $trainData->count(), 2);
+        Console::info("Обучающая выборка пройдена. Значение целевой функции: $targetFunction");
+        $correctPercent = round($diffToIdeal / $total * 100, 2);
+        Console::info("Расхождения с идеалом: $correctPercent%");
 
         /** Сохранение весов и остальной информации в файл */
         $this->save();
@@ -112,7 +137,7 @@ class GenresNeuronet extends Neuronet
         $this->derivatives = [];
 
         /** Вычисляем дельта-вектор для нейронов последнего слоя */
-        $nextLayerDelta = VectorService::divide($this->activationVector, $this->expectedVector);
+        $nextLayerDelta = VectorService::subtract($this->activationVector, $this->expectedVector);
         $this->deltas[$lastLayerIndex] = $nextLayerDelta;
 
         /** Проходим в цикле по всем скрытым слоям нейросети */
@@ -142,7 +167,7 @@ class GenresNeuronet extends Neuronet
              */
             $currentActivationsVector = $this->layersActivationVectors[$i];
             $singleVector = VectorService::generateUnitsVector(count($currentActivationsVector));
-            $divideSingle = VectorService::divide($singleVector, $currentActivationsVector);
+            $divideSingle = VectorService::subtract($singleVector, $currentActivationsVector);
 
             /** @var Layer $nextLayer */
             $nextLayer = $this->layers->get($i + 1);
@@ -182,7 +207,7 @@ class GenresNeuronet extends Neuronet
 
     protected function generateFinalLayer(): Layer
     {
-        $layer = Layer::create(['position' => $this->getLastLayerPosition() + 1]);
+        $layer = Layer::create(['position' => $this->getLastLayerPosition() + 1, 'last' => true]);
 
         Genre::query()
             ->with(['parents'])

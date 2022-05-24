@@ -44,8 +44,8 @@ class Neuron implements Arrayable, Jsonable
     /** Генерация $count весов */
     public function generateWeights(int $count): self
     {
-        $minValue = 1 / VectorService::$accuracy;
-        $maxValue = VectorService::$accuracy - 1 / VectorService::$accuracy;
+        $minValue = - VectorService::$accuracy / 100;
+        $maxValue = VectorService::$accuracy / 100;
 
         $this->weights = [];
         for ($i = 1; $i <= $count; $i++) {
