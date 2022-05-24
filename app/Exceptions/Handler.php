@@ -38,11 +38,15 @@ class Handler extends ExceptionHandler
         TelegramException::class,
     ];
 
-    /**
-     * Register the exception handling callbacks for the application.
-     *
-     * @return void
-     */
+    public function report(Throwable $e)
+    {
+        if (app()->bound('sentry') && $this->shouldReport($e)) {
+            app('sentry')->captureException($e);
+        }
+
+        parent::report($e);
+    }
+
     public function register()
     {
         $this->reportable(function (Throwable $e) {
