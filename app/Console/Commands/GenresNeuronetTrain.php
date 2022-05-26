@@ -8,7 +8,7 @@ use App\Models\Genre;
 use App\Neuronets\GenresNeuronet;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 class GenresNeuronetTrain extends Command

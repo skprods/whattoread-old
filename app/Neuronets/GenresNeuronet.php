@@ -6,7 +6,7 @@ use App\Models\Genre;
 use App\Services\VectorService;
 use Illuminate\Support\Collection;
 use Matrix\Matrix;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 /** Многослойная нейронная сеть для определения жанра текста */
