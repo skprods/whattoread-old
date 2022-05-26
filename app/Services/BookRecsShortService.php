@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Managers\BookRecsShortManager;
 use App\Models\BookRecs;
 use Illuminate\Support\Facades\Log;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 
 class BookRecsShortService
 {

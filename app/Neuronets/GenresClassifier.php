@@ -3,7 +3,7 @@
 namespace App\Neuronets;
 
 use Illuminate\Support\Collection;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\ConsoleOutput;
 

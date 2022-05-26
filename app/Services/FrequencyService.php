@@ -12,7 +12,7 @@ use App\Models\Word;
 use cijic\phpMorphy\Morphy;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 
 class FrequencyService
 {

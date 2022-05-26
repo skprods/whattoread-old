@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 
 abstract class Service

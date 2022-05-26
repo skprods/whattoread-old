@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7e83ea2d63f9702fd683d6b33c8f3d6b",
+    "content-hash": "20544d0b9395bbe100eabef745b20889",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -4819,17 +4819,17 @@
             "time": "2022-04-05T10:05:19+00:00"
         },
         {
-            "name": "skprods/laravel-helpers",
-            "version": "2.0.1",
+            "name": "skprods/advanced-laravel",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/skprods/laravel-helpers.git",
-                "reference": "8930a59b9ecae0be941648c627cb61111a14397d"
+                "url": "https://github.com/skprods/advanced-laravel.git",
+                "reference": "0ea28294b5cce71bb6d2936ae24da2ef9970fc4b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/skprods/laravel-helpers/zipball/8930a59b9ecae0be941648c627cb61111a14397d",
-                "reference": "8930a59b9ecae0be941648c627cb61111a14397d",
+                "url": "https://api.github.com/repos/skprods/advanced-laravel/zipball/0ea28294b5cce71bb6d2936ae24da2ef9970fc4b",
+                "reference": "0ea28294b5cce71bb6d2936ae24da2ef9970fc4b",
                 "shasum": ""
             },
             "require": {
@@ -4843,7 +4843,7 @@
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "SKprods\\LaravelHelpers\\": "src"
+                    "SKprods\\AdvancedLaravel\\": "src"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -4864,10 +4864,10 @@
                 "skprods"
             ],
             "support": {
-                "issues": "https://github.com/skprods/laravel-helpers/issues",
-                "source": "https://github.com/skprods/laravel-helpers/tree/2.0.1"
+                "issues": "https://github.com/skprods/advanced-laravel/issues",
+                "source": "https://github.com/skprods/advanced-laravel/tree/1.0.0"
             },
-            "time": "2022-05-21T12:58:19+00:00"
+            "time": "2022-05-26T17:05:52+00:00"
         },
         {
             "name": "skprods/laravel-telegram-sdk",

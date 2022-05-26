@@ -9,8 +9,6 @@ use App\Models\BookDescriptionFrequencyShort;
 use App\Models\Genre;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
-use SKprods\LaravelHelpers\Facades\Console;
 
 class BookRecsService extends Service
 {

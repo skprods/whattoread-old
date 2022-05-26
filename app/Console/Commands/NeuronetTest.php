@@ -8,7 +8,7 @@ use App\Models\Genre;
 use App\Neuronets\GenresClassifier;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use SKprods\LaravelHelpers\Facades\Console;
+use SKprods\AdvancedLaravel\Facades\Console;
 
 class NeuronetTest extends Command
 {
