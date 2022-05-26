@@ -15,6 +15,9 @@ class Layer implements Arrayable, Jsonable
     /** Коллекция нейронов, входящих в этот слой */
     public Collection $neurons;
 
+    /** Индикатор последнего слоя в нейросети */
+    public bool $isLast;
+
     /** Коэффициент скорости обучения */
     private float $learningCoefficient = 0.0001;
 
@@ -23,10 +26,16 @@ class Layer implements Arrayable, Jsonable
     /** Вектор из значений функций активации для каждого нейрона (в том же порядке, что и нейроны) */
     private array $activationVector;
 
-    public function __construct(int $position, array $neurons)
+    public function __construct(int $position, array $neurons = null, bool $isLast = false)
     {
         $this->position = $position;
-        $this->neurons = Neuron::bulkCreate($neurons);
+        $this->neurons = $neurons ? Neuron::bulkCreate($neurons) : new Collection();
+        $this->isLast = $isLast;
+    }
+
+    public function getLearningCoefficient(): float
+    {
+        return $this->learningCoefficient;
     }
 
     public function setLearningCoefficient(float $learningCoefficient): static
@@ -76,7 +85,7 @@ class Layer implements Arrayable, Jsonable
 
         /** Преобразование каждого вектора к классу матрицы */
         $originMatrix = new Matrix([$vector]);
-        $neuronsMatrix = new Matrix($this->neuronsMatrix());
+        $neuronsMatrix = $this->neuronsMatrix();
 
         /** Вычисление матрицы - результата перемножения матриц выше */
         $multiply = $originMatrix->multiply($neuronsMatrix)->toArray();
@@ -84,16 +93,49 @@ class Layer implements Arrayable, Jsonable
          * $multiply - единичная матрица, но нам нужен сам вектор,
          * поэтому извлекаем первый (и единственный) элемент
          */
-        $multiply = array_shift($multiply);
+        $multiplyVector = array_shift($multiply);
 
         /** Заполняем граничный вектор и вектор активаций */
-        $this->neurons->each(function (Neuron $neuron, int $key) use ($multiply) {
-            $targetValue = $multiply[$key] + $neuron->offset;
-            $this->activationVector[$key] = $neuron->run($targetValue);
+        $targetVector = [];
+        $this->neurons->each(function (Neuron $neuron, int $key) use ($multiplyVector, &$targetVector) {
+            $targetVector[$key] = $multiplyVector[$key] + $neuron->offset;
         });
+
+        $this->activationVector = $this->calcActivationVector($targetVector);
 
         /** Возвращаем вектор активаций */
         return $this->activationVector;
+    }
+
+    protected function calcActivationVector(array $targetVector): array
+    {
+        return $this->isLast ? $this->softmax($targetVector) : $this->sigmoid($targetVector);
+    }
+
+    private function sigmoid(array $targetVector): array
+    {
+        foreach ($targetVector as $key => $targetValue) {
+            $targetVector[$key] = 1 / (1 + exp(-$targetValue));
+        }
+
+        return $targetVector;
+    }
+
+    private function softmax(array $vector): array
+    {
+        $max = max($vector);
+
+        $expSum = 0;
+        foreach ($vector as $value) {
+            $expSum += exp($value - $max);
+        }
+
+        $activation = [];
+        foreach ($vector as $key => $value) {
+            $activation[$key] = exp($value - $max) / $expSum;
+        }
+
+        return $activation;
     }
 
     /**
@@ -119,7 +161,25 @@ class Layer implements Arrayable, Jsonable
         });
     }
 
-    public function neuronsMatrix(): array
+    /**
+     * Коррекция синаптических весов нейронов
+     *
+     * Метод принимает матрицу синаптических весов. Она приходит в формате
+     * NxM, где N - строки матрицы - синаптические веса, а M - столбцы
+     * матрицы - нейроны. Перед корректировкой происходит транспонирование
+     * матриц для упрощения обновления синаптических весов.
+     */
+    public function correctByMatrix(Matrix $weights)
+    {
+        $weights = $weights->transpose()->toArray();
+
+        $this->neurons->map(function (Neuron $neuron, int $key) use ($weights) {
+            $neuron->weights = $weights[$key];
+            return $neuron;
+        });
+    }
+
+    public function neuronsMatrix(): Matrix
     {
         $neuronsCollection = $this->neurons->pluck('weights');
         $weightCount = count($neuronsCollection->first());
@@ -136,13 +196,13 @@ class Layer implements Arrayable, Jsonable
             $matrix[] = $row;
         }
 
-        return $matrix;
+        return new Matrix($matrix);
     }
 
     public function clearNeuronsInfo()
     {
         $this->neurons->map(function (Neuron $neuron) {
-            $neuron->weights = [];
+            $neuron->clearWeights();
             $neuron->clearOffset();
             return $neuron;
         });
@@ -157,13 +217,14 @@ class Layer implements Arrayable, Jsonable
         return [
             'position' => $this->position,
             'neurons' => $neurons,
+            'isLast' => $this->isLast,
         ];
     }
 
-    private function prepareNeurons(int $weightsCount)
+    public function prepareNeurons(int $weightsCount)
     {
         $this->neurons->map(function (Neuron $neuron) use ($weightsCount) {
-            if (!$neuron->ready()) {
+            if (!$neuron->ready($weightsCount)) {
                 $neuron->generateOffset();
                 $neuron->generateWeights($weightsCount);
             }
@@ -179,7 +240,7 @@ class Layer implements Arrayable, Jsonable
 
     public static function create(array $params): self
     {
-        return new self($params['position'], $params['neurons']);
+        return new self($params['position'], $params['neurons'] ?? null, $params['last'] ?? false);
     }
 
     public static function bulkCreate(array $data): Collection
@@ -192,5 +253,19 @@ class Layer implements Arrayable, Jsonable
         }
 
         return $layers;
+    }
+
+    public static function generate(int $position, int $neuronsCount, int $weightsCount): self
+    {
+        $layer = new self($position);
+
+        $neurons = new Collection();
+        for ($i = 0; $i < $neuronsCount; $i++) {
+            $neurons->push(Neuron::generate($weightsCount));
+        }
+
+        $layer->neurons = $neurons;
+
+        return $layer;
     }
 }

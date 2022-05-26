@@ -34,11 +34,60 @@ class Neuron implements Arrayable, Jsonable
      * @param float|null $offset    - смещение для пороговой функции
      * @param array $data           - дополнительная информация о нейроне
      */
-    public function __construct(array $weights, float|null $offset, array $data = [])
+    public function __construct(array $weights = [], float|null $offset = null, array $data = [])
     {
         $this->weights = $weights;
         $this->offset = $offset;
         $this->data = $data;
+    }
+
+    /** Генерация $count весов */
+    public function generateWeights(int $count): self
+    {
+        $minValue = - VectorService::$accuracy / 100;
+        $maxValue = VectorService::$accuracy / 100;
+
+        $this->weights = [];
+        for ($i = 1; $i <= $count; $i++) {
+            $this->weights[] = round(
+                mt_rand($minValue, $maxValue) / VectorService::$accuracy,
+                VectorService::$precision
+            );
+        }
+
+        return $this;
+    }
+
+    /** Очистка весов */
+    public function clearWeights(): self
+    {
+        $this->weights = [];
+        return $this;
+    }
+
+    /** Генерация смещения */
+    public function generateOffset(): self
+    {
+        $minValue = 1 / VectorService::$accuracy;
+        $maxValue = VectorService::$accuracy - 1 / VectorService::$accuracy;
+
+        $this->offset = round(mt_rand($minValue, $maxValue) / VectorService::$accuracy, 3);
+
+        return $this;
+    }
+
+    /** Очистка смещения */
+    public function clearOffset(): self
+    {
+        $this->offset = null;
+        return $this;
+    }
+
+    /** Установка дополнительной информации */
+    public function setData(array $data): self
+    {
+        $this->data = $data;
+        return $this;
     }
 
     public function run(float $targetValue): float
@@ -46,9 +95,9 @@ class Neuron implements Arrayable, Jsonable
         return 1 / (1 + exp(-$targetValue));
     }
 
-    public function ready(): bool
+    public function ready(int $weightsCount): bool
     {
-        return $this->offset !== null && count($this->weights) !== 0;
+        return $this->offset !== null && count($this->weights) === $weightsCount;
     }
 
     public function applyDeltaRule(array $vector, float $learningCoefficient, float $actualValue, bool $activate)
@@ -62,44 +111,6 @@ class Neuron implements Arrayable, Jsonable
 
             $this->weights[$key] = round($weight, VectorService::$precision);
         }
-    }
-
-    public function clearWeights(): self
-    {
-        $this->weights = [];
-        return $this;
-    }
-
-    public function generateWeights(int $count): self
-    {
-        $minValue = 1 / VectorService::$accuracy;
-        $maxValue = VectorService::$accuracy - 1 / VectorService::$accuracy;
-
-        $this->weights = [];
-        for ($i = 1; $i <= $count; $i++) {
-            $this->weights[] = round(
-                mt_rand($minValue, $maxValue) / VectorService::$accuracy,
-                VectorService::$precision
-            );
-        }
-
-        return $this;
-    }
-
-    public function clearOffset(): self
-    {
-        $this->offset = null;
-        return $this;
-    }
-
-    public function generateOffset(): self
-    {
-        $minValue = 1 / VectorService::$accuracy;
-        $maxValue = VectorService::$accuracy - 1 / VectorService::$accuracy;
-
-        $this->offset = round(mt_rand($minValue, $maxValue) / VectorService::$accuracy, 3);
-
-        return $this;
     }
 
     public function toArray(): array
@@ -126,10 +137,17 @@ class Neuron implements Arrayable, Jsonable
         $neurons = new Collection();
 
         foreach ($data as $neuron) {
-            $object = self::create($neuron);
-            $neurons->push($object);
+            $neurons->push(self::create($neuron));
         }
 
         return $neurons;
+    }
+
+    public static function generate(int $weightsCount, array $data = []): self
+    {
+        return (new self())
+            ->generateOffset()
+            ->generateWeights($weightsCount)
+            ->setData($data);
     }
 }

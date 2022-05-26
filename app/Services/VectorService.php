@@ -231,4 +231,51 @@ class VectorService
 
         return $vector;
     }
+
+    public static function subtract(array $first, array $second): array
+    {
+        $result = [];
+
+        if (count($first) >= count($second)) {
+            foreach ($first as $key => $value) {
+                $result[$key] = $value - $second[$key] ?? 0;
+            }
+        } else {
+            foreach ($second as $key => $value) {
+                $result[$key] = - $value + $first[$key] ?? 0;
+            }
+        }
+
+        return $result;
+    }
+
+    public static function hadamardMultiply(array ...$vectors): array
+    {
+        $result = [];
+        $firstVector = array_shift($vectors);
+
+        foreach ($firstVector as $key => $value) {
+            $res = $value;
+
+            foreach ($vectors as $vector) {
+                $res = $res * $vector[$key];
+            }
+
+            $result[$key] = $res;
+        }
+
+        return $result;
+    }
+
+    /** Генерация вектора из 1 */
+    public static function generateUnitsVector(int $length)
+    {
+        $result = [];
+
+        for ($i = 0; $i < $length; $i++) {
+            $result[] = 1;
+        }
+
+        return $result;
+    }
 }

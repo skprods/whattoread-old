@@ -7,9 +7,10 @@ use SKprods\LaravelHelpers\Facades\Console;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
-class GenresClassifier extends Classifier
+/** Однослойная нейронная сеть для определения жанра текста */
+class GenresSingleClassifier extends SingleClassifier
 {
-    protected string $filename = "genres.json";
+    protected string $filename = "genres_single.json";
 
     /**
      * Обучение нейросети на основе обучающей выборки
@@ -76,7 +77,7 @@ class GenresClassifier extends Classifier
      */
     private function trainEpoch(Collection $trainData, Layer $layer, int &$diffToIdeal, int &$total)
     {
-        $bar = new ProgressBar(app(ConsoleOutput::class), $trainData->count());
+        $bar = Console::bar($trainData->count());
         $bar->start();
 
         $trainData->each(function (array $book) use ($layer, &$diffToIdeal, &$total, $bar) {
@@ -130,5 +131,10 @@ class GenresClassifier extends Classifier
         arsort($result);
 
         return $result;
+    }
+
+    protected function generateFinalLayer(): Layer
+    {
+        // TODO: Implement generateFinalLayer() method.
     }
 }
