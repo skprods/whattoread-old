@@ -225,4 +225,17 @@ class GenresNeuronet extends Neuronet
 
         return $layer;
     }
+
+    public function getGenresByActivationVector(array $vector): array
+    {
+        $result = [];
+
+        $this->layers->last()->neurons->each(function (Neuron $neuron, int $key) use (&$result, $vector) {
+            $result[$neuron->data['genreId']] = $vector[$key];
+        });
+
+        arsort($result);
+
+        return $result;
+    }
 }

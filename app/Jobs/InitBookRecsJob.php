@@ -29,6 +29,8 @@ class InitBookRecsJob extends Job
 
         $this->bookRecommendationsService = app(BookRecsService::class, ['debug' => $this->debugMode]);
 
+        DB::statement("SET SESSION MAX_EXECUTION_TIME=86400000"); // 1 день
+
         $builder = DB::table('books')->orderBy('id')->where('status', Book::ACTIVE_STATUS);
 
         if ($this->start) {

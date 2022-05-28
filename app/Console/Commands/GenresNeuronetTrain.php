@@ -23,11 +23,11 @@ class GenresNeuronetTrain extends Command
     private float $learningCoefficient;
     private int $chunk;
 
-    public function __construct(GenresNeuronet $genresClassifier, Subgenres $subgenres)
+    public function __construct(GenresNeuronet $genresNeuronet, Subgenres $subgenres)
     {
         parent::__construct();
 
-        $this->genresNeuronet = $genresClassifier;
+        $this->genresNeuronet = $genresNeuronet;
         $this->bar = Console::bar();
         $this->subgenres = $subgenres;
     }

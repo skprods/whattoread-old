@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Entities\Subgenres;
 use App\Models\Book;
 use App\Models\Genre;
+use App\Neuronets\GenresNeuronet;
 use App\Neuronets\GenresSingleClassifier;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -15,28 +16,27 @@ class NeuronetTest extends Command
     protected $signature = 'neuronet:test';
     protected $description = 'Проверка тестовых данных для нейросети';
 
-    private GenresSingleClassifier $genresClassifier;
+    private GenresNeuronet $genresNeuronet;
     private Subgenres $subgenres;
 
-    public function __construct(GenresSingleClassifier $genresClassifier, Subgenres $subgenres)
+    public function __construct(GenresNeuronet $genresNeuronet, Subgenres $subgenres)
     {
         parent::__construct();
 
-        $this->genresClassifier = $genresClassifier;
+        $this->genresNeuronet = $genresNeuronet;
         $this->subgenres = $subgenres;
     }
 
     public function handle()
     {
-        $this->genresClassifier = new GenresSingleClassifier();
         $this->subgenres = new Subgenres();
 
         $testData = Book::query()
             ->whereHas('genres', function (Builder $query) {
 //                Художественная литература
-//                $query->whereIn('id', [
-//                    1, 2, 6, 18, 31, 38, 54, 75, 90, 92, 121, 249, 255, 258, 334, 358, 370, 372, 843, 852
-//                ]);
+                $query->whereIn('id', [
+                    1, 2, 6, 18, 31, 38, 54, 75, 90, 92, 121, 249, 255, 258, 334, 358, 370, 372, 843, 852
+                ]);
 //                Психология
 //                $query->whereIn('id', [
 //                    138, 199, 201, 309, 323, 552, 712, 736, 737, 738, 739, 740, 741, 743, 744, 745, 746,
@@ -54,10 +54,10 @@ class NeuronetTest extends Command
 //                    313, 314, 315, 316, 317, 728, 187, 319, 321, 322, 323, 324, 850
 //                ]);
 //                Красота. Здоровье. Спорт
-                $query->whereIn('id', [
-                    400, 401, 403, 404, 858, 407, 410, 411, 415, 416, 417, 419, 420, 421,
-                    422, 423, 424, 513, 516, 519, 520, 636, 426, 427, 428, 429, 430
-                ]);
+//                $query->whereIn('id', [
+//                    400, 401, 403, 404, 858, 407, 410, 411, 415, 416, 417, 419, 420, 421,
+//                    422, 423, 424, 513, 516, 519, 520, 636, 426, 427, 428, 429, 430
+//                ]);
             })
             ->whereHas('vector')
             ->orderByDesc('id')
@@ -77,39 +77,52 @@ class NeuronetTest extends Command
             });
 
         $correctCalc = 0;
+        $top2correct = 0;
+        $top3correct = 0;
         $hasCorrectCalc = 0;
         $totalCalc = 0;
 
         $testData->each(
-            function (array $data) use (&$correctCalc, &$hasCorrectCalc, &$totalCalc) {
-                $activationVector = $this->genresClassifier->run($data['vector']);
+            function (array $data) use (&$correctCalc, &$top2correct, &$top3correct, &$hasCorrectCalc, &$totalCalc) {
+                $activationVector = $this->genresNeuronet->run($data['vector']);
 
                 /** Получаем топ-5 жанров из вектора активации */
-                $genres = $this->genresClassifier->getGenresByActivationVector($activationVector);
+                $genres = $this->genresNeuronet->getGenresByActivationVector($activationVector);
                 $topGenres = array_slice($genres, 0, 5, true);
                 $topGenreIds = array_keys($topGenres);
 
                 /** Проверяем, есть ли в жанрах книги жанры из топ-5 от нейросети */
-                foreach ($data['genres'] as $genreId) {
-                    if (in_array($genreId, $topGenreIds)) {
-                        $hasCorrectCalc++;
-                    }
-                }
+//                foreach ($data['genres'] as $genreId) {
+//                    if (in_array($genreId, $topGenreIds)) {
+//                        $hasCorrectCalc++;
+//                        break;
+//                    }
+//                }
 
                 /** Проверяем, есть ли в жанрах книги жанр из топ-1 от нейросети */
                 if (in_array($topGenreIds[0], $data['genres'])) {
                     $correctCalc++;
                 }
 
+                if (in_array($topGenreIds[1], $data['genres'])) {
+                    $top2correct++;
+                }
+
+                if (in_array($topGenreIds[2], $data['genres'])) {
+                    $top3correct++;
+                }
+
                 $totalCalc++;
 
-                Console::info("$correctCalc / $hasCorrectCalc / $totalCalc");
+                Console::info("$correctCalc / $top2correct / $top3correct / $totalCalc");
             }
         );
 
         $correctPercent = round($correctCalc / $totalCalc * 100, 2);
+        $top2Percent = round($top2correct / $totalCalc * 100, 2);
         $hasCorrectPercent = round($hasCorrectCalc / $totalCalc * 100, 2);
         Console::info("Корректных подсчётов: $correctPercent%");
+        Console::info("Корректных подсчётов в топ2: $top2Percent%");
         Console::info("Подсчётов с правильным ответом: $hasCorrectPercent%");
     }
 }
